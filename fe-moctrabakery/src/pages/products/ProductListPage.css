@@ -1,0 +1,169 @@
+/* ProductListPage.css */
+
+.product-list-page {
+  background: linear-gradient(135deg, #f8f9ff 0%, #e3f2fd 100%);
+  min-height: 100vh;
+}
+
+/* Hover effect cho product cards */
+.product-card-hover {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.product-card-hover:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Custom input focus states */
+.form-control:focus,
+.form-select:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+  background-color: #fff;
+}
+
+/* Header icon animation */
+.product-list-page .fa-store {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Custom spinner */
+.spinner-border {
+  border-width: 3px;
+}
+
+/* Badge styling */
+.badge {
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+/* Card enhancements */
+.card {
+  border-radius: 15px;
+  overflow: hidden;
+}
+
+.card-body {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+}
+
+/* Button hover effects */
+.btn {
+  transition: all 0.3s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+/* Alert styling */
+.alert {
+  border-radius: 12px;
+  border: none;
+}
+
+.alert-danger {
+  background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+  color: #c53030;
+}
+
+/* Input group styling */
+.input-group-text {
+  border-radius: 8px 0 0 8px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+}
+
+.form-control,
+.form-select {
+  border-radius: 0 8px 8px 0;
+}
+
+.form-control:first-child,
+.form-select:first-child {
+  border-radius: 8px 0 0 8px;
+}
+
+.form-control:last-child,
+.form-select:last-child {
+  border-radius: 0 8px 8px 0;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+  .display-4 {
+    font-size: 2.5rem;
+  }
+  
+  .product-card-hover:hover {
+    transform: none;
+  }
+  
+  .input-group-lg .form-control,
+  .input-group-lg .form-select {
+    font-size: 1rem;
+  }
+}
+
+/* Loading animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.product-list-page .row {
+  animation: fadeIn 0.6s ease-out;
+}
+
+/* Custom scrollbar cho select */
+.form-select {
+  cursor: pointer;
+}
+
+/* Icon spacing */
+.fas {
+  width: 16px;
+  text-align: center;
+}
+
+/* Border radius cho form elements */
+.form-control,
+.form-select,
+.btn {
+  border-radius: 8px;
+}
+
+/* Shadow effects */
+.shadow-sm {
+  box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Empty state styling */
+.fa-box-open {
+  opacity: 0.6;
+}
+
+/* Results summary */
+.border-top {
+  border-color: #e9ecef !important;
+}

@@ -1,0 +1,180 @@
+/* ProductDetailPage.css */
+
+.product-detail-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Image container styling */
+.img-container {
+  overflow: hidden;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 0.5rem;
+}
+
+.img-container img {
+  transition: transform 0.3s ease;
+}
+
+.img-container:hover img {
+  transform: scale(1.05);
+}
+
+/* Icon styling */
+.icon-detail {
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.icon-detail:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Card enhancements */
+.card {
+  border: none !important;
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Button styling */
+.btn {
+  transition: all 0.3s ease;
+  border-radius: 0.5rem;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-outline-primary:hover {
+  background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #198754 0%, #157347 100%);
+  border: none;
+}
+
+.btn-success:hover {
+  background: linear-gradient(135deg, #157347 0%, #146c43 100%);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+  border: none;
+}
+
+/* Badge styling */
+.badge {
+  border-radius: 0.5rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+/* Price styling */
+.text-success {
+  color: #198754 !important;
+}
+
+/* Alert styling */
+.alert {
+  border: none;
+  border-radius: 0.75rem;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .product-detail-container {
+    padding: 1rem;
+  }
+  
+  .display-6 {
+    font-size: 1.5rem;
+  }
+  
+  .h3 {
+    font-size: 1.25rem;
+  }
+  
+  .btn-lg {
+    padding: 0.75rem 1.5rem;
+  }
+  
+  .icon-detail {
+    padding: 6px;
+  }
+}
+
+/* Loading spinner styling */
+.spinner-border-lg {
+  width: 3rem;
+  height: 3rem;
+}
+
+/* Quantity button group */
+.btn-group .btn:disabled {
+  opacity: 0.6;
+}
+
+/* Size selection buttons */
+.btn.rounded-pill {
+  border-radius: 2rem !important;
+  min-width: 100px;
+}
+
+/* Product features section */
+.d-flex.flex-wrap.gap-3 > * {
+  margin-bottom: 0.5rem;
+}
+
+/* Smooth transitions for all interactive elements */
+* {
+  transition: all 0.3s ease;
+}
+
+/* Hover effects for cards */
+.shadow-lg:hover {
+  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175) !important;
+}
+
+/* Custom scrollbar for mobile */
+@media (max-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 4px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 2px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+}
