@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Container, Table, Button} from 'react-bootstrap';
+import { Container, Table, Button } from 'react-bootstrap';
+import api from '../../api';
 
 function getUserFromToken() {
   const token = localStorage.getItem('token');
@@ -16,10 +17,9 @@ function getUserFromToken() {
   }
 }
 
-// Không dùng demoProducts nữa, khởi tạo rỗng
-
 function ProductManagerProducts() {
   const [products, setProducts] = React.useState([]);
+  const [categories, setCategories] = React.useState([]);
   const navigate = useNavigate();
 
   React.useEffect(() => {
@@ -28,14 +28,21 @@ function ProductManagerProducts() {
       navigate('/login');
       return;
     }
-    // Fetch data từ backend
-    fetch('http://localhost:3000/products')
-      .then((res) => res.json())
-      .then((data) => {
-        setProducts(data);
-        console.log('Products fetched:', data);
+    // Lấy sản phẩm
+    api
+      .get('/products')
+      .then((res) => {
+        setProducts(res.data);
+        console.log('Products fetched:', res.data);
       })
       .catch(() => setProducts([]));
+    // Lấy danh mục
+    api
+      .get('/categories')
+      .then((res) => {
+        setCategories(res.data);
+      })
+      .catch(() => setCategories([]));
   }, [navigate]);
 
   React.useEffect(() => {
@@ -43,7 +50,7 @@ function ProductManagerProducts() {
   }, [products]);
 
   const handleAdd = () => {
-    alert('Demo: Thêm sản phẩm');
+    navigate('/manager/add-product')
   };
 
   const handleEdit = (id) => {
@@ -66,10 +73,29 @@ function ProductManagerProducts() {
 
   // Filtered products
   const filteredProducts = products.filter((p) => {
-    const nameMatch = filter.name === '' || (p.name && p.name.toLowerCase().includes(filter.name.toLowerCase()));
-    const categoryMatch = filter.category === '' || (p.categoryId && typeof p.categoryId === 'object' && p.categoryId.name && p.categoryId.name.toLowerCase().includes(filter.category.toLowerCase()));
-    const isActiveMatch = filter.isActive === '' || (filter.isActive === 'active' && p.isActive) || (filter.isActive === 'inactive' && !p.isActive);
-    const originMatch = filter.origin === '' || (p.origin && p.origin.toLowerCase().includes(filter.origin.toLowerCase()));
+    const nameMatch =
+      filter.name === '' ||
+      (p.name && p.name.toLowerCase().includes(filter.name.toLowerCase()));
+    // Lọc theo tên danh mục lấy từ categories nếu categoryId là id
+    let categoryName = '';
+    if (p.categoryId && typeof p.categoryId === 'object' && p.categoryId.name) {
+      categoryName = p.categoryId.name;
+    } else if (typeof p.categoryId === 'string' && categories.length > 0) {
+      const found = categories.find((c) => c._id === p.categoryId);
+      if (found) categoryName = found.name;
+    }
+    const categoryMatch =
+      filter.category === '' ||
+      (categoryName &&
+        categoryName.toLowerCase().includes(filter.category.toLowerCase()));
+    const isActiveMatch =
+      filter.isActive === '' ||
+      (filter.isActive === 'active' && p.isActive) ||
+      (filter.isActive === 'inactive' && !p.isActive);
+    const originMatch =
+      filter.origin === '' ||
+      (p.origin &&
+        p.origin.toLowerCase().includes(filter.origin.toLowerCase()));
     return nameMatch && categoryMatch && isActiveMatch && originMatch;
   });
 
@@ -77,7 +103,12 @@ function ProductManagerProducts() {
     <Container className="mt-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2 className="fw-bold text-primary mb-0">Quản lý sản phẩm</h2>
-        <Button variant="success" size="lg" className="px-4 py-2 fw-bold shadow" onClick={handleAdd}>
+        <Button
+          variant="success"
+          size="lg"
+          className="px-4 py-2 fw-bold shadow"
+          onClick={handleAdd}
+        >
           + Thêm sản phẩm
         </Button>
       </div>
@@ -89,23 +120,32 @@ function ProductManagerProducts() {
             className="form-control"
             placeholder="Tìm theo tên..."
             value={filter.name}
-            onChange={e => setFilter(f => ({ ...f, name: e.target.value }))}
+            onChange={(e) => setFilter((f) => ({ ...f, name: e.target.value }))}
           />
         </div>
         <div className="col-md-3">
-          <input
-            type="text"
-            className="form-control"
-            placeholder="Tìm theo danh mục..."
+          <select
+            className="form-select"
             value={filter.category}
-            onChange={e => setFilter(f => ({ ...f, category: e.target.value }))}
-          />
+            onChange={(e) =>
+              setFilter((f) => ({ ...f, category: e.target.value }))
+            }
+          >
+            <option value="">Tất cả danh mục</option>
+            {categories.map((cat) => (
+              <option key={cat._id} value={cat.name}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
         </div>
         <div className="col-md-2">
           <select
             className="form-select"
             value={filter.isActive}
-            onChange={e => setFilter(f => ({ ...f, isActive: e.target.value }))}
+            onChange={(e) =>
+              setFilter((f) => ({ ...f, isActive: e.target.value }))
+            }
           >
             <option value="">Tất cả trạng thái</option>
             <option value="active">Đang bán</option>
@@ -118,12 +158,19 @@ function ProductManagerProducts() {
             className="form-control"
             placeholder="Tìm theo nguồn gốc..."
             value={filter.origin}
-            onChange={e => setFilter(f => ({ ...f, origin: e.target.value }))}
+            onChange={(e) =>
+              setFilter((f) => ({ ...f, origin: e.target.value }))
+            }
           />
         </div>
       </div>
       <div className="table-responsive rounded shadow-sm bg-white p-3">
-        <Table bordered hover className="align-middle mb-0" style={{ minWidth: 1200 }}>
+        <Table
+          bordered
+          hover
+          className="align-middle mb-0"
+          style={{ minWidth: 1200 }}
+        >
           <thead className="table-light">
             <tr style={{ verticalAlign: 'middle', textAlign: 'center' }}>
               <th>#</th>
@@ -164,31 +211,98 @@ function ProductManagerProducts() {
                 imageUrl = 'http://localhost:3000' + imageUrl;
               }
               return (
-                <tr key={p._id} style={{ verticalAlign: 'middle', textAlign: 'center' }}>
+                <tr
+                  key={p._id}
+                  style={{ verticalAlign: 'middle', textAlign: 'center' }}
+                >
                   <td>{idx + 1}</td>
                   <td>
                     <img
                       src={imageUrl || '/default-product.png'}
                       alt={p.name}
-                      style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
+                      style={{
+                        width: 60,
+                        height: 60,
+                        objectFit: 'cover',
+                        borderRadius: 8,
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                      }}
                     />
                   </td>
                   <td className="fw-bold text-dark">{p.name || 'Không'}</td>
-                  <td style={{ maxWidth: 200, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.description || 'Không'}</td>
-                  <td className="text-success fw-bold">{p.price ? p.price.toLocaleString('vi-VN') + ' đ' : 'Không'}</td>
+                  <td
+                    style={{
+                      maxWidth: 200,
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    }}
+                  >
+                    {p.description || 'Không'}
+                  </td>
+                  <td className="text-success fw-bold">
+                    {p.price ? p.price.toLocaleString('vi-VN') + ' đ' : 'Không'}
+                  </td>
                   <td>{p.stock ?? 'Không'}</td>
                   <td>
-                    <span className={p.isActive ? 'badge bg-success' : 'badge bg-secondary'}>
-                      {p.isActive === undefined ? 'Không' : (p.isActive ? 'Đang bán' : 'Ngừng bán')}
+                    <span
+                      className={
+                        p.isActive ? 'badge bg-success' : 'badge bg-secondary'
+                      }
+                    >
+                      {p.isActive === undefined
+                        ? 'Không'
+                        : p.isActive
+                          ? 'Đang bán'
+                          : 'Ngừng bán'}
                     </span>
                   </td>
-                  <td>{p.categoryId && typeof p.categoryId === 'object' && p.categoryId.name ? p.categoryId.name : 'Không'}</td>
-                  <td>{p.discountId && typeof p.discountId === 'object' && p.discountId.name ? p.discountId.name : 'Không'}</td>
-                  <td>{p.createdAt ? new Date(p.createdAt).toLocaleString('vi-VN') : 'Không'}</td>
-                  <td>{p.isVegetarian === undefined ? 'Không' : (p.isVegetarian ? '✔️' : 'Không')}</td>
+                  <td>
+                    {/* Hiển thị tên danh mục từ object hoặc từ categories */}
+                    {p.categoryId &&
+                    typeof p.categoryId === 'object' &&
+                    p.categoryId.name
+                      ? p.categoryId.name
+                      : typeof p.categoryId === 'string' &&
+                          categories.length > 0
+                        ? categories.find((c) => c._id === p.categoryId)
+                            ?.name || 'Không'
+                        : 'Không'}
+                  </td>
+                  <td>
+                    {p.discountId &&
+                    typeof p.discountId === 'object' &&
+                    p.discountId.name
+                      ? p.discountId.name
+                      : 'Không'}
+                  </td>
+                  <td>
+                    {p.createdAt
+                      ? new Date(p.createdAt).toLocaleString('vi-VN')
+                      : 'Không'}
+                  </td>
+                  <td>
+                    {p.isVegetarian === undefined
+                      ? 'Không'
+                      : p.isVegetarian
+                        ? '✔️'
+                        : 'Không'}
+                  </td>
                   <td>{p.shelfLifeDays ?? 'Không'}</td>
-                  <td>{p.isRefrigerated === undefined ? 'Không' : (p.isRefrigerated ? '✔️' : 'Không')}</td>
-                  <td>{p.isGlutenFree === undefined ? 'Không' : (p.isGlutenFree ? '✔️' : 'Không')}</td>
+                  <td>
+                    {p.isRefrigerated === undefined
+                      ? 'Không'
+                      : p.isRefrigerated
+                        ? '✔️'
+                        : 'Không'}
+                  </td>
+                  <td>
+                    {p.isGlutenFree === undefined
+                      ? 'Không'
+                      : p.isGlutenFree
+                        ? '✔️'
+                        : 'Không'}
+                  </td>
                   <td>{p.origin || 'Không'}</td>
                   <td>
                     <div className="d-flex flex-column gap-2">
@@ -212,7 +326,9 @@ function ProductManagerProducts() {
                         variant="outline-info"
                         size="sm"
                         className="fw-bold shadow-sm"
-                        onClick={() => alert('Demo: Xem feedback cho sản phẩm ' + p.name)}
+                        onClick={() =>
+                          alert('Demo: Xem feedback cho sản phẩm ' + p.name)
+                        }
                       >
                         Feedback
                       </Button>

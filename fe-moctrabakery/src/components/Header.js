@@ -67,13 +67,13 @@ function Header() {
 
   return (
     <Navbar
-      bg="white"
       expand="lg"
       sticky="top"
-      className="shadow-sm border-bottom"
+      className="shadow-sm border-bottom header-soft-brown"
       style={{
         minHeight: '80px',
         borderBottom: '2px solid #e9ecef',
+        background: '#FFF8F0',
       }}
     >
       <Container fluid className="px-4">
@@ -81,20 +81,20 @@ function Header() {
         <Navbar.Brand
           as={Link}
           to="/"
-          className="d-flex align-items-center fw-bold fs-3 text-dark"
+          className="d-flex align-items-center fw-bold fs-3 text-soft-brown"
           style={{
             textDecoration: 'none',
             transition: 'color 0.3s ease',
           }}
-          onMouseEnter={(e) => (e.target.style.color = '#198754')}
-          onMouseLeave={(e) => (e.target.style.color = '#212529')}
+          onMouseEnter={(e) => (e.target.style.color = '#8B4513')}
+          onMouseLeave={(e) => (e.target.style.color = '#8B4513')}
         >
           <span className="me-2" style={{ fontSize: '2rem' }}>
             🍰
           </span>
           <span>
             Mộc Trà
-            <span style={{ color: '#198754' }} className="ms-1">
+            <span style={{ color: '#D2691E', filter: 'saturate(1.2)' }} className="ms-1">
               Bakery
             </span>
           </span>
@@ -112,8 +112,8 @@ function Header() {
               borderRadius: '8px',
             }}
             onMouseEnter={(e) => {
-              e.target.style.color = '#198754';
-              e.target.style.backgroundColor = '#f8f9fa';
+              e.target.style.color = '#4A7C59';
+              e.target.style.backgroundColor = '#F0F8F0';
             }}
             onMouseLeave={(e) => {
               e.target.style.color = '#212529';
@@ -133,8 +133,8 @@ function Header() {
               borderRadius: '8px',
             }}
             onMouseEnter={(e) => {
-              e.target.style.color = '#198754';
-              e.target.style.backgroundColor = '#f8f9fa';
+              e.target.style.color = '#4A7C59';
+              e.target.style.backgroundColor = '#F0F8F0';
             }}
             onMouseLeave={(e) => {
               e.target.style.color = '#212529';
@@ -154,8 +154,8 @@ function Header() {
               borderRadius: '8px',
             }}
             onMouseEnter={(e) => {
-              e.target.style.color = '#198754';
-              e.target.style.backgroundColor = '#f8f9fa';
+              e.target.style.color = '#4A7C59';
+              e.target.style.backgroundColor = '#F0F8F0';
             }}
             onMouseLeave={(e) => {
               e.target.style.color = '#212529';
@@ -175,8 +175,8 @@ function Header() {
               borderRadius: '8px',
             }}
             onMouseEnter={(e) => {
-              e.target.style.color = '#198754';
-              e.target.style.backgroundColor = '#f8f9fa';
+              e.target.style.color = '#4A7C59';
+              e.target.style.backgroundColor = '#F0F8F0';
             }}
             onMouseLeave={(e) => {
               e.target.style.color = '#212529';
@@ -192,22 +192,21 @@ function Header() {
               <Nav.Link
                 as={Link}
                 to={user.role === 'Admin' ? '/admin/dashboard' : '/manager/dashboard'}
-                className={`px-4 fw-medium ${user.role === 'Admin' ? 'text-danger' : 'text-warning'}`}
+                className={`px-4 fw-medium text-dark`}
                 style={{
                   fontSize: '1rem',
                   transition: 'all 0.3s ease',
                   borderRadius: '8px',
-                  color: user.role === 'Admin' ? '#dc3545' : '#ffc107',
                   fontWeight: 600,
                 }}
                 onMouseEnter={(e) => {
                   e.target.style.color = '#fff';
                   e.target.style.backgroundColor =
-                    user.role === 'Admin' ? '#dc3545' : '#ffc107';
+                    user.role === 'Admin' ? '#8B4513' : '#D2691E';
                 }}
                 onMouseLeave={(e) => {
                   e.target.style.color =
-                    user.role === 'Admin' ? '#dc3545' : '#ffc107';
+                    user.role === 'Admin' ? '#8B4513' : '#D2691E';
                   e.target.style.backgroundColor = 'transparent';
                 }}
               >
@@ -224,24 +223,27 @@ function Header() {
             <Button
               as={Link}
               to="/cart"
-              variant="outline-success"
               size="sm"
               className="position-relative me-2 rounded-circle d-flex align-items-center justify-content-center"
               style={{
                 width: '45px',
                 height: '45px',
-                border: '2px solid transparent',
+                border: '2px solid #4A7C59',
+                background: '#fff',
+                color: '#4A7C59',
                 transition: 'all 0.3s ease',
               }}
               title="Giỏ hàng"
               onMouseEnter={(e) => {
-                e.target.style.backgroundColor = '#d1e7dd';
-                e.target.style.borderColor = '#198754';
+                e.target.style.backgroundColor = '#4A7C59';
+                e.target.style.borderColor = '#4A7C59';
+                e.target.style.color = '#fff';
                 e.target.style.transform = 'scale(1.1)';
               }}
               onMouseLeave={(e) => {
-                e.target.style.backgroundColor = 'transparent';
-                e.target.style.borderColor = 'transparent';
+                e.target.style.backgroundColor = '#fff';
+                e.target.style.borderColor = '#4A7C59';
+                e.target.style.color = '#4A7C59';
                 e.target.style.transform = 'scale(1)';
               }}
             >
@@ -253,6 +255,8 @@ function Header() {
                   style={{
                     fontSize: '0.7rem',
                     animation: 'pulse 2s infinite',
+                    backgroundColor: '#CD853F',
+                    border: 'none',
                   }}
                 >
                   {cartCount}
@@ -263,24 +267,27 @@ function Header() {
             <Button
               as={Link}
               to="/notifications"
-              variant="outline-primary"
               size="sm"
               className="position-relative me-2 rounded-circle d-flex align-items-center justify-content-center"
               style={{
                 width: '45px',
                 height: '45px',
-                border: '2px solid transparent',
+                border: '2px solid #D2691E',
+                background: '#fff',
+                color: '#D2691E',
                 transition: 'all 0.3s ease',
               }}
               title="Thông báo"
               onMouseEnter={(e) => {
-                e.target.style.backgroundColor = '#cff4fc';
-                e.target.style.borderColor = '#0d6efd';
+                e.target.style.backgroundColor = '#D2691E';
+                e.target.style.borderColor = '#D2691E';
+                e.target.style.color = '#fff';
                 e.target.style.transform = 'scale(1.1)';
               }}
               onMouseLeave={(e) => {
-                e.target.style.backgroundColor = 'transparent';
-                e.target.style.borderColor = 'transparent';
+                e.target.style.backgroundColor = '#fff';
+                e.target.style.borderColor = '#D2691E';
+                e.target.style.color = '#D2691E';
                 e.target.style.transform = 'scale(1)';
               }}
             >
@@ -292,6 +299,8 @@ function Header() {
                   style={{
                     fontSize: '0.7rem',
                     animation: 'pulse 2s infinite',
+                    backgroundColor: '#4A7C59',
+                    border: 'none',
                   }}
                 >
                   {notificationCount}
@@ -302,24 +311,27 @@ function Header() {
             <Button
               as={Link}
               to="/messages"
-              variant="outline-info"
               size="sm"
               className="position-relative rounded-circle d-flex align-items-center justify-content-center"
               style={{
                 width: '45px',
                 height: '45px',
-                border: '2px solid transparent',
+                border: '2px solid #8B7355',
+                background: '#fff',
+                color: '#8B7355',
                 transition: 'all 0.3s ease',
               }}
               title="Tin nhắn"
               onMouseEnter={(e) => {
-                e.target.style.backgroundColor = '#d3f3fd';
-                e.target.style.borderColor = '#0dcaf0';
+                e.target.style.backgroundColor = '#8B7355';
+                e.target.style.borderColor = '#8B7355';
+                e.target.style.color = '#fff';
                 e.target.style.transform = 'scale(1.1)';
               }}
               onMouseLeave={(e) => {
-                e.target.style.backgroundColor = 'transparent';
-                e.target.style.borderColor = 'transparent';
+                e.target.style.backgroundColor = '#fff';
+                e.target.style.borderColor = '#8B7355';
+                e.target.style.color = '#8B7355';
                 e.target.style.transform = 'scale(1)';
               }}
             >
@@ -331,6 +343,8 @@ function Header() {
                   style={{
                     fontSize: '0.7rem',
                     animation: 'pulse 2s infinite',
+                    backgroundColor: '#D2691E',
+                    border: 'none',
                   }}
                 >
                   {messageCount}
@@ -344,11 +358,15 @@ function Header() {
             {user ? (
               <div className="d-flex align-items-center">
                 <div
-                  className="d-flex align-items-center bg-success-subtle px-3 py-2 rounded-pill me-3"
-                  style={{ border: '1px solid #d1e7dd' }}
+                  className="d-flex align-items-center px-3 py-2 rounded-pill me-3"
+                  style={{ 
+                    border: '1px solid #4A7C59',
+                    backgroundColor: '#F0F8F0',
+                    color: '#2D5016'
+                  }}
                 >
-                  <BsPersonCircle size={20} className="text-success me-2" />
-                  <span className="fw-medium text-success-emphasis small">
+                  <BsPersonCircle size={20} className="me-2" style={{ color: '#4A7C59' }} />
+                  <span className="fw-medium small">
                     Xin chào, {user.name}
                   </span>
                 </div>
@@ -359,16 +377,18 @@ function Header() {
                   className="rounded-pill fw-medium"
                   style={{
                     transition: 'all 0.3s ease',
-                    border: '2px solid #dc3545',
+                    border: '2px solid #A0522D',
+                    color: '#A0522D',
+                    backgroundColor: 'transparent',
                   }}
                   onMouseEnter={(e) => {
-                    e.target.style.backgroundColor = '#dc3545';
+                    e.target.style.backgroundColor = '#A0522D';
                     e.target.style.color = 'white';
                     e.target.style.transform = 'translateY(-2px)';
                   }}
                   onMouseLeave={(e) => {
                     e.target.style.backgroundColor = 'transparent';
-                    e.target.style.color = '#dc3545';
+                    e.target.style.color = '#A0522D';
                     e.target.style.transform = 'translateY(0)';
                   }}
                 >
@@ -380,23 +400,24 @@ function Header() {
                 <Button
                   as={Link}
                   to="/login"
-                  variant="outline-dark"
                   size="sm"
                   className="d-flex align-items-center me-2 rounded-pill fw-medium"
                   style={{
+                    background: '#fff',
+                    color: '#4A7C59',
+                    border: '2px solid #4A7C59',
                     transition: 'all 0.3s ease',
-                    border: '2px solid #6c757d',
                   }}
                   onMouseEnter={(e) => {
-                    e.target.style.backgroundColor = '#198754';
-                    e.target.style.borderColor = '#198754';
-                    e.target.style.color = 'white';
+                    e.target.style.backgroundColor = '#4A7C59';
+                    e.target.style.color = '#fff';
+                    e.target.style.borderColor = '#4A7C59';
                     e.target.style.transform = 'translateY(-2px)';
                   }}
                   onMouseLeave={(e) => {
-                    e.target.style.backgroundColor = 'transparent';
-                    e.target.style.borderColor = '#6c757d';
-                    e.target.style.color = '#6c757d';
+                    e.target.style.backgroundColor = '#fff';
+                    e.target.style.color = '#4A7C59';
+                    e.target.style.borderColor = '#4A7C59';
                     e.target.style.transform = 'translateY(0)';
                   }}
                 >
@@ -406,24 +427,30 @@ function Header() {
                 <Button
                   as={Link}
                   to="/register"
-                  variant="success"
                   size="sm"
                   className="rounded-pill fw-medium"
                   style={{
+                    background: '#D2691E',
+                    color: '#fff',
+                    border: '2px solid #D2691E',
                     transition: 'all 0.3s ease',
-                    boxShadow: '0 2px 4px rgba(25, 135, 84, 0.2)',
+                    boxShadow: '0 2px 4px rgba(210, 105, 30, 0.2)',
                   }}
                   onMouseEnter={(e) => {
-                    e.target.style.backgroundColor = '#157347';
+                    e.target.style.backgroundColor = '#B8860B';
+                    e.target.style.color = '#fff';
+                    e.target.style.borderColor = '#B8860B';
                     e.target.style.transform = 'translateY(-2px)';
                     e.target.style.boxShadow =
-                      '0 4px 8px rgba(25, 135, 84, 0.3)';
+                      '0 4px 8px rgba(210, 105, 30, 0.3)';
                   }}
                   onMouseLeave={(e) => {
-                    e.target.style.backgroundColor = '#198754';
+                    e.target.style.backgroundColor = '#D2691E';
+                    e.target.style.color = '#fff';
+                    e.target.style.borderColor = '#D2691E';
                     e.target.style.transform = 'translateY(0)';
                     e.target.style.boxShadow =
-                      '0 2px 4px rgba(25, 135, 84, 0.2)';
+                      '0 2px 4px rgba(210, 105, 30, 0.2)';
                   }}
                 >
                   Đăng ký

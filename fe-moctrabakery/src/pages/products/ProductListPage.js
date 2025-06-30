@@ -12,7 +12,7 @@ import {
   Button
 } from 'react-bootstrap';
 import api from '../../api';
-import ProductCard from '../../components/ProductCard';
+import ProductCard from '../../components/product/ProductCard';
 import './ProductListPage.css';
 
 function ProductListPage() {

@@ -2,14 +2,25 @@ import React from 'react';
 import { BsFacebook, BsMessenger, BsTelephone, BsGeoAlt, BsEnvelope, BsClock } from 'react-icons/bs';
 
 function Footer() {
+  // Màu chủ đạo mới
+  const mainBg = '#E9D5B4'; // Đậm hơn nữa, tông be nâu rõ rệt
+  const mainText = '#4E2E0E'; // Nâu gỗ rất đậm
+  const descText = '#3E2723'; // Nâu xám rất đậm
+  const accent = '#FF6F00'; // Cam đậm nổi bật
+  const border = '#bfa06a'; // Border nâu vàng đậm
+  const iconGreen = '#2D5016'; // Xanh lá đậm nhất
+  const iconBrown = '#4E2E0E';
+  const iconOrange = '#FF6F00';
+  const iconShadow = '0 2px 6px rgba(78, 46, 14, 0.22)';
   return (
     <footer 
       style={{
-        background: 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)',
-        borderTop: '4px solid #198754',
-        color: '#fff',
+        background: mainBg,
+        borderTop: `3px solid ${accent}`,
+        color: mainText,
         padding: '3rem 0',
-        marginTop: 'auto'
+        marginTop: 'auto',
+        fontFamily: 'inherit',
       }}
     >
       <div style={{maxWidth: '1200px', margin: '0 auto', padding: '0 1rem'}}>
@@ -24,19 +35,21 @@ function Footer() {
             <div style={{marginBottom: '1.5rem'}}>
               <h5 style={{
                 fontWeight: 'bold',
-                color: '#198754',
+                color: accent,
                 marginBottom: '1rem',
                 display: 'flex',
-                alignItems: 'center'
+                alignItems: 'center',
+                letterSpacing: '1px',
               }}>
                 <span style={{marginRight: '0.5rem', fontSize: '1.5rem'}}>🍰</span>
                 Mộc Trà Bakery
               </h5>
               <p style={{
-                color: '#adb5bd',
+                color: descText,
                 marginBottom: '1rem',
                 lineHeight: '1.6',
-                fontSize: '0.95rem'
+                fontSize: '0.95rem',
+                opacity: '0.95',
               }}>
                 Tiệm bánh thủ công với hương vị truyền thống, mang đến những sản phẩm bánh tươi ngon, 
                 được làm từ nguyên liệu chất lượng cao.
@@ -44,10 +57,11 @@ function Footer() {
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
-                color: '#adb5bd',
-                marginBottom: '0.5rem'
+                color: accent,
+                marginBottom: '0.5rem',
+                opacity: '0.95',
               }}>
-                <BsClock style={{marginRight: '0.5rem', color: '#ffc107'}} />
+                <BsClock style={{marginRight: '0.5rem', color: accent}} />
                 <span style={{fontSize: '0.9rem'}}>Mở cửa: 6:00 - 22:00 hàng ngày</span>
               </div>
             </div>
@@ -57,8 +71,9 @@ function Footer() {
           <div>
             <h6 style={{
               fontWeight: 'bold',
-              color: '#ffc107',
-              marginBottom: '1rem'
+              color: accent,
+              marginBottom: '1rem',
+              letterSpacing: '0.5px',
             }}>
               Thông tin liên hệ
             </h6>
@@ -74,15 +89,16 @@ function Footer() {
                   justifyContent: 'center',
                   marginRight: '1rem',
                   borderRadius: '50%',
-                  backgroundColor: '#198754',
+                  backgroundColor: iconGreen,
                   width: '35px',
-                  height: '35px'
+                  height: '35px',
+                  boxShadow: iconShadow,
                 }}>
                   <BsGeoAlt size={16} style={{color: '#fff'}} />
                 </div>
                 <div>
-                  <div style={{fontWeight: '500', marginBottom: '0.25rem'}}>Địa chỉ</div>
-                  <div style={{color: '#adb5bd', fontSize: '0.9rem'}}>123 Đường Admin, TP. HCM</div>
+                  <div style={{fontWeight: '500', marginBottom: '0.25rem', color: mainText}}>Địa chỉ</div>
+                  <div style={{color: descText, fontSize: '0.9rem', opacity: '0.95'}}>123 Đường Admin, TP. HCM</div>
                 </div>
               </div>
 
@@ -97,24 +113,26 @@ function Footer() {
                   justifyContent: 'center',
                   marginRight: '1rem',
                   borderRadius: '50%',
-                  backgroundColor: '#0dcaf0',
+                  backgroundColor: iconOrange,
                   width: '35px',
-                  height: '35px'
+                  height: '35px',
+                  boxShadow: iconShadow,
                 }}>
                   <BsTelephone size={16} style={{color: '#fff'}} />
                 </div>
                 <div>
-                  <div style={{fontWeight: '500', marginBottom: '0.25rem'}}>Hotline</div>
+                  <div style={{fontWeight: '500', marginBottom: '0.25rem', color: mainText}}>Hotline</div>
                   <a 
                     href="tel:0901234567" 
                     style={{
-                      color: '#0dcaf0',
+                      color: accent,
                       textDecoration: 'none',
                       fontSize: '0.9rem',
-                      transition: 'color 0.3s ease'
+                      transition: 'color 0.3s ease',
+                      fontWeight: '500',
                     }}
-                    onMouseEnter={(e) => e.target.style.color = '#00d4ff'}
-                    onMouseLeave={(e) => e.target.style.color = '#0dcaf0'}
+                    onMouseEnter={(e) => e.target.style.color = '#FF9800'}
+                    onMouseLeave={(e) => e.target.style.color = accent}
                   >
                     0901 234 567
                   </a>
@@ -128,24 +146,26 @@ function Footer() {
                   justifyContent: 'center',
                   marginRight: '1rem',
                   borderRadius: '50%',
-                  backgroundColor: '#ffc107',
+                  backgroundColor: iconBrown,
                   width: '35px',
-                  height: '35px'
+                  height: '35px',
+                  boxShadow: iconShadow,
                 }}>
-                  <BsEnvelope size={16} style={{color: '#000'}} />
+                  <BsEnvelope size={16} style={{color: '#fff'}} />
                 </div>
                 <div>
-                  <div style={{fontWeight: '500', marginBottom: '0.25rem'}}>Email</div>
+                  <div style={{fontWeight: '500', marginBottom: '0.25rem', color: mainText}}>Email</div>
                   <a 
                     href="mailto:info@moctrabakery.com" 
                     style={{
-                      color: '#ffc107',
+                      color: accent,
                       textDecoration: 'none',
                       fontSize: '0.9rem',
-                      transition: 'color 0.3s ease'
+                      transition: 'color 0.3s ease',
+                      fontWeight: '500',
                     }}
-                    onMouseEnter={(e) => e.target.style.color = '#ffeb3b'}
-                    onMouseLeave={(e) => e.target.style.color = '#ffc107'}
+                    onMouseEnter={(e) => e.target.style.color = '#FF9800'}
+                    onMouseLeave={(e) => e.target.style.color = accent}
                   >
                     info@moctrabakery.com
                   </a>
@@ -158,15 +178,17 @@ function Footer() {
           <div>
             <h6 style={{
               fontWeight: 'bold',
-              color: '#ffc107',
-              marginBottom: '1rem'
+              color: accent,
+              marginBottom: '1rem',
+              letterSpacing: '0.5px',
             }}>
               Kết nối với chúng tôi
             </h6>
             <p style={{
-              color: '#adb5bd',
+              color: descText,
               fontSize: '0.9rem',
-              marginBottom: '1rem'
+              marginBottom: '1rem',
+              opacity: '0.95',
             }}>
               Theo dõi chúng tôi để cập nhật những sản phẩm mới và ưu đãi hấp dẫn!
             </p>
@@ -179,7 +201,7 @@ function Footer() {
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  backgroundColor: '#1877f2',
+                  backgroundColor: iconGreen,
                   color: '#fff',
                   padding: '0.75rem 1.5rem',
                   borderRadius: '25px',
@@ -187,16 +209,22 @@ function Footer() {
                   fontSize: '0.9rem',
                   fontWeight: '500',
                   transition: 'all 0.3s ease',
-                  boxShadow: '0 4px 8px rgba(24, 119, 242, 0.2)',
-                  border: 'none'
+                  boxShadow: '0 4px 8px rgba(74, 124, 89, 0.13)',
+                  border: `2px solid ${accent}`,
                 }}
                 onMouseEnter={(e) => {
+                  e.target.style.backgroundColor = accent;
+                  e.target.style.color = '#fff';
                   e.target.style.transform = 'translateY(-3px)';
-                  e.target.style.boxShadow = '0 6px 12px rgba(24, 119, 242, 0.3)';
+                  e.target.style.boxShadow = '0 6px 12px rgba(255, 179, 102, 0.18)';
+                  e.target.style.borderColor = iconGreen;
                 }}
                 onMouseLeave={(e) => {
+                  e.target.style.backgroundColor = iconGreen;
+                  e.target.style.color = '#fff';
                   e.target.style.transform = 'translateY(0)';
-                  e.target.style.boxShadow = '0 4px 8px rgba(24, 119, 242, 0.2)';
+                  e.target.style.boxShadow = '0 4px 8px rgba(74, 124, 89, 0.13)';
+                  e.target.style.borderColor = accent;
                 }}
               >
                 <BsFacebook style={{marginRight: '0.5rem'}} size={20} />
@@ -210,7 +238,7 @@ function Footer() {
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  backgroundColor: '#0068ff',
+                  backgroundColor: accent,
                   color: '#fff',
                   padding: '0.75rem 1.5rem',
                   borderRadius: '25px',
@@ -218,25 +246,65 @@ function Footer() {
                   fontSize: '0.9rem',
                   fontWeight: '500',
                   transition: 'all 0.3s ease',
-                  boxShadow: '0 4px 8px rgba(0, 104, 255, 0.2)',
-                  border: 'none'
+                  boxShadow: '0 4px 8px rgba(255, 179, 102, 0.13)',
+                  border: `2px solid ${iconGreen}`,
                 }}
                 onMouseEnter={(e) => {
-                  e.target.style.backgroundColor = '#0056d6';
+                  e.target.style.backgroundColor = iconGreen;
+                  e.target.style.color = '#fff';
                   e.target.style.transform = 'translateY(-3px)';
-                  e.target.style.boxShadow = '0 6px 12px rgba(0, 104, 255, 0.3)';
+                  e.target.style.boxShadow = '0 6px 12px rgba(74, 124, 89, 0.18)';
+                  e.target.style.borderColor = accent;
                 }}
                 onMouseLeave={(e) => {
-                  e.target.style.backgroundColor = '#0068ff';
+                  e.target.style.backgroundColor = accent;
+                  e.target.style.color = '#fff';
                   e.target.style.transform = 'translateY(0)';
-                  e.target.style.boxShadow = '0 4px 8px rgba(0, 104, 255, 0.2)';
+                  e.target.style.boxShadow = '0 4px 8px rgba(255, 179, 102, 0.13)';
+                  e.target.style.borderColor = iconGreen;
                 }}
               >
                 <BsMessenger style={{marginRight: '0.5rem'}} size={20} />
                 Zalo
               </a>
             </div>
+
+            {/* Additional info */}
+            <div style={{
+              backgroundColor: '#FEFCF8',
+              padding: '1rem',
+              borderRadius: '8px',
+              border: `1px solid ${border}`,
+              marginTop: '1rem',
+            }}>
+              <p style={{
+                color: descText,
+                fontSize: '0.85rem',
+                margin: '0',
+                opacity: '0.95',
+                textAlign: 'center',
+              }}>
+                <strong style={{color: accent}}>Cam kết:</strong> Sản phẩm tươi ngon, an toàn thực phẩm
+              </p>
+            </div>
           </div>
+        </div>
+
+        {/* Copyright */}
+        <div style={{
+          borderTop: `1px solid ${border}`,
+          paddingTop: '1.5rem',
+          textAlign: 'center',
+        }}>
+          <p style={{
+            color: descText,
+            fontSize: '0.85rem',
+            margin: '0',
+            opacity: '0.95',
+          }}>
+            © 2024 <span style={{color: accent, fontWeight: '500'}}>Mộc Trà Bakery</span>. 
+            Tất cả quyền được bảo lưu. | Thiết kế với ❤️ tại Việt Nam
+          </p>
         </div>
       </div>
     </footer>

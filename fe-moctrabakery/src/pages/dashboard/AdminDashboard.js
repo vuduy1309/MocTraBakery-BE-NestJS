@@ -2,7 +2,7 @@ import React from 'react';
 import { Container, Row, Col, Card, ListGroup, Badge } from 'react-bootstrap';
 import { BsBoxSeam, BsPeople, BsCash, BsCartCheck, BsTag, BsBarChart, BsGear, BsShieldLock, BsJournalText } from 'react-icons/bs';
 
-function AdminDashboardDemo() {
+function AdminDashboard() {
   return (
     <Container fluid className="mt-4">
       <Row>
@@ -119,4 +119,4 @@ function AdminDashboardDemo() {
   );
 }
 
-export default AdminDashboardDemo;
+export default AdminDashboard;

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Form, Button, Row, Col, Alert } from 'react-bootstrap';
-import api from '../api';
+import api from '../../api';
 
 const allProductFields = [
   { name: 'origin', label: 'Xuất xứ', type: 'text' },

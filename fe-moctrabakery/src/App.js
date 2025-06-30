@@ -13,11 +13,12 @@ import Footer from './components/Footer';
 import HomePage from './pages/HomePage';
 import ProductListPage from './pages/products/ProductListPage';
 import ProductDetailPage from './pages/products/ProductDetailPage';
-import CartPage from './pages/CartPage';
-import ProductManagerDashboard from './pages/ProductManagerDashboard';
-import AdminDashboardDemo from './pages/AdminDashboardDemo';
-import ProductManagerProducts from './pages/ProductManagerProducts';
-import ProductAddPage from './pages/ProductAddPage';
+import CartPage from './pages/cart/CartPage';
+import ProductManagerDashboard from './pages/dashboard/ProductManagerDashboard';
+import ProductManagerProducts from './pages/dashboard/ProductManagerProducts';
+import ProductAddPage from './pages/dashboard/ProductAddPage';
+import ProductManagerLayout from './layouts/ProductManagerLayout';
+import AdminDashboard from './pages/dashboard/AdminDashboard';
 
 function App() {
   return (
@@ -30,11 +31,17 @@ function App() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/cart" element={<CartPage />} />
-        <Route path="*" element={<Navigate to="/ư" />} />
-        <Route path="/manager/dashboard*" element={<ProductManagerDashboard />} />
-        <Route path="/1234*" element={<AdminDashboardDemo />} />
-        <Route path="/manager/products" element={<ProductManagerProducts />} />
+        <Route path="*" element={<Navigate to="/" />} />
+        <Route
+          path="/manager/dashboard*"
+          element={<ProductManagerDashboard />}
+        />
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/manager" element={<ProductManagerLayout />}>
+          <Route path="dashboard" element={<ProductManagerDashboard />} />
+          <Route path="products" element={<ProductManagerProducts />} />
         <Route path="/manager/add-product" element={<ProductAddPage />} />
+        </Route>
       </Routes>
       <Footer />
     </Router>
