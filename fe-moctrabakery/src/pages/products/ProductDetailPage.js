@@ -177,12 +177,38 @@ function ProductDetailPage() {
                 <FaHeart />
               </Button>
               <div className="img-container p-3">
-                <Image
-                  src={product.image || (product.images && product.images[0])}
-                  alt={product.name}
-                  className="w-100 h-100 object-fit-cover rounded"
-                  style={{ minHeight: '400px', maxHeight: '500px' }}
-                />
+                {(() => {
+                  let imageUrl = '';
+                  if (
+                    Array.isArray(product.images) &&
+                    product.images.length > 0
+                  ) {
+                    let first = product.images[0];
+                    if (typeof first === 'string') {
+                      imageUrl = first;
+                    } else if (first && typeof first === 'object') {
+                      imageUrl = first.image || first.url || '';
+                    }
+                  } else if (
+                    product.image &&
+                    typeof product.image === 'object'
+                  ) {
+                    imageUrl = product.image.image || product.image.url || '';
+                  } else if (typeof product.image === 'string') {
+                    imageUrl = product.image;
+                  }
+                  if (imageUrl && imageUrl.startsWith('/uploads')) {
+                    imageUrl = 'http://localhost:3000' + imageUrl;
+                  }
+                  return (
+                    <Image
+                      src={imageUrl || '/default-product.png'}
+                      alt={product.name}
+                      className="w-100 h-100 object-fit-cover rounded"
+                      style={{ minHeight: '400px', maxHeight: '500px' }}
+                    />
+                  );
+                })()}
               </div>
             </div>
           </Card>

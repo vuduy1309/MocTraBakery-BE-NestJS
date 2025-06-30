@@ -70,6 +70,7 @@ let ProductController = class ProductController {
                 includedFlavors: obj.includedFlavors,
                 packaging: obj.packaging,
                 sizes: obj.sizes,
+                origin: obj.origin,
             };
         });
     }
@@ -101,6 +102,7 @@ let ProductController = class ProductController {
             includedFlavors: obj.includedFlavors,
             packaging: obj.packaging,
             sizes: obj.sizes,
+            origin: obj.origin,
         };
     }
 };

@@ -76,6 +76,7 @@ export class ProductController {
         includedFlavors: obj.includedFlavors,
         packaging: obj.packaging,
         sizes: obj.sizes,
+        origin: obj.origin,
       };
     });
   }
@@ -112,6 +113,7 @@ export class ProductController {
       includedFlavors: obj.includedFlavors,
       packaging: obj.packaging,
       sizes: obj.sizes,
+      origin: obj.origin,
     };
   }
 }

@@ -34,6 +34,7 @@ export declare class ProductController {
         includedFlavors: any;
         packaging: any;
         sizes: any;
+        origin: any;
     }[]>;
     getById(id: string): Promise<{
         _id: any;
@@ -54,5 +55,6 @@ export declare class ProductController {
         includedFlavors: any;
         packaging: any;
         sizes: any;
+        origin: any;
     }>;
 }

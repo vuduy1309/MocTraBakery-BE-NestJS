@@ -1,38 +1,39 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Card, 
-  Badge, 
-  Button, 
-  OverlayTrigger, 
+import {
+  Card,
+  Badge,
+  Button,
+  OverlayTrigger,
   Tooltip,
-  Image 
+  Image,
 } from 'react-bootstrap';
-import { 
-  FaHeart, 
-  FaRegHeart, 
-  FaShoppingCart, 
+import {
+  FaHeart,
+  FaRegHeart,
+  FaShoppingCart,
   FaStar,
   FaGift,
   FaLeaf,
-  FaSnowflake 
+  FaSnowflake,
 } from 'react-icons/fa';
 import './ProductCard.css';
 
 const API_URL = 'http://localhost:3000'; // Đổi thành domain backend nếu deploy
 
-function ProductCard({ 
-  _id, 
-  name, 
-  price, 
-  image, 
-  sizes = [], 
-  discount, 
+function ProductCard({
+  _id,
+  name,
+  price,
+  image, // Giữ prop image cho tương thích ngược
+  images, // Thêm prop images mới
+  sizes = [],
+  discount,
   isVegetarian,
   isRefrigerated,
   rating = 4.5,
   reviewCount = 0,
-  ...rest 
+  ...rest
 }) {
   const navigate = useNavigate();
   const [isFavorite, setIsFavorite] = useState(false);
@@ -42,7 +43,10 @@ function ProductCard({
   let displayPrice = price;
   let sizeLabel = '';
   if (sizes && sizes.length > 0) {
-    const minSize = sizes.reduce((min, s) => (s.price < min.price ? s : min), sizes[0]);
+    const minSize = sizes.reduce(
+      (min, s) => (s.price < min.price ? s : min),
+      sizes[0],
+    );
     displayPrice = minSize.price;
     sizeLabel = `Từ ${minSize.name}`;
   }
@@ -82,28 +86,57 @@ function ProductCard({
       stars.push(<FaStar key={i} className="text-warning" size={12} />);
     }
     if (hasHalfStar) {
-      stars.push(<FaStar key="half" className="text-warning" size={12} style={{ opacity: 0.5 }} />);
+      stars.push(
+        <FaStar
+          key="half"
+          className="text-warning"
+          size={12}
+          style={{ opacity: 0.5 }}
+        />,
+      );
     }
     const remainingStars = 5 - Math.ceil(rating);
     for (let i = 0; i < remainingStars; i++) {
-      stars.push(<FaStar key={`empty-${i}`} className="text-muted" size={12} />);
+      stars.push(
+        <FaStar key={`empty-${i}`} className="text-muted" size={12} />,
+      );
     }
     return stars;
   };
 
-  // Xử lý ảnh: nhận image là string hoặc mảng, ưu tiên phần tử đầu tiên
+  // Xử lý ảnh: ưu tiên images từ backend, fallback về image
   let imageUrl = '';
-  if (Array.isArray(image) && image.length > 0) {
-    imageUrl = image[0];
-  } else if (typeof image === 'string') {
-    imageUrl = image;
+
+  // Ưu tiên images (từ backend API)
+  const imageSource = images || image;
+
+  if (Array.isArray(imageSource) && imageSource.length > 0) {
+    let first = imageSource[0];
+    if (typeof first === 'string') {
+      imageUrl = first;
+    } else if (first && typeof first === 'object') {
+      imageUrl = first.image || first.url || '';
+    }
+  } else if (imageSource && typeof imageSource === 'object') {
+    imageUrl = imageSource.image || imageSource.url || '';
+  } else if (typeof imageSource === 'string') {
+    imageUrl = imageSource;
   }
-  if (imageUrl && imageUrl.startsWith('/uploads')) {
-    imageUrl = API_URL + imageUrl;
+
+  // Xử lý URL ảnh
+  if (imageUrl) {
+    // Nếu là đường dẫn tương đối từ server
+    if (imageUrl.startsWith('/uploads')) {
+      imageUrl = API_URL + imageUrl;
+    }
+    // Nếu không phải URL đầy đủ và không bắt đầu bằng http
+    else if (!imageUrl.startsWith('http') && !imageUrl.startsWith('data:')) {
+      imageUrl = API_URL + (imageUrl.startsWith('/') ? '' : '/') + imageUrl;
+    }
   }
 
   return (
-    <Card 
+    <Card
       className="product-card h-100 border-0 shadow-sm position-relative"
       style={{ cursor: 'pointer', transition: 'all 0.3s ease' }}
       onClick={handleCardClick}
@@ -112,26 +145,25 @@ function ProductCard({
     >
       {/* Discount Badge */}
       {discountPercent > 0 && (
-        <Badge 
-          bg="danger" 
+        <Badge
+          bg="danger"
           className="position-absolute top-0 start-0 m-2 px-2 py-1 fs-6"
           style={{ zIndex: 10 }}
         >
-          <FaGift className="me-1" size={10} />
-          -{discountPercent}%
+          <FaGift className="me-1" size={10} />-{discountPercent}%
         </Badge>
       )}
 
       {/* Favorite Button */}
       <Button
-        variant={isFavorite ? "danger" : "light"}
+        variant={isFavorite ? 'danger' : 'light'}
         size="sm"
         className="position-absolute top-0 end-0 m-2 rounded-circle p-1 border-0"
-        style={{ 
-          zIndex: 10, 
-          width: '32px', 
+        style={{
+          zIndex: 10,
+          width: '32px',
           height: '32px',
-          backgroundColor: isFavorite ? undefined : 'rgba(255, 255, 255, 0.9)'
+          backgroundColor: isFavorite ? undefined : 'rgba(255, 255, 255, 0.9)',
         }}
         onClick={handleFavoriteClick}
       >
@@ -139,17 +171,20 @@ function ProductCard({
       </Button>
 
       {/* Product Image */}
-      <div className="position-relative overflow-hidden" style={{ height: '200px' }}>
-        <Image 
-          src={imageUrl || '/default-product.png'} 
-          alt={name} 
+      <div
+        className="position-relative overflow-hidden"
+        style={{ height: '200px' }}
+      >
+        <Image
+          src={imageUrl || '/default-product.png'}
+          alt={name}
           className="w-100 h-100 object-fit-cover"
-          style={{ 
+          style={{
             transition: 'transform 0.3s ease',
-            transform: isHovered ? 'scale(1.05)' : 'scale(1)'
+            transform: isHovered ? 'scale(1.05)' : 'scale(1)',
           }}
         />
-        
+
         {/* Quick Add Button - appears on hover */}
         {isHovered && (
           <Button
@@ -157,10 +192,10 @@ function ProductCard({
             size="sm"
             className="position-absolute bottom-0 end-0 m-2 rounded-circle p-2"
             onClick={handleQuickAdd}
-            style={{ 
+            style={{
               animation: 'slideUp 0.3s ease',
               width: '40px',
-              height: '40px'
+              height: '40px',
             }}
           >
             <FaShoppingCart size={16} />
@@ -193,13 +228,13 @@ function ProductCard({
         </div>
 
         {/* Product Name */}
-        <Card.Title 
-          as="h6" 
+        <Card.Title
+          as="h6"
           className="mb-2 text-truncate fw-bold"
-          style={{ 
+          style={{
             fontSize: '1rem',
             lineHeight: '1.2',
-            minHeight: '1.2rem'
+            minHeight: '1.2rem',
           }}
         >
           {name}
@@ -234,9 +269,9 @@ function ProductCard({
         </div>
 
         {/* Action Button */}
-        <Button 
-          variant="outline-primary" 
-          size="sm" 
+        <Button
+          variant="outline-primary"
+          size="sm"
           className="w-100 fw-bold"
           onClick={(e) => {
             e.stopPropagation();
