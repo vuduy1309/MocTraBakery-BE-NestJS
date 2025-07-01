@@ -303,67 +303,6 @@ function HomePage() {
             </Row>
           )}
         </section>
-
-        {/* Contact Section */}
-        <section className="contact-section" style={{ marginBottom: 0 }}>
-          <Card className="border-0 shadow-lg">
-            <Card.Header className="bg-soft-beige text-soft-beige text-center py-4">
-              <h2 className="display-6 fw-bold mb-0">Liên hệ với chúng tôi</h2>
-            </Card.Header>
-            <Card.Body className="p-5">
-              <Row className="g-4">
-                <Col lg={6}>
-                  <div className="d-flex align-items-center mb-3">
-                    <FaMapMarkerAlt
-                      className="text-soft-beige me-3"
-                      size={20}
-                    />
-                    <div>
-                      <strong>Địa chỉ:</strong>
-                      <br />
-                      123 Đường Admin, Quận 1, TP. HCM
-                    </div>
-                  </div>
-                  <div className="d-flex align-items-center mb-3">
-                    <FaPhone className="text-soft-beige me-3" size={20} />
-                    <div>
-                      <strong>Hotline:</strong>
-                      <br />
-                      0901 234 567
-                    </div>
-                  </div>
-                </Col>
-                <Col lg={6}>
-                  <div className="d-flex align-items-center mb-3">
-                    <FaEnvelope className="text-soft-beige me-3" size={20} />
-                    <div>
-                      <strong>Email:</strong>
-                      <br />
-                      moctrabakery@example.com
-                    </div>
-                  </div>
-                  <div className="d-flex align-items-center mb-3">
-                    <FaFacebook className="text-soft-beige me-3" size={20} />
-                    <div>
-                      <strong>Facebook:</strong>
-                      <br />
-                      fb.com/moctrabakery
-                    </div>
-                  </div>
-                </Col>
-              </Row>
-              <div className="text-center mt-4">
-                <Button
-                  variant="soft-beige"
-                  size="lg"
-                  className="px-5 fw-bold btn-soft-beige"
-                >
-                  Liên hệ ngay
-                </Button>
-              </div>
-            </Card.Body>
-          </Card>
-        </section>
       </Container>
     </div>
   );

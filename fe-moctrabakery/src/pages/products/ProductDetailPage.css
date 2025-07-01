@@ -3,13 +3,15 @@
 .product-detail-container {
   max-width: 1400px;
   margin: 0 auto;
+  background: #F8F5F0;
+  border-radius: 1.5rem;
 }
 
 /* Image container styling */
 .img-container {
   overflow: hidden;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  border-radius: 0.5rem;
+  background: #FAF6F1;
+  border-radius: 1.2rem;
 }
 
 .img-container img {
@@ -35,14 +37,18 @@
 }
 
 /* Card enhancements */
-.card {
+.card,
+.card.shadow-lg {
+  background: #FAF6F1 !important;
+  border-radius: 1.5rem !important;
+  box-shadow: 0 4px 24px 0 rgba(164,144,124,0.10) !important;
   border: none !important;
-  transition: all 0.3s ease;
 }
 
-.card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
+.card:hover,
+.card.shadow-lg:hover {
+  box-shadow: 0 8px 32px 0 rgba(164,144,124,0.18) !important;
+  transform: translateY(-4px) scale(1.01);
 }
 
 /* Button styling */
@@ -51,48 +57,75 @@
   border-radius: 0.5rem;
 }
 
-.btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+.btn-primary,
+.btn-primary:focus {
+  background: #A4907C !important;
+  border: none !important;
+  color: #fff !important;
 }
 
-.btn-outline-primary:hover {
-  background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+.btn-primary:hover {
+  background: #8B6F3A !important;
+  color: #fff !important;
 }
 
-.btn-success {
-  background: linear-gradient(135deg, #198754 0%, #157347 100%);
-  border: none;
+.btn-success,
+.btn-success:focus {
+  background: #4E944F !important;
+  border: none !important;
+  color: #fff !important;
 }
 
 .btn-success:hover {
-  background: linear-gradient(135deg, #157347 0%, #146c43 100%);
+  background: #41753B !important;
+  color: #fff !important;
 }
 
-.btn-primary {
-  background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
-  border: none;
+.btn-outline-primary,
+.btn-outline-primary:focus {
+  border-color: #A4907C !important;
+  color: #A4907C !important;
+  background: transparent !important;
+}
+
+.btn-outline-primary:hover {
+  background: #A4907C !important;
+  color: #fff !important;
+}
+
+.btn-group .btn,
+.btn-group .btn:disabled {
+  border-color: #A4907C !important;
+  color: #A4907C !important;
+  background: #F8F5F0 !important;
+}
+
+.btn-group .btn:hover:not(:disabled) {
+  background: #A4907C !important;
+  color: #fff !important;
 }
 
 /* Badge styling */
-.badge {
-  border-radius: 0.5rem;
-  font-weight: 500;
-  letter-spacing: 0.5px;
+.badge,
+.badge.bg-light {
+  background: #F8F5F0 !important;
+  color: #6B4F27 !important;
+  border: 1px solid #E9D5B4 !important;
 }
 
 /* Price styling */
 .text-success {
-  color: #198754 !important;
+  color: #4E944F !important;
 }
 
 /* Alert styling */
 .alert {
-  border: none;
-  border-radius: 0.75rem;
-  animation: slideDown 0.3s ease;
+  background: #FAF6F1 !important;
+  color: #6B4F27 !important;
+  border: 1px solid #E9D5B4 !important;
 }
 
+/* Animation keyframes */
 @keyframes slideDown {
   from {
     opacity: 0;
@@ -178,3 +211,5 @@
     background: #555;
   }
 }
+
+/* End bakery theme overrides */

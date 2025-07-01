@@ -75,3 +75,4 @@ export class Product {
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);
+ProductSchema.set('timestamps', true);

@@ -54,7 +54,7 @@ function ProductManagerProducts() {
   };
 
   const handleEdit = (id) => {
-    alert('Demo: Sửa sản phẩm ' + id);
+    navigate('/manager/update-product/' + id);
   };
 
   const handleDelete = (id) => {

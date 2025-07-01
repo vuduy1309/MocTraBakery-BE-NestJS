@@ -68,21 +68,21 @@ function ProductListPage() {
   };
 
   return (
-    <div className="product-list-page bg-light min-vh-100 py-4">
+    <div className="product-list-page" style={{ background: '#F8F5F0', minHeight: '100vh', padding: '1.5rem 0' }}>
       <Container fluid className="px-4">
         
         {/* Header Section */}
         <Row className="mb-5">
           <Col>
             <div className="text-center py-4">
-              <div className="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 rounded-circle mb-4" 
-                   style={{ width: '80px', height: '80px' }}>
-                <i className="fas fa-store fa-2x text-primary"></i>
+              <div className="d-inline-flex align-items-center justify-content-center" 
+                   style={{ width: '80px', height: '80px', background: '#A4907C22', borderRadius: '50%', marginBottom: '1.5rem' }}>
+                <i className="fas fa-store fa-2x" style={{ color: '#6B4F27' }}></i>
               </div>
-              <h1 className="display-4 fw-bold text-primary mb-3">
+              <h1 className="display-4 fw-bold mb-3" style={{ color: '#6B4F27' }}>
                 Danh sách sản phẩm
               </h1>
-              <p className="lead text-muted">
+              <p className="lead" style={{ color: '#8B6F3A' }}>
                 Khám phá bộ sưu tập sản phẩm đa dạng với chất lượng tốt nhất
               </p>
             </div>
@@ -92,16 +92,16 @@ function ProductListPage() {
         {/* Filter Section */}
         <Row className="mb-4">
           <Col>
-            <Card className="shadow-sm border-0">
+            <Card className="shadow-sm border-0" style={{ background: '#FAF6F1' }}>
               <Card.Body className="p-4">
                 <Row className="align-items-end">
                   <Col lg={5} className="mb-3 mb-lg-0">
-                    <Form.Label className="fw-semibold text-muted mb-2">
+                    <Form.Label className="fw-semibold mb-2" style={{ color: '#8B6F3A' }}>
                       Tìm kiếm sản phẩm
                     </Form.Label>
                     <InputGroup size="lg">
                       <InputGroup.Text className="bg-white border-end-0">
-                        <i className="fas fa-search text-muted"></i>
+                        <i className="fas fa-search" style={{ color: '#A4907C' }}></i>
                       </InputGroup.Text>
                       <Form.Control
                         type="text"
@@ -123,12 +123,12 @@ function ProductListPage() {
                     </InputGroup>
                   </Col>
                   <Col lg={4} className="mb-3 mb-lg-0">
-                    <Form.Label className="fw-semibold text-muted mb-2">
+                    <Form.Label className="fw-semibold mb-2" style={{ color: '#8B6F3A' }}>
                       Danh mục
                     </Form.Label>
                     <InputGroup size="lg">
                       <InputGroup.Text className="bg-white border-end-0">
-                        <i className="fas fa-filter text-muted"></i>
+                        <i className="fas fa-filter" style={{ color: '#A4907C' }}></i>
                       </InputGroup.Text>
                       <Form.Select
                         value={category}
@@ -144,12 +144,12 @@ function ProductListPage() {
                     </InputGroup>
                   </Col>
                   <Col lg={3}>
-                    <Form.Label className="fw-semibold text-muted mb-2">
+                    <Form.Label className="fw-semibold mb-2" style={{ color: '#8B6F3A' }}>
                       Khoảng giá
                     </Form.Label>
                     <InputGroup size="lg">
                       <InputGroup.Text className="bg-white border-end-0">
-                        <i className="fas fa-money-bill-wave text-muted"></i>
+                        <i className="fas fa-money-bill-wave" style={{ color: '#A4907C' }}></i>
                       </InputGroup.Text>
                       <Form.Select
                         value={priceRange}
@@ -172,7 +172,7 @@ function ProductListPage() {
                   <Col>
                     <div className="d-flex align-items-center justify-content-between flex-wrap">
                       <div className="d-flex align-items-center gap-3 mb-2 mb-sm-0">
-                        <Badge bg="primary" pill className="fs-6 px-3 py-2">
+                        <Badge pill className="fs-6 px-3 py-2" style={{ background: '#A4907C', color: '#fff' }}>
                           <i className="fas fa-box me-2"></i>
                           {filteredProducts.length} sản phẩm
                         </Badge>
@@ -185,7 +185,7 @@ function ProductListPage() {
                       
                       {(search || category || priceRange) && (
                         <Button 
-                          variant="outline-secondary" 
+                          style={{ borderColor: '#A4907C', color: '#A4907C' }}
                           size="sm"
                           onClick={clearFilters}
                           className="d-flex align-items-center"
@@ -209,12 +209,11 @@ function ProductListPage() {
               <div className="text-center">
                 <Spinner 
                   animation="border" 
-                  variant="primary" 
-                  style={{ width: '3rem', height: '3rem' }}
+                  style={{ width: '3rem', height: '3rem', color: '#A4907C' }}
                 />
                 <div className="mt-3">
-                  <h5 className="text-muted">Đang tải sản phẩm...</h5>
-                  <p className="text-muted mb-0">Vui lòng chờ trong giây lát</p>
+                  <h5 style={{ color: '#A4907C' }}>Đang tải sản phẩm...</h5>
+                  <p className="mb-0" style={{ color: '#8B6F3A' }}>Vui lòng chờ trong giây lát</p>
                 </div>
               </div>
             </Col>
@@ -225,8 +224,8 @@ function ProductListPage() {
         {error && (
           <Row className="justify-content-center mb-4">
             <Col lg={8}>
-              <Alert variant="danger" className="d-flex align-items-center py-3">
-                <i className="fas fa-exclamation-circle me-3 fa-lg"></i>
+              <Alert style={{ background: '#FAF6F1', color: '#6B4F27', border: '1px solid #A4907C' }} className="d-flex align-items-center py-3">
+                <i className="fas fa-exclamation-circle me-3 fa-lg" style={{ color: '#A4907C' }}></i>
                 <div>
                   <strong>Có lỗi xảy ra!</strong> {error}
                 </div>
@@ -240,10 +239,11 @@ function ProductListPage() {
           <Row className="g-4">
             {filteredProducts.map((p) => (
               <Col key={p._id} xs={12} sm={6} md={4} lg={3}>
-                <div className="h-100 product-card-hover">
+                <div className="h-100 product-card-hover" style={{ background: '#FAF6F1', borderRadius: '1rem' }}>
                   <ProductCard
                     {...p}
                     discount={p.discountId && (typeof p.discountId === 'object' ? p.discountId : null)}
+                    buttonHoverColor="#A4907C"
                   />
                 </div>
               </Col>
@@ -256,17 +256,17 @@ function ProductListPage() {
           <Row className="justify-content-center py-5">
             <Col xs="auto">
               <div className="text-center py-5">
-                <div className="d-inline-flex align-items-center justify-content-center bg-light rounded-circle mb-4" 
-                     style={{ width: '100px', height: '100px' }}>
-                  <i className="fas fa-box-open fa-3x text-muted"></i>
+                <div className="d-inline-flex align-items-center justify-content-center" 
+                     style={{ width: '100px', height: '100px', background: '#FAF6F1', borderRadius: '50%', marginBottom: '1.5rem' }}>
+                  <i className="fas fa-box-open fa-3x" style={{ color: '#A4907C' }}></i>
                 </div>
-                <h4 className="text-muted mb-3">Không có sản phẩm phù hợp</h4>
-                <p className="text-muted mb-4">
+                <h4 className="mb-3" style={{ color: '#A4907C' }}>Không có sản phẩm phù hợp</h4>
+                <p className="mb-4" style={{ color: '#8B6F3A' }}>
                   Thử thay đổi từ khóa tìm kiếm hoặc bộ lọc danh mục để tìm sản phẩm bạn cần
                 </p>
                 {(search || category) && (
                   <Button 
-                    variant="primary"
+                    style={{ background: '#A4907C', border: 'none' }}
                     onClick={clearFilters}
                     className="d-flex align-items-center mx-auto"
                   >
@@ -284,9 +284,9 @@ function ProductListPage() {
           <Row className="mt-5">
             <Col>
               <div className="text-center py-4 border-top">
-                <p className="text-muted mb-0">
-                  Hiển thị <strong className="text-primary">{filteredProducts.length}</strong> trong 
-                  tổng số <strong className="text-primary">{products.length}</strong> sản phẩm
+                <p className="mb-0" style={{ color: '#8B6F3A' }}>
+                  Hiển thị <strong style={{ color: '#6B4F27' }}>{filteredProducts.length}</strong> trong 
+                  tổng số <strong style={{ color: '#6B4F27' }}>{products.length}</strong> sản phẩm
                 </p>
               </div>
             </Col>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Container, Form, Button, Row, Col, Alert } from 'react-bootstrap';
+import { useNavigate, useParams } from 'react-router-dom';
+import { Container, Form, Button, Row, Col, Alert, Spinner } from 'react-bootstrap';
 import api from '../../api';
 
 const allProductFields = [
@@ -26,7 +26,7 @@ const defaultFields = [
   { name: 'name', label: 'Tên sản phẩm', required: true, type: 'text' },
   { name: 'price', label: 'Giá', required: true, type: 'number' },
   { name: 'stock', label: 'Tồn kho', required: true, type: 'number' },
-  { name: 'categoryId', label: 'Danh mục (ID)', required: true, type: 'text' },
+  { name: 'categoryId', label: 'Danh mục (ID)', required: false, type: 'text' },
   { name: 'origin', label: 'Xuất xứ', required: false, type: 'text' },
   { name: 'isActive', label: 'Kích hoạt', required: false, type: 'text' },
   {
@@ -38,7 +38,8 @@ const defaultFields = [
   { name: 'description', label: 'Mô tả', required: false, type: 'text' },
 ];
 
-function ProductAddPage() {
+function ProductUpdatePage() {
+  const { id } = useParams();
   const [fields, setFields] = useState(defaultFields);
   const [form, setForm] = useState({});
   const [newField, setNewField] = useState({
@@ -49,19 +50,41 @@ function ProductAddPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
-    async function fetchCategories() {
+    async function fetchData() {
+      setLoading(true);
       try {
-        const res = await api.get('/categories');
-        setCategories(res.data);
+        const [catRes, prodRes] = await Promise.all([
+          api.get('/categories'),
+          api.get(`/products/${id}`),
+        ]);
+        setCategories(catRes.data);
+        const prod = prodRes.data;
+        // Lưu lại ảnh cũ và category cũ để so sánh khi submit
+        setForm({ ...prod, _oldImages: prod.images, _oldCategoryId: prod.categoryId });
+        // Thêm các trường động nếu có dữ liệu thực sự
+        const dynamicFields = allProductFields.filter((f) => {
+          if (defaultFields.some((df) => df.name === f.name)) return false;
+          const val = prod[f.name];
+          if (val === undefined || val === null) return false;
+          if (Array.isArray(val) && val.length === 0) return false;
+          if (typeof val === 'string' && val.trim() === '') return false;
+          if (typeof val === 'object' && Object.keys(val).length === 0) return false;
+          return true;
+        });
+        setFields([...defaultFields, ...dynamicFields.map(f => ({ ...f, required: false }))]);
       } catch (err) {
-        setCategories([]);
+        setError('Không thể tải dữ liệu sản phẩm hoặc danh mục.');
+      } finally {
+        setLoading(false);
       }
     }
-    fetchCategories();
-  }, []);
+    fetchData();
+    // eslint-disable-next-line
+  }, [id]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -190,7 +213,9 @@ function ProductAddPage() {
 
     let submitData = { ...form };
 
-    if (submitData.images && Array.isArray(submitData.images)) {
+    // Ảnh: Nếu không thay đổi gì thì giữ ảnh cũ
+    if (submitData.images && Array.isArray(submitData.images) && submitData.images.length > 0 && submitData.images[0] instanceof File) {
+      // Có file mới upload
       const uploadedUrls = [];
       for (let file of submitData.images) {
         const data = new FormData();
@@ -201,20 +226,35 @@ function ProductAddPage() {
           });
           uploadedUrls.push(res.data.url);
         } catch (err) {
-          setError(
-            'Lỗi upload ảnh: ' + (err.response?.data?.message || err.message),
-          );
+          setError('Lỗi upload ảnh: ' + (err.response?.data?.message || err.message));
           return;
         }
       }
       submitData.images = uploadedUrls;
+    } else if (!submitData.images || submitData.images.length === 0) {
+      // Không chọn ảnh mới, giữ ảnh cũ
+      submitData.images = form._oldImages || [];
     } else if (typeof submitData.images === 'string') {
       submitData.images = submitData.images.split(',').map((s) => s.trim());
     }
 
+    // Danh mục: Nếu không thay đổi thì giữ category cũ
+    if (!submitData.categoryId || submitData.categoryId === '' || (typeof submitData.categoryId === 'object' && submitData.categoryId !== null)) {
+      // Nếu là object (populate) hoặc rỗng thì lấy lại id cũ
+      if (typeof form._oldCategoryId === 'object' && form._oldCategoryId !== null) {
+        submitData.categoryId = form._oldCategoryId._id;
+      } else {
+        submitData.categoryId = form._oldCategoryId;
+      }
+    }
+
+    // Xóa các trường tạm
+    delete submitData._oldImages;
+    delete submitData._oldCategoryId;
+
     try {
-      await api.post('/products', submitData);
-      setSuccess('Thêm sản phẩm thành công!');
+      await api.put(`/products/${id}`, submitData);
+      setSuccess('Cập nhật sản phẩm thành công!');
       setTimeout(() => navigate(-1), 1000);
     } catch (err) {
       setError(
@@ -226,7 +266,7 @@ function ProductAddPage() {
   // Xóa các thuộc tính không phải mặc định
   const handleRemoveCustomFields = () => {
     setFields(defaultFields);
-    // Xóa giá trị các thuộc tính  khỏi form
+    // Xóa giá trị các thuộc tính khỏi form
     const newForm = { ...form };
     Object.keys(newForm).forEach((key) => {
       if (!defaultFields.some((f) => f.name === key)) {
@@ -236,9 +276,17 @@ function ProductAddPage() {
     setForm(newForm);
   };
 
+  if (loading) {
+    return (
+      <Container className="mt-4 text-center">
+        <Spinner animation="border" /> Đang tải dữ liệu...
+      </Container>
+    );
+  }
+
   return (
     <Container className="mt-4">
-      <h3>Thêm sản phẩm mới</h3>
+      <h3>Cập nhật sản phẩm</h3>
       {error && <Alert variant="danger">{error}</Alert>}
       {success && <Alert variant="success">{success}</Alert>}
       <Form onSubmit={handleSubmit}>
@@ -266,29 +314,57 @@ function ProductAddPage() {
                   )}
                 </Form.Label>
                 {f.name === 'categoryId' ? (
-                  <Form.Select
-                    name="categoryId"
-                    value={form['categoryId'] || ''}
-                    onChange={handleChange}
-                    required={f.required}
-                  >
-                    <option value="">-- Chọn danh mục --</option>
-                    {categories.map((cat) => (
-                      <option key={cat._id} value={cat._id}>
-                        {cat.name}
-                      </option>
-                    ))}
-                  </Form.Select>
+                  <div>
+                    {form._oldCategoryId && categories.length > 0 && (
+                      <div style={{ fontSize: 13, color: '#888', marginBottom: 4 }}>
+                        Danh mục hiện tại:{' '}
+                        <b>
+                          {(() => {
+                            // Nếu _oldCategoryId là object (populate), lấy name, nếu là string thì tìm trong categories
+                            if (typeof form._oldCategoryId === 'object' && form._oldCategoryId !== null) {
+                              return form._oldCategoryId.name || '';
+                            }
+                            const cat = categories.find(c => c._id === form._oldCategoryId);
+                            return cat ? cat.name : form._oldCategoryId;
+                          })()}
+                        </b>
+                      </div>
+                    )}
+                    <Form.Select
+                      name="categoryId"
+                      value={form['categoryId'] || ''}
+                      onChange={handleChange}
+                    >
+                      <option value="">-- Chọn danh mục --</option>
+                      {categories.map((cat) => (
+                        <option key={cat._id} value={cat._id}>
+                          {cat.name}
+                        </option>
+                      ))}
+                    </Form.Select>
+                  </div>
                 ) : f.name === 'images' ? (
-                  <Form.Control
-                    type="file"
-                    name="images"
-                    multiple
-                    accept="image/*"
-                    onChange={(e) => {
-                      setForm({ ...form, images: Array.from(e.target.files) });
-                    }}
-                  />
+                  <div>
+                    {form._oldImages && Array.isArray(form._oldImages) && form._oldImages.length > 0 && (
+                      <div style={{ marginBottom: 8 }}>
+                        <div style={{ fontSize: 13, color: '#888' }}>Ảnh hiện tại:</div>
+                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                          {form._oldImages.map((img, idx) => (
+                            <img key={idx} src={img} alt="Ảnh sản phẩm" style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 4, border: '1px solid #eee' }} />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    <Form.Control
+                      type="file"
+                      name="images"
+                      multiple
+                      accept="image/*"
+                      onChange={(e) => {
+                        setForm({ ...form, images: Array.from(e.target.files) });
+                      }}
+                    />
+                  </div>
                 ) : f.name === 'isActive' ||
                   f.name === 'isRefrigerated' ||
                   f.name === 'isVegetarian' ? (
@@ -415,8 +491,8 @@ function ProductAddPage() {
             </Col>
           ))}
         </Row>
-        <Button type="submit" variant="success" className="me-2">
-          Thêm sản phẩm
+        <Button type="submit" variant="primary" className="me-2">
+          Cập nhật sản phẩm
         </Button>
         {fields.length > defaultFields.length && (
           <Button
@@ -424,7 +500,7 @@ function ProductAddPage() {
             className="ms-2"
             onClick={handleRemoveCustomFields}
           >
-            Xóa tất cả thuộc tính 
+            Xóa tất cả thuộc tính
           </Button>
         )}
       </Form>
@@ -479,4 +555,4 @@ function ProductAddPage() {
   );
 }
 
-export default ProductAddPage;
+export default ProductUpdatePage;

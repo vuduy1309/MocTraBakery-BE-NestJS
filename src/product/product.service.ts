@@ -1,4 +1,3 @@
-
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -7,6 +6,19 @@ import { Product, ProductDocument } from './product.schema';
 @Injectable()
 export class ProductService {
   constructor(@InjectModel(Product.name) private productModel: Model<ProductDocument>) {}
+
+  // Cập nhật sản phẩm
+  async update(id: string, data: any): Promise<Product | null> {
+    return this.productModel.findByIdAndUpdate(id, data, { new: true })
+      .populate('categoryId')
+      .populate('discountId')
+      .exec();
+  }
+
+  // Xóa sản phẩm
+  async remove(id: string): Promise<Product | null> {
+    return this.productModel.findByIdAndDelete(id).exec();
+  }
 
   // Lấy tất cả sản phẩm
   async findAll(): Promise<Product[]> {

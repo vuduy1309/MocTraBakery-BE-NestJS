@@ -19,6 +19,7 @@ import ProductManagerProducts from './pages/dashboard/ProductManagerProducts';
 import ProductAddPage from './pages/dashboard/ProductAddPage';
 import ProductManagerLayout from './layouts/ProductManagerLayout';
 import AdminDashboard from './pages/dashboard/AdminDashboard';
+import ProductUpdatePage from './pages/dashboard/ProductUpdatePage';
 
 function App() {
   return (
@@ -40,7 +41,8 @@ function App() {
         <Route path="/manager" element={<ProductManagerLayout />}>
           <Route path="dashboard" element={<ProductManagerDashboard />} />
           <Route path="products" element={<ProductManagerProducts />} />
-        <Route path="/manager/add-product" element={<ProductAddPage />} />
+          <Route path="/manager/add-product" element={<ProductAddPage />} />
+          <Route path="/manager/update-product/:id" element={<ProductUpdatePage />} />
         </Route>
       </Routes>
       <Footer />

@@ -1,10 +1,64 @@
-import { Controller, Get, Post, Body, Param, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { Types } from 'mongoose';
 import { ProductService } from './product.service';
 
 @Controller('products')
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
+
+  // API: PUT /products/:id (Cập nhật sản phẩm)
+  @Put(':id')
+  async update(@Param('id') id: string, @Body() body: any) {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new BadRequestException('Invalid product id');
+    }
+    if (!body.name || !body.price || !body.stock || !body.categoryId) {
+      throw new BadRequestException('Thiếu trường bắt buộc');
+    }
+    if (typeof body.images === 'string') {
+      body.images = body.images.split(',').map((s: string) => s.trim());
+    }
+    // Gọi service để cập nhật sản phẩm (cần có phương thức update trong ProductService)
+    if (typeof this.productService['update'] !== 'function') {
+      throw new NotFoundException(
+        'Update method not implemented in ProductService',
+      );
+    }
+    const updated = await (this.productService as any).update(id, body);
+    if (!updated) {
+      throw new NotFoundException('Product not found');
+    }
+    return updated;
+  }
+
+  // API: DELETE /products/:id (Xóa sản phẩm)
+  @Delete(':id')
+  async remove(@Param('id') id: string) {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new BadRequestException('Invalid product id');
+    }
+    // Gọi service để xóa sản phẩm (cần có phương thức remove trong ProductService)
+    if (typeof this.productService['remove'] !== 'function') {
+      throw new NotFoundException(
+        'Remove method not implemented in ProductService',
+      );
+    }
+    const deleted = await (this.productService as any).remove(id);
+    if (!deleted) {
+      throw new NotFoundException('Product not found');
+    }
+    return { success: true };
+  }
 
   // API: POST /products
   @Post()

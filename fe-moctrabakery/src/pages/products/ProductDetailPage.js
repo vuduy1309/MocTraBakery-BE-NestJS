@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '../../api';
 import {
@@ -8,7 +8,6 @@ import {
   Card,
   Button,
   Badge,
-  Form,
   OverlayTrigger,
   Tooltip,
   Alert,
@@ -18,19 +17,16 @@ import {
   Stack,
 } from 'react-bootstrap';
 import {
-  FaLeaf,
-  FaSnowflake,
-  FaBoxOpen,
-  FaFireAlt,
   FaGift,
   FaShoppingCart,
   FaMinus,
   FaPlus,
   FaStar,
   FaHeart,
+  FaShieldAlt,
+  FaTruck,
+  FaUndo,
 } from 'react-icons/fa';
-import { MdOutlineFastfood } from 'react-icons/md';
-import { BsFillCalendar2WeekFill } from 'react-icons/bs';
 import './ProductDetailPage.css';
 
 function ProductDetailPage() {
@@ -43,6 +39,11 @@ function ProductDetailPage() {
   const [addCartMsg, setAddCartMsg] = useState('');
   const [showAlert, setShowAlert] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [currentImageIdx, setCurrentImageIdx] = useState(0);
+  const [isHovering, setIsHovering] = useState(false);
+  
+  // Ref để lưu interval ID
+  const intervalRef = useRef(null);
 
   useEffect(() => {
     async function fetchProduct() {
@@ -61,6 +62,40 @@ function ProductDetailPage() {
     fetchProduct();
   }, [id]);
 
+  // Effect để xử lý auto-play ảnh
+  useEffect(() => {
+    // Chỉ chạy auto-play nếu có nhiều hơn 1 ảnh
+    if (product && Array.isArray(product.images) && product.images.length > 1) {
+      // Xóa interval cũ nếu có
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+
+      // Chỉ tạo interval mới nếu không đang hover
+      if (!isHovering) {
+        intervalRef.current = setInterval(() => {
+          setCurrentImageIdx((prev) => (prev + 1) % product.images.length);
+        }, 5000); // 5 giây (trong khoảng 4-6 giây)
+      }
+    }
+
+    // Cleanup function
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [product, isHovering]);
+
+  // Cleanup khi component unmount
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, []);
+
   const handleQuantityChange = (operation) => {
     if (operation === 'increment' && quantity < 10) {
       setQuantity(quantity + 1);
@@ -74,6 +109,25 @@ function ProductDetailPage() {
     setShowAlert(false);
     try {
       const token = localStorage.getItem('token');
+      // 1. Lấy giỏ hàng hiện tại
+      const cartRes = await api.get('/cart', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const cart = cartRes.data;
+      // 2. Kiểm tra sản phẩm đã có trong giỏ hàng chưa
+      const existed = cart.items && cart.items.some(
+        (item) =>
+          item.productId &&
+          (item.productId._id === product._id || item.productId === product._id) &&
+          item.size === selectedSize
+      );
+      if (existed) {
+        setAddCartMsg('Sản phẩm này đã có trong giỏ hàng!');
+        setShowAlert(true);
+        setTimeout(() => setShowAlert(false), 3000);
+        return;
+      }
+      // 3. Nếu chưa có thì thêm vào giỏ hàng
       await api.post(
         '/cart/add',
         {
@@ -110,14 +164,23 @@ function ProductDetailPage() {
     return product.price;
   };
 
-  // Helper render icon with tooltip
-  const renderIcon = (icon, text) => (
-    <OverlayTrigger placement="top" overlay={<Tooltip>{text}</Tooltip>}>
-      <span className="me-2 icon-detail d-inline-flex align-items-center">
-        {icon}
-      </span>
-    </OverlayTrigger>
-  );
+  // Handler cho việc chuyển ảnh thủ công
+  const handleImageNavigation = (direction) => {
+    if (direction === 'prev') {
+      setCurrentImageIdx((prev) => (prev - 1 + product.images.length) % product.images.length);
+    } else {
+      setCurrentImageIdx((prev) => (prev + 1) % product.images.length);
+    }
+  };
+
+  // Handler cho hover events
+  const handleMouseEnter = () => {
+    setIsHovering(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovering(false);
+  };
 
   if (loading) {
     return (
@@ -141,274 +204,515 @@ function ProductDetailPage() {
 
   if (!product) return null;
 
+  // Chuẩn bị đặc điểm sản phẩm dạng text
+  const features = [];
+  if (product.isVegetarian) features.push('Thực phẩm chay');
+  if (product.isRefrigerated) features.push('Bảo quản lạnh');
+  if (product.calories) features.push(`${product.calories} calories`);
+  if (product.shelfLifeDays)
+    features.push(`Hạn sử dụng: ${product.shelfLifeDays} ngày`);
+  if (product.packaging) features.push(`Đóng gói: ${product.packaging}`);
+  if (product.includedFlavors && product.includedFlavors.length > 0)
+    features.push(`Hương vị: ${product.includedFlavors.join(', ')}`);
+
   return (
-    <Container className="product-detail-container py-4">
-      {showAlert && (
-        <Alert
-          variant={addCartMsg.includes('thành công') ? 'success' : 'danger'}
-          dismissible
-          onClose={() => setShowAlert(false)}
-          className="mb-4"
-        >
-          {addCartMsg}
-        </Alert>
-      )}
-
-      <Row className="g-4">
-        {/* Product Image */}
-        <Col lg={6}>
-          <Card className="border-0 shadow-lg h-100">
-            <div className="position-relative">
-              {product.discountId && product.discountId.percent && (
-                <Badge
-                  bg="danger"
-                  className="position-absolute top-0 start-0 m-3 px-3 py-2 fs-6 z-index-1"
-                  style={{ zIndex: 10 }}
-                >
-                  <FaGift className="me-1" />-{product.discountId.percent}%
-                </Badge>
-              )}
-              <Button
-                variant={isFavorite ? 'danger' : 'outline-danger'}
-                className="position-absolute top-0 end-0 m-3 rounded-circle p-2"
-                style={{ zIndex: 10, width: '45px', height: '45px' }}
-                onClick={() => setIsFavorite(!isFavorite)}
+    <div style={{ 
+      minHeight: '100vh', 
+      background: 'linear-gradient(135deg, #F8F5F0 0%, #F0EDE8 100%)',
+      paddingTop: '40px',
+      paddingBottom: '40px'
+    }}>
+      <Container fluid="xl">
+        {/* Alert thông báo */}
+        {showAlert && (
+          <Row className="mb-4">
+            <Col>
+              <Alert
+                variant={addCartMsg.includes('thành công') ? 'success' : 'danger'}
+                dismissible
+                onClose={() => setShowAlert(false)}
+                className="text-center shadow-sm"
+                style={{
+                  borderRadius: '15px',
+                  border: 'none'
+                }}
               >
-                <FaHeart />
-              </Button>
-              <div className="img-container p-3">
-                {(() => {
-                  let imageUrl = '';
-                  if (
-                    Array.isArray(product.images) &&
-                    product.images.length > 0
-                  ) {
-                    let first = product.images[0];
-                    if (typeof first === 'string') {
-                      imageUrl = first;
-                    } else if (first && typeof first === 'object') {
-                      imageUrl = first.image || first.url || '';
-                    }
-                  } else if (
-                    product.image &&
-                    typeof product.image === 'object'
-                  ) {
-                    imageUrl = product.image.image || product.image.url || '';
-                  } else if (typeof product.image === 'string') {
-                    imageUrl = product.image;
-                  }
-                  if (imageUrl && imageUrl.startsWith('/uploads')) {
-                    imageUrl = 'http://localhost:3000' + imageUrl;
-                  }
-                  return (
-                    <Image
-                      src={imageUrl || '/default-product.png'}
-                      alt={product.name}
-                      className="w-100 h-100 object-fit-cover rounded"
-                      style={{ minHeight: '400px', maxHeight: '500px' }}
-                    />
-                  );
-                })()}
-              </div>
-            </div>
-          </Card>
-        </Col>
+                {addCartMsg}
+              </Alert>
+            </Col>
+          </Row>
+        )}
 
-        {/* Product Details */}
-        <Col lg={6}>
-          <div className="h-100 d-flex flex-column">
-            {/* Product Header */}
-            <Card className="border-0 shadow-lg mb-3">
-              <Card.Body>
-                <div className="mb-3">
-                  <Badge bg="info" className="me-2 px-3 py-2">
-                    {product.categoryId?.name}
+        <Row className="g-4">
+          {/* Cột ảnh sản phẩm */}
+          <Col lg={6}>
+            <Card className="border-0 shadow-lg h-100" style={{ 
+              borderRadius: '20px',
+              background: '#fff',
+              minHeight: '500px'
+            }}>
+              <div 
+                className="position-relative p-4 h-100 d-flex align-items-center justify-content-center"
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
+              >
+                {/* Badge giảm giá */}
+                {product.discountId && product.discountId.percent && (
+                  <Badge
+                    bg="danger"
+                    className="position-absolute top-0 start-0 m-3 px-3 py-2"
+                    style={{ 
+                      zIndex: 10,
+                      borderRadius: '15px',
+                      fontSize: '0.9rem'
+                    }}
+                  >
+                    <FaGift className="me-1" />-{product.discountId.percent}%
                   </Badge>
-                  <div className="d-flex align-items-center mt-2">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <FaStar key={star} className="text-warning me-1" />
-                    ))}
-                    <small className="text-muted ms-2">
-                      (4.8/5 - 124 đánh giá)
-                    </small>
-                  </div>
-                </div>
-
-                <Card.Title
-                  as="h1"
-                  className="mb-3 text-primary fw-bold display-6"
+                )}
+                
+                {/* Nút yêu thích */}
+                <Button
+                  variant={isFavorite ? 'danger' : 'outline-danger'}
+                  className="position-absolute top-0 end-0 m-3 rounded-circle p-2"
+                  style={{ 
+                    zIndex: 10, 
+                    width: '50px', 
+                    height: '50px',
+                    border: '2px solid #dc3545'
+                  }}
+                  onClick={() => setIsFavorite(!isFavorite)}
                 >
-                  {product.name}
-                </Card.Title>
+                  <FaHeart />
+                </Button>
 
-                <Card.Text className="mb-3 text-muted lead">
-                  {product.description}
-                </Card.Text>
-
-                {/* Product Features */}
-                <div className="mb-4">
-                  <h6 className="text-secondary mb-3">Đặc điểm sản phẩm:</h6>
-                  <div className="d-flex flex-wrap gap-3">
-                    {product.isVegetarian &&
-                      renderIcon(
-                        <FaLeaf color="#27ae60" size={20} />,
-                        'Thực phẩm chay',
-                      )}
-                    {product.isRefrigerated &&
-                      renderIcon(
-                        <FaSnowflake color="#2980b9" size={20} />,
-                        'Bảo quản lạnh',
-                      )}
-                    {product.calories &&
-                      renderIcon(
-                        <FaFireAlt color="#e67e22" size={20} />,
-                        `${product.calories} calories`,
-                      )}
-                    {product.shelfLifeDays &&
-                      renderIcon(
-                        <BsFillCalendar2WeekFill color="#8e44ad" size={20} />,
-                        `Hạn sử dụng: ${product.shelfLifeDays} ngày`,
-                      )}
-                    {product.packaging &&
-                      renderIcon(
-                        <FaBoxOpen color="#b9770e" size={20} />,
-                        `Đóng gói: ${product.packaging}`,
-                      )}
-                    {product.includedFlavors &&
-                      product.includedFlavors.length > 0 &&
-                      renderIcon(
-                        <MdOutlineFastfood color="#c0392b" size={20} />,
-                        `Hương vị: ${product.includedFlavors.join(', ')}`,
-                      )}
+                {/* Ảnh sản phẩm */}
+                <div className="w-100 h-100 d-flex align-items-center justify-content-center position-relative">
+                  {/* Nút chuyển ảnh trái */}
+                  {Array.isArray(product.images) && product.images.length > 1 && (
+                    <Button
+                      variant="light"
+                      className="position-absolute top-50 start-0 translate-middle-y"
+                      style={{ 
+                        zIndex: 11, 
+                        borderRadius: '50%', 
+                        border: '1px solid #A4907C', 
+                        width: 36, 
+                        height: 36, 
+                        padding: 0, 
+                        left: 10,
+                        opacity: isHovering ? 1 : 0.7,
+                        transition: 'opacity 0.3s ease'
+                      }}
+                      onClick={() => handleImageNavigation('prev')}
+                      aria-label="Ảnh trước"
+                    >
+                      <span style={{ fontSize: 22, color: '#A4907C' }}>&lt;</span>
+                    </Button>
+                  )}
+                  
+                  {/* Container ảnh với hiệu ứng transition */}
+                  <div style={{ 
+                    position: 'relative', 
+                    width: '100%', 
+                    height: '400px',
+                    overflow: 'hidden',
+                    borderRadius: '10px'
+                  }}>
+                    {(() => {
+                      let imageUrl = '';
+                      let imgArr = Array.isArray(product.images) ? product.images : [];
+                      let imgObj = imgArr.length > 0 ? imgArr[currentImageIdx] : null;
+                      if (typeof imgObj === 'string') {
+                        imageUrl = imgObj;
+                      } else if (imgObj && typeof imgObj === 'object') {
+                        imageUrl = imgObj.image || imgObj.url || '';
+                      } else if (product.image && typeof product.image === 'object') {
+                        imageUrl = product.image.image || product.image.url || '';
+                      } else if (typeof product.image === 'string') {
+                        imageUrl = product.image;
+                      }
+                      if (imageUrl && imageUrl.startsWith('/uploads')) {
+                        imageUrl = 'http://localhost:3000' + imageUrl;
+                      }
+                      return (
+                        <Image
+                          key={currentImageIdx} // Key để trigger re-render với animation
+                          src={imageUrl || '/default-product.png'}
+                          alt={product.name}
+                          className="rounded"
+                          style={{ 
+                            maxHeight: '100%', 
+                            maxWidth: '100%', 
+                            width: 'auto',
+                            height: 'auto',
+                            objectFit: 'contain',
+                            filter: 'drop-shadow(0 8px 16px rgba(164,144,124,0.15))',
+                            position: 'absolute',
+                            top: '50%',
+                            left: '50%',
+                            transform: 'translate(-50%, -50%)',
+                            transition: 'opacity 0.5s ease-in-out, transform 0.5s ease-in-out',
+                            animation: 'fadeInScale 0.5s ease-in-out'
+                          }}
+                        />
+                      );
+                    })()}
                   </div>
-                </div>
-              </Card.Body>
-            </Card>
+                  
+                  {/* Nút chuyển ảnh phải */}
+                  {Array.isArray(product.images) && product.images.length > 1 && (
+                    <Button
+                      variant="light"
+                      className="position-absolute top-50 end-0 translate-middle-y"
+                      style={{ 
+                        zIndex: 11, 
+                        borderRadius: '50%', 
+                        border: '1px solid #A4907C', 
+                        width: 36, 
+                        height: 36, 
+                        padding: 0, 
+                        right: 10,
+                        opacity: isHovering ? 1 : 0.7,
+                        transition: 'opacity 0.3s ease'
+                      }}
+                      onClick={() => handleImageNavigation('next')}
+                      aria-label="Ảnh tiếp theo"
+                    >
+                      <span style={{ fontSize: 22, color: '#A4907C' }}>&gt;</span>
+                    </Button>
+                  )}
 
-            {/* Purchase Options */}
-            <Card className="border-0 shadow-lg flex-grow-1">
-              <Card.Body>
-                {/* Size Selection */}
-                {product.sizes && product.sizes.length > 0 && (
-                  <div className="mb-4">
-                    <h6 className="text-secondary mb-3">Chọn kích thước:</h6>
-                    <div className="d-flex flex-wrap gap-2">
-                      {product.sizes.map((size, i) => (
-                        <Button
-                          key={i}
-                          variant={
-                            selectedSize === size.name
-                              ? 'primary'
-                              : 'outline-primary'
-                          }
-                          onClick={() => setSelectedSize(size.name)}
-                          className="rounded-pill px-4"
-                        >
-                          <div className="text-center">
-                            <div className="fw-bold">{size.name}</div>
-                            <small>{size.price.toLocaleString()}đ</small>
-                            <br />
-                            <small className="text-muted">
-                              Còn {size.stock}
-                            </small>
-                          </div>
-                        </Button>
+                  {/* Indicator dots cho ảnh */}
+                  {Array.isArray(product.images) && product.images.length > 1 && (
+                    <div 
+                      className="position-absolute bottom-0 start-50 translate-middle-x mb-3"
+                      style={{ zIndex: 10 }}
+                    >
+                      <div className="d-flex gap-2">
+                        {product.images.map((_, index) => (
+                          <button
+                            key={index}
+                            onClick={() => setCurrentImageIdx(index)}
+                            style={{
+                              width: '8px',
+                              height: '8px',
+                              borderRadius: '50%',
+                              border: 'none',
+                              background: index === currentImageIdx ? '#A4907C' : 'rgba(164,144,124,0.4)',
+                              cursor: 'pointer',
+                              transition: 'all 0.3s ease',
+                              transform: index === currentImageIdx ? 'scale(1.2)' : 'scale(1)'
+                            }}
+                            aria-label={`Chuyển đến ảnh ${index + 1}`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </Card>
+          </Col>
+
+          {/* Cột thông tin sản phẩm */}
+          <Col lg={6}>
+            <div className="h-100 d-flex flex-column">
+              {/* Thông tin cơ bản */}
+              <Card className="border-0 shadow-lg mb-4" style={{ 
+                borderRadius: '20px',
+                background: '#fff'
+              }}>
+                <Card.Body className="p-4">
+                  {/* Category và Rating */}
+                  <div className="mb-3">
+                    <Badge 
+                      bg="primary" 
+                      className="px-3 py-2 me-3"
+                      style={{ 
+                        borderRadius: '12px',
+                        background: '#A4907C',
+                        border: 'none'
+                      }}
+                    >
+                      {product.categoryId?.name}
+                    </Badge>
+                    <div className="d-flex align-items-center mt-2">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <FaStar key={star} className="text-warning me-1" />
                       ))}
+                      <small className="text-muted ms-2">
+                        (4.8/5 - 124 đánh giá)
+                      </small>
                     </div>
                   </div>
-                )}
 
-                {/* Price Display */}
-                <div className="mb-4">
-                  <h6 className="text-secondary mb-2">Giá:</h6>
-                  <div className="d-flex align-items-center gap-3">
-                    {product.discountId && product.discountId.percent ? (
-                      <>
-                        <span className="h3 text-success fw-bold mb-0">
-                          {calculateDiscountedPrice().toLocaleString()}đ
-                        </span>
-                        <span className="h5 text-muted text-decoration-line-through mb-0">
+                  {/* Tên sản phẩm */}
+                  <h1 className="mb-3 fw-bold" style={{ 
+                    color: '#6B4F27',
+                    fontSize: '2rem',
+                    lineHeight: '1.3'
+                  }}>
+                    {product.name}
+                  </h1>
+
+                  {/* Mô tả */}
+                  <p className="mb-4 text-muted" style={{ 
+                    fontSize: '1.1rem',
+                    lineHeight: '1.6'
+                  }}>
+                    {product.description}
+                  </p>
+
+                  {/* Đặc điểm sản phẩm */}
+                  <div>
+                    <h6 className="mb-3 fw-bold" style={{ color: '#8B6F3A' }}>
+                      Đặc điểm sản phẩm:
+                    </h6>
+                    <Row>
+                      {features.length > 0 ? (
+                        features.map((feature, i) => (
+                          <Col md={6} key={i} className="mb-2">
+                            <div className="d-flex align-items-center">
+                              <span className="me-2" style={{ color: '#A4907C' }}>•</span>
+                              <span style={{ color: '#6B4F27', fontSize: '0.95rem' }}>
+                                {feature}
+                              </span>
+                            </div>
+                          </Col>
+                        ))
+                      ) : (
+                        <Col>
+                          <span className="text-muted">Không có thông tin đặc điểm.</span>
+                        </Col>
+                      )}
+                    </Row>
+                  </div>
+                </Card.Body>
+              </Card>
+
+              {/* Card mua hàng */}
+              <Card className="border-0 shadow-lg flex-grow-1" style={{ 
+                borderRadius: '20px',
+                background: '#fff'
+              }}>
+                <Card.Body className="p-4">
+                  {/* Chọn kích thước */}
+                  {product.sizes && product.sizes.length > 0 && (
+                    <div className="mb-4">
+                      <h6 className="mb-3 fw-bold" style={{ color: '#8B6F3A' }}>
+                        Chọn kích thước:
+                      </h6>
+                      <Row className="g-2">
+                        {product.sizes.map((size, i) => (
+                          <Col key={i} xs={6} md={4}>
+                            <Button
+                              variant={selectedSize === size.name ? 'primary' : 'outline-primary'}
+                              onClick={() => setSelectedSize(size.name)}
+                              className="w-100"
+                              style={{
+                                borderRadius: '12px',
+                                background: selectedSize === size.name ? '#A4907C' : 'transparent',
+                                color: selectedSize === size.name ? '#fff' : '#A4907C',
+                                borderColor: '#A4907C',
+                                transition: 'all 0.3s ease',
+                                padding: '12px 8px'
+                              }}
+                            >
+                              <div className="text-center">
+                                <div className="fw-bold">{size.name}</div>
+                                <small>{size.price.toLocaleString()}đ</small>
+                                <br />
+                                <small className={selectedSize === size.name ? 'text-light' : 'text-muted'}>
+                                  Còn {size.stock}
+                                </small>
+                              </div>
+                            </Button>
+                          </Col>
+                        ))}
+                      </Row>
+                    </div>
+                  )}
+
+                  {/* Giá */}
+                  <div className="mb-4">
+                    <h6 className="mb-3 fw-bold" style={{ color: '#8B6F3A' }}>
+                      Giá:
+                    </h6>
+                    <div className="d-flex align-items-center gap-3">
+                      {product.discountId && product.discountId.percent ? (
+                        <>
+                          <span className="h3 fw-bold mb-0" style={{
+                            color: '#A4907C',
+                            background: 'linear-gradient(135deg, #F8F5F0, #F0EDE8)',
+                            borderRadius: '12px',
+                            padding: '8px 16px',
+                            border: '2px solid #A4907C'
+                          }}>
+                            {calculateDiscountedPrice().toLocaleString()}đ
+                          </span>
+                          <span className="h5 mb-0 text-decoration-line-through text-muted">
+                            {getSelectedSizePrice().toLocaleString()}đ
+                          </span>
+                        </>
+                      ) : (
+                        <span className="h3 fw-bold mb-0" style={{
+                          color: '#A4907C',
+                          background: 'linear-gradient(135deg, #F8F5F0, #F0EDE8)',
+                          borderRadius: '12px',
+                          padding: '8px 16px',
+                          border: '2px solid #A4907C'
+                        }}>
                           {getSelectedSizePrice().toLocaleString()}đ
                         </span>
-                      </>
-                    ) : (
-                      <span className="h3 text-success fw-bold mb-0">
-                        {getSelectedSizePrice().toLocaleString()}đ
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Quantity Selection */}
-                <div className="mb-4">
-                  <h6 className="text-secondary mb-3">Số lượng:</h6>
-                  <div className="d-flex align-items-center gap-3">
-                    <ButtonGroup>
-                      <Button
-                        variant="outline-secondary"
-                        onClick={() => handleQuantityChange('decrement')}
-                        disabled={quantity <= 1}
-                      >
-                        <FaMinus />
-                      </Button>
-                      <Button
-                        variant="outline-secondary"
-                        disabled
-                        className="px-4"
-                      >
-                        {quantity}
-                      </Button>
-                      <Button
-                        variant="outline-secondary"
-                        onClick={() => handleQuantityChange('increment')}
-                        disabled={quantity >= 10}
-                      >
-                        <FaPlus />
-                      </Button>
-                    </ButtonGroup>
-                    <small className="text-muted">Tối đa 10 sản phẩm</small>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <Stack direction="horizontal" gap={3} className="mt-4">
-                  <Button
-                    variant="success"
-                    size="lg"
-                    className="flex-grow-1 py-3 fw-bold"
-                    onClick={handleAddToCart}
-                    disabled={
-                      product.sizes && product.sizes.length > 0 && !selectedSize
-                    }
-                  >
-                    <FaShoppingCart className="me-2" />
-                    Thêm vào giỏ hàng
-                  </Button>
-                  <Button
-                    variant="primary"
-                    size="lg"
-                    className="px-4 py-3 fw-bold"
-                  >
-                    Mua ngay
-                  </Button>
-                </Stack>
-
-                {/* Additional Info */}
-                <div className="mt-4 pt-3 border-top">
-                  <small className="text-muted">
-                    <div className="mb-1">
-                      ✓ Miễn phí giao hàng cho đơn từ 200.000đ
+                      )}
                     </div>
-                    <div className="mb-1">✓ Đảm bảo chất lượng 100%</div>
-                    <div>✓ Hỗ trợ đổi trả trong 7 ngày</div>
-                  </small>
-                </div>
-              </Card.Body>
-            </Card>
-          </div>
-        </Col>
-      </Row>
-    </Container>
+                  </div>
+
+                  {/* Số lượng */}
+                  <div className="mb-4">
+                    <h6 className="mb-3 fw-bold" style={{ color: '#8B6F3A' }}>
+                      Số lượng:
+                    </h6>
+                    <div className="d-flex align-items-center gap-3">
+                      <ButtonGroup>
+                        <Button
+                          variant="outline-secondary"
+                          onClick={() => handleQuantityChange('decrement')}
+                          disabled={quantity <= 1}
+                          style={{
+                            borderColor: '#A4907C',
+                            color: '#A4907C',
+                            background: '#F8F5F0',
+                            borderRadius: '8px 0 0 8px',
+                            width: '45px',
+                            height: '45px'
+                          }}
+                        >
+                          <FaMinus />
+                        </Button>
+                        <Button
+                          variant="outline-secondary"
+                          disabled
+                          style={{
+                            borderColor: '#A4907C',
+                            color: '#A4907C',
+                            background: '#fff',
+                            width: '60px',
+                            height: '45px',
+                            fontWeight: 'bold'
+                          }}
+                        >
+                          {quantity}
+                        </Button>
+                        <Button
+                          variant="outline-secondary"
+                          onClick={() => handleQuantityChange('increment')}
+                          disabled={quantity >= 10}
+                          style={{
+                            borderColor: '#A4907C',
+                            color: '#A4907C',
+                            background: '#F8F5F0',
+                            borderRadius: '0 8px 8px 0',
+                            width: '45px',
+                            height: '45px'
+                          }}
+                        >
+                          <FaPlus />
+                        </Button>
+                      </ButtonGroup>
+                      <small className="text-muted">Tối đa 10 sản phẩm</small>
+                    </div>
+                  </div>
+
+                  {/* Nút hành động */}
+                  <Row className="g-3 mb-4">
+                    <Col>
+                      <Button
+                        size="lg"
+                        className="w-100 py-3 fw-bold"
+                        onClick={handleAddToCart}
+                        disabled={product.sizes && product.sizes.length > 0 && !selectedSize}
+                        style={{
+                          background: 'linear-gradient(135deg, #A4907C, #8B6F3A)',
+                          border: 'none',
+                          borderRadius: '12px',
+                          boxShadow: '0 4px 15px rgba(164,144,124,0.3)',
+                          transition: 'all 0.3s ease'
+                        }}
+                      >
+                        <FaShoppingCart className="me-2" />
+                        Thêm vào giỏ hàng
+                      </Button>
+                    </Col>
+                    <Col>
+                      <Button
+                        variant="primary"
+                        size="lg"
+                        className="w-100 py-3 fw-bold"
+                        style={{
+                          background: 'linear-gradient(135deg, #8B6F3A, #6B4F27)',
+                          border: 'none',
+                          borderRadius: '12px',
+                          boxShadow: '0 4px 15px rgba(139,111,58,0.3)',
+                          transition: 'all 0.3s ease'
+                        }}
+                      >
+                        Mua ngay
+                      </Button>
+                    </Col>
+                  </Row>
+
+                  {/* Thông tin bảo hành */}
+                  <div className="pt-3 border-top">
+                    <Row className="g-3 text-center">
+                      <Col md={4}>
+                        <div className="d-flex flex-column align-items-center">
+                          <FaTruck className="mb-2" style={{ color: '#A4907C', fontSize: '1.5rem' }} />
+                          <small className="text-muted">
+                            Miễn phí giao hàng<br />cho đơn từ 200.000đ
+                          </small>
+                        </div>
+                      </Col>
+                      <Col md={4}>
+                        <div className="d-flex flex-column align-items-center">
+                          <FaShieldAlt className="mb-2" style={{ color: '#A4907C', fontSize: '1.5rem' }} />
+                          <small className="text-muted">
+                            Đảm bảo<br />chất lượng 100%
+                          </small>
+                        </div>
+                      </Col>
+                      <Col md={4}>
+                        <div className="d-flex flex-column align-items-center">
+                          <FaUndo className="mb-2" style={{ color: '#A4907C', fontSize: '1.5rem' }} />
+                          <small className="text-muted">
+                            Hỗ trợ đổi trả<br />trong 7 ngày
+                          </small>
+                        </div>
+                      </Col>
+                    </Row>
+                  </div>
+                </Card.Body>
+              </Card>
+            </div>
+          </Col>
+        </Row>
+      </Container>
+
+      {/* CSS Animation */}
+      <style jsx>{`
+        @keyframes fadeInScale {
+          0% {
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.95);
+          }
+          100% {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+          }
+        }
+      `}</style>
+    </div>
   );
 }
 

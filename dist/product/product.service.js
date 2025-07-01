@@ -22,6 +22,15 @@ let ProductService = class ProductService {
     constructor(productModel) {
         this.productModel = productModel;
     }
+    async update(id, data) {
+        return this.productModel.findByIdAndUpdate(id, data, { new: true })
+            .populate('categoryId')
+            .populate('discountId')
+            .exec();
+    }
+    async remove(id) {
+        return this.productModel.findByIdAndDelete(id).exec();
+    }
     async findAll() {
         return this.productModel
             .find()

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import api from '../../api';
-import { Container, Table, Button, Form, Alert } from 'react-bootstrap';
+import { Container, Table, Button, Form, Alert, Card } from 'react-bootstrap';
+import './CartPage.css';
 
 function CartPage() {
   const [cart, setCart] = useState(null);
@@ -16,6 +17,7 @@ function CartPage() {
       const res = await api.get('/cart', {
         headers: { Authorization: `Bearer ${token}` },
       });
+      console.log('Cart API data:', res.data);
       setCart(res.data);
     } catch (err) {
       setError('Không thể tải giỏ hàng. Vui lòng đăng nhập!');
@@ -63,61 +65,104 @@ function CartPage() {
     // Có thể chuyển hướng sang trang thanh toán thực tế ở đây
   };
 
-  if (loading) return <Container className="py-5"><div>Đang tải giỏ hàng...</div></Container>;
-  if (error) return <Container className="py-5"><Alert variant="danger">{error}</Alert></Container>;
-  if (!cart || !cart.items || cart.items.length === 0) return <Container className="py-5"><Alert variant="info">Giỏ hàng trống.</Alert></Container>;
+  if (loading) return (
+    <div className="cart-page-bg p-0 m-0" style={{ minHeight: '100vh', width: '100vw' }}>
+      <div style={{ height: 80 }}></div>
+      <Card className="cart-card mx-auto my-5 p-4" style={{ width: '75vw', maxWidth: 1400, minWidth: 340 }}>
+        <div>Đang tải giỏ hàng...</div>
+      </Card>
+    </div>
+  );
+  if (error) return (
+    <div className="cart-page-bg p-0 m-0" style={{ minHeight: '100vh', width: '100vw' }}>
+      <div style={{ height: 80 }}></div>
+      <Card className="cart-card mx-auto my-5 p-4" style={{ width: '75vw', maxWidth: 1400, minWidth: 340 }}>
+        <Alert className="cart-error-alert" variant="danger">{error}</Alert>
+      </Card>
+    </div>
+  );
+  if (!cart || !cart.items || cart.items.length === 0) return (
+    <div className="cart-page-bg p-0 m-0" style={{ minHeight: '100vh', width: '100vw' }}>
+      <div style={{ height: 80 }}></div>
+      <Card className="cart-card mx-auto my-5 p-4" style={{ width: '75vw', maxWidth: 1400, minWidth: 340 }}>
+        <Alert className="cart-empty-alert" variant="info">Giỏ hàng trống.</Alert>
+      </Card>
+    </div>
+  );
 
   return (
-    <Container className="py-5">
-      <h2>Giỏ hàng của bạn</h2>
-      {msg && <Alert variant="info">{msg}</Alert>}
-      <Table bordered hover>
-        <thead>
-          <tr>
-            <th>Sản phẩm</th>
-            <th>Size</th>
-            <th>Số lượng</th>
-            <th>Giá</th>
-            <th>Thành tiền</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {cart.items.map((item, idx) => (
-            <tr key={idx}>
-              <td>{item.productId?.name || 'Sản phẩm đã xóa'}</td>
-              <td>{item.size}</td>
-              <td style={{minWidth: 120}}>
-                <Form.Control
-                  type="number"
-                  min={1}
-                  max={99}
-                  value={item.quantity}
-                  style={{width: 70, display: 'inline-block', marginRight: 8}}
-                  onChange={e => handleUpdateQuantity(item.productId?._id, item.size, Number(e.target.value))}
-                  disabled={!item.productId}
-                />
-              </td>
-              <td>{item.price?.toLocaleString()} đ</td>
-              <td>{(item.price * item.quantity).toLocaleString()} đ</td>
-              <td>
-                <Button variant="danger" size="sm" onClick={() => handleRemove(item.productId?._id, item.size)}>
-                  Xóa
-                </Button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
-      <div style={{textAlign:'right', fontWeight:'bold', fontSize:18}}>
-        Tổng tiền: {cart.total?.toLocaleString()} đ
-      </div>
-      <div style={{textAlign:'right', marginTop: 24}}>
-        <Button variant="success" size="lg" onClick={handleCheckout} disabled={cart.items.length === 0}>
-          Thanh toán
-        </Button>
-      </div>
-    </Container>
+    <div className="cart-page-bg p-0 m-0" style={{ minHeight: '100vh', width: '100vw' }}>
+      <div style={{ height: 80 }}></div>
+      <Card className="cart-card mx-auto my-5 p-4" style={{ width: '75vw', maxWidth: 1400, minWidth: 340 }}>
+        <h2 style={{ color: '#6B4F27', fontWeight: 700, marginBottom: 24 }}>Giỏ hàng của bạn</h2>
+        {msg && <Alert className="cart-info-alert" variant="info">{msg}</Alert>}
+        <div className="cart-list-view">
+          {cart.items.map((item, idx) => {
+            const prod = item.productId;
+            let imgSrc = prod?.images?.[0] || prod?.image || 'https://via.placeholder.com/60x60?text=No+Image';
+            if (imgSrc && imgSrc.startsWith('/uploads/')) {
+              imgSrc = `http://localhost:3000${imgSrc}`;
+            }
+            const discountPercent = prod?.discount?.percent || 0;
+            const discountText = prod?.discount ? `-${prod.discount.percent}%` : '';
+            const priceAfterDiscount = discountPercent ? Math.round(item.price * (1 - discountPercent / 100)) : item.price;
+            return (
+              <div key={idx} className="cart-list-item" style={{ display: 'flex', alignItems: 'center', borderBottom: '1px solid #E5D9C5', padding: '18px 0' }}>
+                <div style={{ width: 90, textAlign: 'center', marginRight: 22 }}>
+                  {prod ? (
+                    <img src={imgSrc} alt={prod.name} style={{ width: 100, height: 100, objectFit: 'cover', borderRadius: 10, border: '1.5px solid #A4907C', background: '#fff' }} />
+                  ) : (
+                    <span style={{ color: '#A4907C' }}>—</span>
+                  )}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 600, fontSize: 18, color: '#6B4F27' }}>{prod?.name || <span style={{ color: '#A4907C' }}>Sản phẩm đã xóa</span>}</div>
+                  <div style={{ color: '#A4907C', fontSize: 15, margin: '2px 0 6px 0' }}>{prod?.description || '—'}</div>
+                  <div style={{ fontSize: 14, color: '#6B4F27' }}>
+                    <span style={{ marginRight: 16 }}>Calo: {prod?.calories !== undefined && prod?.calories !== null ? `${prod.calories} kcal` : '—'}</span>
+                    <span style={{ marginRight: 16 }}>Nguồn gốc: {prod?.origin || '—'}</span>
+                    <span style={{ marginRight: 16 }}>Chay: {prod?.isVegetarian === true ? 'Chay' : prod?.isVegetarian === false ? 'Không chay' : '—'}</span>
+                    <span style={{ marginRight: 16 }}>Bảo quản lạnh: {prod?.isRefrigerated === true ? 'Có' : prod?.isRefrigerated === false ? 'Không' : '—'}</span>
+                    <span style={{ marginRight: 16 }}>Size: {item.size || '—'}</span>
+                  </div>
+                </div>
+                <div style={{ minWidth: 120, marginRight: 18, display: 'flex', alignItems: 'center' }}>
+                  <span style={{marginRight: 6, color: '#6B4F27', fontWeight: 500}}>Số lượng:</span>
+                  <Form.Control
+                    type="number"
+                    min={1}
+                    max={99}
+                    defaultValue={item.quantity}
+                    style={{ width: 70, display: 'inline-block', background: '#fff', border: '1.5px solid #A4907C', color: '#6B4F27' }}
+                    onBlur={e => handleUpdateQuantity(prod?._id, item.size, Number(e.target.value))}
+                    disabled={!prod}
+                  />
+                </div>
+                <div style={{ minWidth: 120, color: '#8B6F3A', fontWeight: 600, marginRight: 18 }}>
+                  <span style={{marginRight: 4}}>Đơn giá:</span>{item.price?.toLocaleString()} đ
+                </div>
+                <div style={{ minWidth: 120, color: '#4E944F', fontWeight: 700, marginRight: 18 }}>
+                  <span style={{marginRight: 4}}>Thành tiền:</span>{priceAfterDiscount * item.quantity > 0 ? (priceAfterDiscount * item.quantity).toLocaleString() : (item.price * item.quantity).toLocaleString()} đ
+                </div>
+                <div>
+                  <Button className="cart-remove-btn" size="sm" onClick={() => handleRemove(prod?._id, item.size)}>
+                    Xóa
+                  </Button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <div className="cart-total" style={{ textAlign: 'right', marginTop: 24, fontSize: 20, fontWeight: 600 }}>
+          Tổng tiền: {cart.total?.toLocaleString()} đ
+        </div>
+        <div style={{ textAlign: 'right', marginTop: 24 }}>
+          <Button className="cart-checkout-btn" size="lg" onClick={handleCheckout} disabled={cart.items.length === 0}>
+            Thanh toán
+          </Button>
+        </div>
+      </Card>
+    </div>
   );
 }
 

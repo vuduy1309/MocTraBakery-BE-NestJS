@@ -3,6 +3,8 @@ import { Product, ProductDocument } from './product.schema';
 export declare class ProductService {
     private productModel;
     constructor(productModel: Model<ProductDocument>);
+    update(id: string, data: any): Promise<Product | null>;
+    remove(id: string): Promise<Product | null>;
     findAll(): Promise<Product[]>;
     findById(id: string): Promise<Product | null>;
     countDocuments(): Promise<number>;

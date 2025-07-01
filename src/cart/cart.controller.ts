@@ -1,8 +1,6 @@
-
 import { Controller, Get, Post, Body, Req, UseGuards } from '@nestjs/common';
 import { CartService } from './cart.service';
 import { AuthGuard } from '@nestjs/passport';
-
 
 @Controller('cart')
 export class CartController {
@@ -22,7 +20,18 @@ export class CartController {
     const { productId, size, quantity } = body;
     return this.cartService.addToCart(userId, productId, size, quantity);
   }
-
+  @UseGuards(AuthGuard('jwt'))
+  @Post('update')
+  async updateItemQuantity(@Req() req, @Body() body) {
+    const userId = req.user.userId;
+    const { productId, size, quantity } = body;
+    return this.cartService.updateItemQuantity(
+      userId,
+      productId,
+      size,
+      quantity,
+    );
+  }
   @UseGuards(AuthGuard('jwt'))
   @Post('remove')
   async removeFromCart(@Req() req, @Body() body) {

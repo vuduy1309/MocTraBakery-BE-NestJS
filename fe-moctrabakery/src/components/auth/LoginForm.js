@@ -11,6 +11,7 @@ import {
 } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../../api';
+import './LoginForm.css';
 
 function LoginForm() {
   const [form, setForm] = useState({ email: '', password: '' });
@@ -82,17 +83,16 @@ function LoginForm() {
   };
 
   return (
-    <Container className="py-5">
-      <Row className="justify-content-center">
-        <Col xs={12} sm={10} md={8} lg={6} xl={5}>
-          <Card className="shadow-lg border-0">
-            <Card.Header className="bg-primary text-white text-center py-4">
+    <Container fluid className="login-form-bg p-0 m-0" style={{ height: '100%', minWidth: '100vw', display: 'block', paddingTop: 0, paddingBottom: 0 }}>
+      <Row className="justify-content-center w-100 m-0" style={{ height: '100%' }}>
+        <Col xs={12} sm={8} md={6} lg={4} xl={3} className="d-flex flex-column justify-content-center" style={{ height: '100%' }}>
+          <Card className="shadow-lg border-0 login-card my-4">
+            <Card.Header className="text-center py-4">
               <h3 className="mb-0">
                 <i className="fas fa-sign-in-alt me-2"></i>
                 Đăng nhập
               </h3>
             </Card.Header>
-
             <Card.Body className="p-4">
               {message && (
                 <Alert
@@ -179,7 +179,6 @@ function LoginForm() {
                 </div>
               </Form>
             </Card.Body>
-
             <Card.Footer className="text-center py-3 bg-light">
               <span className="text-muted">Chưa có tài khoản? </span>
               <Link to="/register" className="text-decoration-none fw-semibold">

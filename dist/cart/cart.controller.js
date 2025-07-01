@@ -30,6 +30,11 @@ let CartController = class CartController {
         const { productId, size, quantity } = body;
         return this.cartService.addToCart(userId, productId, size, quantity);
     }
+    async updateItemQuantity(req, body) {
+        const userId = req.user.userId;
+        const { productId, size, quantity } = body;
+        return this.cartService.updateItemQuantity(userId, productId, size, quantity);
+    }
     async removeFromCart(req, body) {
         const userId = req.user.userId;
         const { productId, size } = body;
@@ -54,6 +59,15 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], CartController.prototype, "addToCart", null);
+__decorate([
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
+    (0, common_1.Post)('update'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], CartController.prototype, "updateItemQuantity", null);
 __decorate([
     (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
     (0, common_1.Post)('remove'),

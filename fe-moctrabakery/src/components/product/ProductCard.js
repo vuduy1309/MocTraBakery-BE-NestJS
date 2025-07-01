@@ -25,19 +25,39 @@ function ProductCard({
   _id,
   name,
   price,
-  image, // Giữ prop image cho tương thích ngược
-  images, // Thêm prop images mới
+  image,
+  images,
   sizes = [],
   discount,
   isVegetarian,
   isRefrigerated,
   rating = 4.5,
   reviewCount = 0,
+  buttonHoverColor = '#A4907C',
   ...rest
 }) {
   const navigate = useNavigate();
   const [isFavorite, setIsFavorite] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [isBtnHovered, setIsBtnHovered] = useState(false);
+  const [currentImageIdx, setCurrentImageIdx] = useState(0);
+  // Tự động chuyển ảnh khi không hover
+  React.useEffect(() => {
+    let timer;
+    const imgArr = Array.isArray(images) ? images : [];
+    if (imgArr.length > 1 && !isHovered) {
+      timer = setInterval(() => {
+        setCurrentImageIdx((prev) => (prev + 1) % imgArr.length);
+      }, 2000); // 2s mỗi ảnh
+    }
+    return () => timer && clearInterval(timer);
+  }, [images, isHovered]);
+  // Khi hover thì không chuyển, khi hover vào thì giữ nguyên ảnh hiện tại
+  React.useEffect(() => {
+    if (isHovered) {
+      // Không làm gì, giữ nguyên currentImageIdx
+    }
+  }, [isHovered]);
 
   // Tìm giá nhỏ nhất trong các size (nếu có)
   let displayPrice = price;
@@ -106,31 +126,23 @@ function ProductCard({
 
   // Xử lý ảnh: ưu tiên images từ backend, fallback về image
   let imageUrl = '';
-
-  // Ưu tiên images (từ backend API)
   const imageSource = images || image;
-
-  if (Array.isArray(imageSource) && imageSource.length > 0) {
-    let first = imageSource[0];
-    if (typeof first === 'string') {
-      imageUrl = first;
-    } else if (first && typeof first === 'object') {
-      imageUrl = first.image || first.url || '';
-    }
-  } else if (imageSource && typeof imageSource === 'object') {
+  let imgArr = Array.isArray(imageSource) ? imageSource : [];
+  let imgObj = imgArr.length > 0 ? imgArr[currentImageIdx] : null;
+  if (typeof imgObj === 'string') {
+    imageUrl = imgObj;
+  } else if (imgObj && typeof imgObj === 'object') {
+    imageUrl = imgObj.image || imgObj.url || '';
+  } else if (imageSource && typeof imageSource === 'object' && !Array.isArray(imageSource)) {
     imageUrl = imageSource.image || imageSource.url || '';
   } else if (typeof imageSource === 'string') {
     imageUrl = imageSource;
   }
-
   // Xử lý URL ảnh
   if (imageUrl) {
-    // Nếu là đường dẫn tương đối từ server
     if (imageUrl.startsWith('/uploads')) {
       imageUrl = API_URL + imageUrl;
-    }
-    // Nếu không phải URL đầy đủ và không bắt đầu bằng http
-    else if (!imageUrl.startsWith('http') && !imageUrl.startsWith('data:')) {
+    } else if (!imageUrl.startsWith('http') && !imageUrl.startsWith('data:')) {
       imageUrl = API_URL + (imageUrl.startsWith('/') ? '' : '/') + imageUrl;
     }
   }
@@ -138,7 +150,16 @@ function ProductCard({
   return (
     <Card
       className="product-card h-100 border-0 shadow-sm position-relative"
-      style={{ cursor: 'pointer', transition: 'all 0.3s ease' }}
+      style={{
+        cursor: 'pointer',
+        transition: 'box-shadow 0.3s cubic-bezier(.4,2,.6,1), transform 0.25s cubic-bezier(.4,2,.6,1)',
+        background: '#FAF6F1',
+        borderRadius: '1rem',
+        boxShadow: isHovered ? '0 8px 32px 0 rgba(164,144,124,0.18)' : '0 2px 8px 0 rgba(164,144,124,0.08)',
+        transform: isHovered ? 'translateY(-6px) scale(1.025)' : 'none',
+        outline: isHovered ? '2px solid #E9D5B4' : 'none',
+        outlineOffset: isHovered ? '2px' : '0',
+      }}
       onClick={handleCardClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -173,15 +194,16 @@ function ProductCard({
       {/* Product Image */}
       <div
         className="position-relative overflow-hidden"
-        style={{ height: '200px' }}
+        style={{ height: '200px', background: '#F8F5F0', borderRadius: '1rem 1rem 0 0', transition: 'background 0.3s' }}
       >
         <Image
           src={imageUrl || '/default-product.png'}
           alt={name}
           className="w-100 h-100 object-fit-cover"
           style={{
-            transition: 'transform 0.3s ease',
-            transform: isHovered ? 'scale(1.05)' : 'scale(1)',
+            transition: 'transform 0.4s cubic-bezier(.4,2,.6,1), filter 0.3s',
+            transform: isHovered ? 'scale(1.07)' : 'scale(1)',
+            filter: isHovered ? 'brightness(1.04) saturate(1.08)' : 'none',
           }}
         />
 
@@ -193,9 +215,14 @@ function ProductCard({
             className="position-absolute bottom-0 end-0 m-2 rounded-circle p-2"
             onClick={handleQuickAdd}
             style={{
-              animation: 'slideUp 0.3s ease',
+              animation: 'slideUp 0.3s cubic-bezier(.4,2,.6,1)',
               width: '40px',
               height: '40px',
+              background: '#A4907C',
+              border: 'none',
+              color: '#fff',
+              boxShadow: '0 2px 8px 0 rgba(164,144,124,0.18)',
+              transition: 'background 0.2s',
             }}
           >
             <FaShoppingCart size={16} />
@@ -209,19 +236,19 @@ function ProductCard({
           {isVegetarian && (
             <OverlayTrigger overlay={<Tooltip>Thực phẩm chay</Tooltip>}>
               <span className="me-2">
-                <FaLeaf color="#27ae60" size={14} />
+                <FaLeaf color="#6B8E23" size={14} />
               </span>
             </OverlayTrigger>
           )}
           {isRefrigerated && (
             <OverlayTrigger overlay={<Tooltip>Bảo quản lạnh</Tooltip>}>
               <span className="me-2">
-                <FaSnowflake color="#2980b9" size={14} />
+                <FaSnowflake color="#7FB3D5" size={14} />
               </span>
             </OverlayTrigger>
           )}
           {sizeLabel && (
-            <Badge bg="light" text="dark" className="ms-auto">
+            <Badge bg="light" text="dark" className="ms-auto" style={{ background: '#F8F5F0', color: '#6B4F27', border: '1px solid #E9D5B4' }}>
               {sizeLabel}
             </Badge>
           )}
@@ -254,7 +281,7 @@ function ProductCard({
         <div className="mb-3">
           {finalPrice !== displayPrice ? (
             <div>
-              <span className="h6 text-success fw-bold mb-0">
+              <span className="h6 fw-bold mb-0" style={{ color: '#4E944F' }}>
                 {finalPrice.toLocaleString()}đ
               </span>
               <span className="ms-2 small text-muted text-decoration-line-through">
@@ -262,7 +289,7 @@ function ProductCard({
               </span>
             </div>
           ) : (
-            <span className="h6 text-success fw-bold mb-0">
+            <span className="h6 fw-bold mb-0" style={{ color: '#4E944F' }}>
               {finalPrice.toLocaleString()}đ
             </span>
           )}
@@ -273,6 +300,14 @@ function ProductCard({
           variant="outline-primary"
           size="sm"
           className="w-100 fw-bold"
+          style={{
+            borderColor: '#A4907C',
+            color: isBtnHovered ? '#fff' : '#A4907C',
+            background: isBtnHovered ? buttonHoverColor : 'transparent',
+            transition: 'all 0.2s',
+          }}
+          onMouseEnter={() => setIsBtnHovered(true)}
+          onMouseLeave={() => setIsBtnHovered(false)}
           onClick={(e) => {
             e.stopPropagation();
             handleCardClick();

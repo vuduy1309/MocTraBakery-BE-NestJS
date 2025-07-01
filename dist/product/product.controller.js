@@ -21,6 +21,38 @@ let ProductController = class ProductController {
     constructor(productService) {
         this.productService = productService;
     }
+    async update(id, body) {
+        if (!mongoose_1.Types.ObjectId.isValid(id)) {
+            throw new common_1.BadRequestException('Invalid product id');
+        }
+        if (!body.name || !body.price || !body.stock || !body.categoryId) {
+            throw new common_1.BadRequestException('Thiếu trường bắt buộc');
+        }
+        if (typeof body.images === 'string') {
+            body.images = body.images.split(',').map((s) => s.trim());
+        }
+        if (typeof this.productService['update'] !== 'function') {
+            throw new common_1.NotFoundException('Update method not implemented in ProductService');
+        }
+        const updated = await this.productService.update(id, body);
+        if (!updated) {
+            throw new common_1.NotFoundException('Product not found');
+        }
+        return updated;
+    }
+    async remove(id) {
+        if (!mongoose_1.Types.ObjectId.isValid(id)) {
+            throw new common_1.BadRequestException('Invalid product id');
+        }
+        if (typeof this.productService['remove'] !== 'function') {
+            throw new common_1.NotFoundException('Remove method not implemented in ProductService');
+        }
+        const deleted = await this.productService.remove(id);
+        if (!deleted) {
+            throw new common_1.NotFoundException('Product not found');
+        }
+        return { success: true };
+    }
     async create(body) {
         if (!body.name || !body.price || !body.stock || !body.categoryId) {
             throw new common_1.BadRequestException('Thiếu trường bắt buộc');
@@ -107,6 +139,21 @@ let ProductController = class ProductController {
     }
 };
 exports.ProductController = ProductController;
+__decorate([
+    (0, common_1.Put)(':id'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], ProductController.prototype, "update", null);
+__decorate([
+    (0, common_1.Delete)(':id'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], ProductController.prototype, "remove", null);
 __decorate([
     (0, common_1.Post)(),
     __param(0, (0, common_1.Body)()),

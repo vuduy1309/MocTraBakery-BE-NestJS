@@ -118,4 +118,5 @@ exports.Product = Product = __decorate([
     (0, mongoose_1.Schema)()
 ], Product);
 exports.ProductSchema = mongoose_1.SchemaFactory.createForClass(Product);
+exports.ProductSchema.set('timestamps', true);
 //# sourceMappingURL=product.schema.js.map
