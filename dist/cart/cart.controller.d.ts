@@ -22,6 +22,8 @@ export declare class CartController {
             size: string | undefined;
             quantity: number;
             price: number;
+            priceAfterDiscount: number;
+            discountPercent: number;
         }[];
         total: number;
     }>;

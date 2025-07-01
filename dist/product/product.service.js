@@ -23,10 +23,22 @@ let ProductService = class ProductService {
         this.productModel = productModel;
     }
     async update(id, data) {
-        return this.productModel.findByIdAndUpdate(id, data, { new: true })
-            .populate('categoryId')
-            .populate('discountId')
-            .exec();
+        if (data.$unset) {
+            const unset = data.$unset;
+            const setData = { ...data };
+            delete setData.$unset;
+            await this.productModel.updateOne({ _id: id }, { $set: setData, $unset: unset });
+            return this.productModel.findById(id)
+                .populate('categoryId')
+                .populate('discountId')
+                .exec();
+        }
+        else {
+            return this.productModel.findByIdAndUpdate(id, data, { new: true })
+                .populate('categoryId')
+                .populate('discountId')
+                .exec();
+        }
     }
     async remove(id) {
         return this.productModel.findByIdAndDelete(id).exec();

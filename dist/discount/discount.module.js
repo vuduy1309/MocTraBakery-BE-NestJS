@@ -12,12 +12,13 @@ const mongoose_1 = require("@nestjs/mongoose");
 const discount_schema_1 = require("./discount.schema");
 const discount_service_1 = require("./discount.service");
 const discount_controller_1 = require("./discount.controller");
+const product_module_1 = require("../product/product.module");
 let DiscountModule = class DiscountModule {
 };
 exports.DiscountModule = DiscountModule;
 exports.DiscountModule = DiscountModule = __decorate([
     (0, common_1.Module)({
-        imports: [mongoose_1.MongooseModule.forFeature([{ name: discount_schema_1.Discount.name, schema: discount_schema_1.DiscountSchema }])],
+        imports: [mongoose_1.MongooseModule.forFeature([{ name: discount_schema_1.Discount.name, schema: discount_schema_1.DiscountSchema }]), product_module_1.ProductModule],
         controllers: [discount_controller_1.DiscountController],
         providers: [discount_service_1.DiscountService],
         exports: [discount_service_1.DiscountService],

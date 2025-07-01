@@ -14,12 +14,14 @@ import HomePage from './pages/HomePage';
 import ProductListPage from './pages/products/ProductListPage';
 import ProductDetailPage from './pages/products/ProductDetailPage';
 import CartPage from './pages/cart/CartPage';
+import CheckoutPage from './pages/cart/CheckoutPage';
 import ProductManagerDashboard from './pages/dashboard/ProductManagerDashboard';
 import ProductManagerProducts from './pages/dashboard/ProductManagerProducts';
 import ProductAddPage from './pages/dashboard/ProductAddPage';
 import ProductManagerLayout from './layouts/ProductManagerLayout';
 import AdminDashboard from './pages/dashboard/AdminDashboard';
 import ProductUpdatePage from './pages/dashboard/ProductUpdatePage';
+import DiscountManagerPage from './pages/dashboard/DiscountManagerPage';
 
 function App() {
   return (
@@ -32,6 +34,7 @@ function App() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/cart" element={<CartPage />} />
+        <Route path="/cart/checkout" element={<CheckoutPage />} />
         <Route path="*" element={<Navigate to="/" />} />
         <Route
           path="/manager/dashboard*"
@@ -43,6 +46,7 @@ function App() {
           <Route path="products" element={<ProductManagerProducts />} />
           <Route path="/manager/add-product" element={<ProductAddPage />} />
           <Route path="/manager/update-product/:id" element={<ProductUpdatePage />} />
+          <Route path="/manager/discounts" element={<DiscountManagerPage/>}/>
         </Route>
       </Routes>
       <Footer />

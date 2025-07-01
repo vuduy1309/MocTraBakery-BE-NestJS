@@ -21,7 +21,7 @@ export class AppController {
     const featuredProducts = await this.productService.findAll();
     const featured = featuredProducts.slice(0, 3);
     // Lấy các discount đang active
-    const discounts = await this.discountService.findAllActive ? await this.discountService.findAllActive() : await this.discountService.findAll();
+    const discounts = await this.discountService.findAllActive();
     // Lấy review động từ comment collection
     const reviews = await this.commentService.findAll(2);
     // Lấy 1 promo mẫu (cứng)

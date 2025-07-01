@@ -5,7 +5,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 
 function getActiveKey(pathname) {
   if (pathname.includes('/manager/products')) return 'products';
-  if (pathname.includes('/manager/promotions')) return 'promotions';
+  if (pathname.includes('/manager/discounts')) return 'discounts';
   if (pathname.includes('/manager/orders')) return 'orders';
   if (pathname.includes('/manager/customers')) return 'customers';
   return 'dashboard';

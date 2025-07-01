@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import api from '../../api';
 import { Container, Table, Button, Form, Alert, Card } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 import './CartPage.css';
 
 function CartPage() {
@@ -8,6 +9,7 @@ function CartPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [msg, setMsg] = useState('');
+  const navigate = useNavigate();
 
   const fetchCart = async () => {
     setLoading(true);
@@ -59,10 +61,9 @@ function CartPage() {
     }
   };
 
-  // Xử lý nút checkout (demo)
+  // Xử lý nút checkout
   const handleCheckout = () => {
-    setMsg('Cảm ơn bạn đã đặt hàng! (Demo: chưa thực hiện thanh toán thực tế)');
-    // Có thể chuyển hướng sang trang thanh toán thực tế ở đây
+    navigate('/cart/checkout', { state: { cart } });
   };
 
   if (loading) return (
@@ -103,9 +104,10 @@ function CartPage() {
             if (imgSrc && imgSrc.startsWith('/uploads/')) {
               imgSrc = `http://localhost:3000${imgSrc}`;
             }
-            const discountPercent = prod?.discount?.percent || 0;
-            const discountText = prod?.discount ? `-${prod.discount.percent}%` : '';
-            const priceAfterDiscount = discountPercent ? Math.round(item.price * (1 - discountPercent / 100)) : item.price;
+            // Lấy discount và priceAfterDiscount từ backend trả về
+            const discountPercent = item.discountPercent || prod?.discount?.percent || 0;
+            const discountText = discountPercent ? `-${discountPercent}%` : '';
+            const priceAfterDiscount = item.priceAfterDiscount !== undefined ? item.priceAfterDiscount : (discountPercent ? Math.round(item.price * (1 - discountPercent / 100)) : item.price);
             return (
               <div key={idx} className="cart-list-item" style={{ display: 'flex', alignItems: 'center', borderBottom: '1px solid #E5D9C5', padding: '18px 0' }}>
                 <div style={{ width: 90, textAlign: 'center', marginRight: 22 }}>
@@ -118,6 +120,12 @@ function CartPage() {
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: 600, fontSize: 18, color: '#6B4F27' }}>{prod?.name || <span style={{ color: '#A4907C' }}>Sản phẩm đã xóa</span>}</div>
                   <div style={{ color: '#A4907C', fontSize: 15, margin: '2px 0 6px 0' }}>{prod?.description || '—'}</div>
+                  {/* Discount info */}
+                  {discountPercent > 0 && (
+                    <div style={{ color: '#E67E22', fontWeight: 500, fontSize: 15, margin: '2px 0 6px 0' }}>
+                      Giảm giá: <span style={{ fontWeight: 700 }}>{discountText}</span> (Tiết kiệm {(item.price * discountPercent / 100).toLocaleString()} đ mỗi sản phẩm)
+                    </div>
+                  )}
                   <div style={{ fontSize: 14, color: '#6B4F27' }}>
                     <span style={{ marginRight: 16 }}>Calo: {prod?.calories !== undefined && prod?.calories !== null ? `${prod.calories} kcal` : '—'}</span>
                     <span style={{ marginRight: 16 }}>Nguồn gốc: {prod?.origin || '—'}</span>
@@ -139,7 +147,17 @@ function CartPage() {
                   />
                 </div>
                 <div style={{ minWidth: 120, color: '#8B6F3A', fontWeight: 600, marginRight: 18 }}>
-                  <span style={{marginRight: 4}}>Đơn giá:</span>{item.price?.toLocaleString()} đ
+                  {discountPercent > 0 ? (
+                    <>
+                      <span style={{marginRight: 4}}>Đơn giá:</span>
+                      <span style={{ textDecoration: 'line-through', color: '#A4907C', marginRight: 6 }}>{item.price?.toLocaleString()} đ</span>
+                      <span style={{ color: '#4E944F', fontWeight: 700 }}>{priceAfterDiscount?.toLocaleString()} đ</span>
+                    </>
+                  ) : (
+                    <>
+                      <span style={{marginRight: 4}}>Đơn giá:</span>{item.price?.toLocaleString()} đ
+                    </>
+                  )}
                 </div>
                 <div style={{ minWidth: 120, color: '#4E944F', fontWeight: 700, marginRight: 18 }}>
                   <span style={{marginRight: 4}}>Thành tiền:</span>{priceAfterDiscount * item.quantity > 0 ? (priceAfterDiscount * item.quantity).toLocaleString() : (item.price * item.quantity).toLocaleString()} đ

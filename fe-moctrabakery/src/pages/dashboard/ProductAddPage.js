@@ -280,15 +280,49 @@ function ProductAddPage() {
                     ))}
                   </Form.Select>
                 ) : f.name === 'images' ? (
-                  <Form.Control
-                    type="file"
-                    name="images"
-                    multiple
-                    accept="image/*"
-                    onChange={(e) => {
-                      setForm({ ...form, images: Array.from(e.target.files) });
-                    }}
-                  />
+                  <>
+                    <Form.Control
+                      type="file"
+                      name="images"
+                      accept="image/*"
+                      onChange={(e) => {
+                        if (!e.target.files || e.target.files.length === 0) return;
+                        const file = e.target.files[0];
+                        setForm({
+                          ...form,
+                          images: [...(form.images || []), file],
+                        });
+                        // Reset input để có thể chọn lại cùng file nếu muốn
+                        e.target.value = '';
+                      }}
+                    />
+                    {/* Hiển thị preview ảnh đã chọn */}
+                    {form.images && Array.isArray(form.images) && form.images.length > 0 && (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
+                        {form.images.map((file, idx) => (
+                          <div key={idx} style={{ position: 'relative' }}>
+                            <img
+                              src={URL.createObjectURL(file)}
+                              alt={`preview-${idx}`}
+                              style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 8, border: '1px solid #eee' }}
+                            />
+                            <Button
+                              size="sm"
+                              variant="danger"
+                              style={{ position: 'absolute', top: -8, right: -8, borderRadius: '50%', padding: '0 6px', fontSize: 13, zIndex: 2 }}
+                              onClick={() => {
+                                const arr = [...form.images];
+                                arr.splice(idx, 1);
+                                setForm({ ...form, images: arr });
+                              }}
+                            >
+                              ×
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </>
                 ) : f.name === 'isActive' ||
                   f.name === 'isRefrigerated' ||
                   f.name === 'isVegetarian' ? (

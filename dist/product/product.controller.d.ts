@@ -2,7 +2,7 @@ import { ProductService } from './product.service';
 export declare class ProductController {
     private readonly productService;
     constructor(productService: ProductService);
-    update(id: string, body: any): Promise<any>;
+    update(id: string, body: any): Promise<import("./product.schema").Product>;
     remove(id: string): Promise<{
         success: boolean;
     }>;

@@ -26,6 +26,9 @@ import {
   FaShieldAlt,
   FaTruck,
   FaUndo,
+  FaFire,
+  FaBolt,
+  FaTag,
 } from 'react-icons/fa';
 import './ProductDetailPage.css';
 
@@ -149,19 +152,30 @@ function ProductDetailPage() {
     }
   };
 
-  const calculateDiscountedPrice = () => {
-    if (product.discountId && product.discountId.percent) {
-      return product.price * (1 - product.discountId.percent / 100);
-    }
-    return product.price;
-  };
-
+  // Lấy giá của size đang chọn (nếu có), nếu không thì lấy giá gốc
   const getSelectedSizePrice = () => {
     if (selectedSize && product.sizes) {
       const size = product.sizes.find((s) => s.name === selectedSize);
       return size ? size.price : product.price;
     }
     return product.price;
+  };
+
+  // Tính giá sau giảm giá cho size đang chọn (nếu có discount)
+  const calculateDiscountedPrice = () => {
+    const basePrice = getSelectedSizePrice();
+    if (product.discountId && product.discountId.percent) {
+      return Math.round(basePrice * (1 - product.discountId.percent / 100));
+    }
+    return basePrice;
+  };
+
+  // Tính số tiền tiết kiệm được
+  const getSavingAmount = () => {
+    if (product.discountId && product.discountId.percent) {
+      return getSelectedSizePrice() - calculateDiscountedPrice();
+    }
+    return 0;
   };
 
   // Handler cho việc chuyển ảnh thủ công
@@ -256,35 +270,61 @@ function ProductDetailPage() {
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
               >
-                {/* Badge giảm giá */}
+                {/* Modern Discount Badge with Animation */}
                 {product.discountId && product.discountId.percent && (
-                  <Badge
-                    bg="danger"
-                    className="position-absolute top-0 start-0 m-3 px-3 py-2"
-                    style={{ 
-                      zIndex: 10,
-                      borderRadius: '15px',
-                      fontSize: '0.9rem'
-                    }}
-                  >
-                    <FaGift className="me-1" />-{product.discountId.percent}%
-                  </Badge>
+                  <div className="position-absolute top-0 start-0 m-3" style={{ zIndex: 10 }}>
+                    <div
+                      className="position-relative"
+                      style={{
+                        background: 'linear-gradient(135deg, #FF6B35 0%, #FF4757 100%)',
+                        borderRadius: '20px',
+                        padding: '12px 20px',
+                        color: 'white',
+                        fontWeight: 'bold',
+                        fontSize: '1rem',
+                        boxShadow: '0 8px 25px rgba(255, 71, 87, 0.4)',
+                        transform: 'perspective(1000px) rotateX(-5deg)',
+                        animation: 'pulseGlow 2s ease-in-out infinite alternate',
+                        border: '2px solid rgba(255, 255, 255, 0.3)',
+                        backdropFilter: 'blur(10px)'
+                      }}
+                    >
+                      <div className="d-flex align-items-center gap-2">
+                        <FaBolt className="text-warning" style={{ 
+                          fontSize: '1.2rem',
+                          filter: 'drop-shadow(0 0 4px rgba(255, 193, 7, 0.8))'
+                        }} />
+                        <span>-{product.discountId.percent}%</span>
+                      </div>
+                      <div style={{ 
+                        fontSize: '0.7rem', 
+                        opacity: 0.9,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                        marginTop: '2px'
+                      }}>
+                        HOT DEAL
+                      </div>
+                      {/* Decorative corner */}
+                      <div
+                        style={{
+                          position: 'absolute',
+                          top: '-2px',
+                          right: '-2px',
+                          width: '20px',
+                          height: '20px',
+                          background: 'linear-gradient(135deg, #FFD700, #FFA500)',
+                          borderRadius: '50%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}
+                      >
+                        <FaFire style={{ fontSize: '10px', color: '#FF4757' }} />
+                      </div>
+                    </div>
+                  </div>
                 )}
-                
-                {/* Nút yêu thích */}
-                <Button
-                  variant={isFavorite ? 'danger' : 'outline-danger'}
-                  className="position-absolute top-0 end-0 m-3 rounded-circle p-2"
-                  style={{ 
-                    zIndex: 10, 
-                    width: '50px', 
-                    height: '50px',
-                    border: '2px solid #dc3545'
-                  }}
-                  onClick={() => setIsFavorite(!isFavorite)}
-                >
-                  <FaHeart />
-                </Button>
 
                 {/* Ảnh sản phẩm */}
                 <div className="w-100 h-100 d-flex align-items-center justify-content-center position-relative">
@@ -337,7 +377,7 @@ function ProductDetailPage() {
                       }
                       return (
                         <Image
-                          key={currentImageIdx} // Key để trigger re-render với animation
+                          key={currentImageIdx}
                           src={imageUrl || '/default-product.png'}
                           alt={product.name}
                           className="rounded"
@@ -534,28 +574,112 @@ function ProductDetailPage() {
                     </div>
                   )}
 
-                  {/* Giá */}
+                  {/* Modern Price Display with Discount */}
                   <div className="mb-4">
                     <h6 className="mb-3 fw-bold" style={{ color: '#8B6F3A' }}>
                       Giá:
                     </h6>
-                    <div className="d-flex align-items-center gap-3">
-                      {product.discountId && product.discountId.percent ? (
-                        <>
-                          <span className="h3 fw-bold mb-0" style={{
-                            color: '#A4907C',
-                            background: 'linear-gradient(135deg, #F8F5F0, #F0EDE8)',
-                            borderRadius: '12px',
-                            padding: '8px 16px',
-                            border: '2px solid #A4907C'
-                          }}>
-                            {calculateDiscountedPrice().toLocaleString()}đ
-                          </span>
-                          <span className="h5 mb-0 text-decoration-line-through text-muted">
-                            {getSelectedSizePrice().toLocaleString()}đ
-                          </span>
-                        </>
-                      ) : (
+                    
+                    {product.discountId && product.discountId.percent ? (
+                      <div className="position-relative">
+                        {/* Main price container with gradient background */}
+                        <div
+                          style={{
+                            background: 'linear-gradient(135deg, #FF6B35 0%, #FF4757 100%)',
+                            borderRadius: '20px',
+                            padding: '20px',
+                            color: 'white',
+                            position: 'relative',
+                            overflow: 'hidden',
+                            boxShadow: '0 10px 30px rgba(255, 71, 87, 0.3)',
+                            border: '2px solid rgba(255, 255, 255, 0.2)'
+                          }}
+                        >
+                          {/* Decorative background pattern */}
+                          <div
+                            style={{
+                              position: 'absolute',
+                              top: '-50%',
+                              right: '-20%',
+                              width: '150px',
+                              height: '150px',
+                              background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)',
+                              borderRadius: '50%'
+                            }}
+                          />
+                          
+                          <div className="d-flex justify-content-between align-items-center">
+                            <div>
+                              {/* Discounted price */}
+                              <div className="d-flex align-items-center gap-2 mb-2">
+                                <FaTag className="text-warning" style={{ fontSize: '1.2rem' }} />
+                                <span className="h2 fw-bold mb-0">
+                                  {calculateDiscountedPrice().toLocaleString()}đ
+                                </span>
+                              </div>
+                              
+                              {/* Original price */}
+                              <div className="d-flex align-items-center gap-2 mb-2">
+                                <span className="text-decoration-line-through opacity-75">
+                                  Giá gốc: {getSelectedSizePrice().toLocaleString()}đ
+                                </span>
+                              </div>
+                              
+                              {/* Savings amount */}
+                              <div
+                                style={{
+                                  background: 'rgba(255, 255, 255, 0.2)',
+                                  borderRadius: '12px',
+                                  padding: '8px 12px',
+                                  display: 'inline-block',
+                                  backdropFilter: 'blur(10px)'
+                                }}
+                              >
+                                <small className="fw-bold">
+                                  🎉 Tiết kiệm: {getSavingAmount().toLocaleString()}đ
+                                </small>
+                              </div>
+                            </div>
+                            
+                            {/* Discount percentage badge */}
+                            <div
+                              style={{
+                                background: 'linear-gradient(135deg, #FFD700, #FFA500)',
+                                borderRadius: '50%',
+                                width: '80px',
+                                height: '80px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: '#333',
+                                fontWeight: 'bold',
+                                boxShadow: '0 5px 15px rgba(255, 165, 0, 0.4)',
+                                animation: 'float 3s ease-in-out infinite'
+                              }}
+                            >
+                              <div style={{ fontSize: '1.4rem' }}>
+                                -{product.discountId.percent}%
+                              </div>
+                              <div style={{ fontSize: '0.6rem', textTransform: 'uppercase' }}>
+                                OFF
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Limited time offer indicator */}
+                        <div className="mt-2 text-center">
+                          <small className="text-danger fw-bold d-flex align-items-center justify-content-center gap-1">
+                            <FaBolt className="text-warning" />
+                            Ưu đãi có thời hạn - Nhanh tay đặt hàng!
+                            <FaBolt className="text-warning" />
+                          </small>
+                        </div>
+                      </div>
+                    ) : (
+                      // Regular price display (no discount)
+                      <div className="d-flex align-items-center gap-3">
                         <span className="h3 fw-bold mb-0" style={{
                           color: '#A4907C',
                           background: 'linear-gradient(135deg, #F8F5F0, #F0EDE8)',
@@ -565,8 +689,8 @@ function ProductDetailPage() {
                         }}>
                           {getSelectedSizePrice().toLocaleString()}đ
                         </span>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Số lượng */}
@@ -624,7 +748,6 @@ function ProductDetailPage() {
                       <small className="text-muted">Tối đa 10 sản phẩm</small>
                     </div>
                   </div>
-
                   {/* Nút hành động */}
                   <Row className="g-3 mb-4">
                     <Col>
@@ -714,6 +837,7 @@ function ProductDetailPage() {
       `}</style>
     </div>
   );
+// ...existing code...
 }
 
 export default ProductDetailPage;

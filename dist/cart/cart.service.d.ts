@@ -25,6 +25,8 @@ export declare class CartService {
             size: string | undefined;
             quantity: number;
             price: number;
+            priceAfterDiscount: number;
+            discountPercent: number;
         }[];
         total: number;
     }>;

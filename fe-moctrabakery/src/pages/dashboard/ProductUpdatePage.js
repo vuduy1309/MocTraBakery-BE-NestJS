@@ -213,30 +213,32 @@ function ProductUpdatePage() {
 
     let submitData = { ...form };
 
-    // Ảnh: Nếu không thay đổi gì thì giữ ảnh cũ
-    if (submitData.images && Array.isArray(submitData.images) && submitData.images.length > 0 && submitData.images[0] instanceof File) {
-      // Có file mới upload
-      const uploadedUrls = [];
-      for (let file of submitData.images) {
-        const data = new FormData();
-        data.append('file', file);
-        try {
-          const res = await api.post('/upload', data, {
-            headers: { 'Content-Type': 'multipart/form-data' },
-          });
-          uploadedUrls.push(res.data.url);
-        } catch (err) {
-          setError('Lỗi upload ảnh: ' + (err.response?.data?.message || err.message));
-          return;
-        }
-      }
-      submitData.images = uploadedUrls;
-    } else if (!submitData.images || submitData.images.length === 0) {
-      // Không chọn ảnh mới, giữ ảnh cũ
-      submitData.images = form._oldImages || [];
-    } else if (typeof submitData.images === 'string') {
-      submitData.images = submitData.images.split(',').map((s) => s.trim());
+    // Xử lý ảnh: tách riêng File (ảnh mới) và string (ảnh cũ)
+    let newFiles = [];
+    let oldImages = [];
+    if (Array.isArray(form.images) && form.images.length > 0) {
+      newFiles = form.images.filter(img => img instanceof File);
+      oldImages = form.images.filter(img => typeof img === 'string' && img.trim() !== '');
+    } else if (Array.isArray(form._oldImages)) {
+      oldImages = form._oldImages.filter(img => typeof img === 'string' && img.trim() !== '');
     }
+
+    // Upload tất cả ảnh mới
+    const uploadedUrls = [];
+    for (let file of newFiles) {
+      const data = new FormData();
+      data.append('file', file);
+      try {
+        const res = await api.post('/upload', data, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        uploadedUrls.push(res.data.url);
+      } catch (err) {
+        setError('Lỗi upload ảnh: ' + (err.response?.data?.message || err.message));
+        return;
+      }
+    }
+    submitData.images = [...oldImages, ...uploadedUrls];
 
     // Danh mục: Nếu không thay đổi thì giữ category cũ
     if (!submitData.categoryId || submitData.categoryId === '' || (typeof submitData.categoryId === 'object' && submitData.categoryId !== null)) {
@@ -251,6 +253,27 @@ function ProductUpdatePage() {
     // Xóa các trường tạm
     delete submitData._oldImages;
     delete submitData._oldCategoryId;
+
+    // --- Xác định các field bị xóa để gửi $unset ---
+    // Lấy danh sách field cũ (từ _oldProductFields)
+    // Ta sẽ lấy keys của sản phẩm ban đầu (prod) và so sánh với keys hiện tại
+    // Để đơn giản, lấy từ form._oldProductFields nếu có, hoặc từ form._oldImages, _oldCategoryId, hoặc từ fields ban đầu
+    // Nhưng ở đây, ta sẽ lấy từ các trường động allProductFields
+    const oldDynamicFields = allProductFields
+      .map(f => f.name)
+      .filter(name => form[name] !== undefined || (form._oldImages && name === 'images') || (form._oldCategoryId && name === 'categoryId'));
+    // Các field hiện tại (sau khi đã xóa trên FE)
+    const currentFields = fields.map(f => f.name);
+    // Các field động đã bị xóa
+    const removedFields = oldDynamicFields.filter(name => !currentFields.includes(name));
+    // Nếu có field bị xóa, gửi $unset và xóa field đó khỏi submitData để tránh conflict MongoDB
+    if (removedFields.length > 0) {
+      submitData.$unset = {};
+      removedFields.forEach(name => {
+        submitData.$unset[name] = "";
+        delete submitData[name];
+      });
+    }
 
     try {
       await api.put(`/products/${id}`, submitData);
@@ -297,16 +320,15 @@ function ProductUpdatePage() {
                 <Form.Label>
                   {f.label}{' '}
                   {f.required && <span style={{ color: 'red' }}>*</span>}
-                  {!defaultFields.some((df) => df.name === f.name) && (
+                  {/* Chỉ cho phép xóa các trường động vừa được thêm vào (không có dữ liệu từ DB) */}
+                  {!defaultFields.some((df) => df.name === f.name) && form[f.name] === undefined && (
                     <Button
                       variant="outline-danger"
                       size="sm"
                       style={{ float: 'right', padding: '0 6px', fontSize: 13 }}
                       onClick={() => {
                         setFields(fields.filter((ff) => ff.name !== f.name));
-                        const newForm = { ...form };
-                        delete newForm[f.name];
-                        setForm(newForm);
+                        // Không cần xóa khỏi form vì chưa có dữ liệu
                       }}
                     >
                       Xóa
@@ -349,21 +371,80 @@ function ProductUpdatePage() {
                       <div style={{ marginBottom: 8 }}>
                         <div style={{ fontSize: 13, color: '#888' }}>Ảnh hiện tại:</div>
                         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                          {form._oldImages.map((img, idx) => (
-                            <img key={idx} src={img} alt="Ảnh sản phẩm" style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 4, border: '1px solid #eee' }} />
-                          ))}
+                          {form._oldImages.map((img, idx) => {
+                            let src = '';
+                            if (typeof img === 'string') {
+                              if (img.startsWith('http')) {
+                                src = img;
+                              } else {
+                                src = `http://localhost:3000${img.startsWith('/') ? '' : '/'}${img}`;
+                              }
+                            } else {
+                              src = '';
+                            }
+                            return (
+                              <div key={idx} style={{ position: 'relative' }}>
+                                <img src={src} alt="Ảnh sản phẩm" style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 4, border: '1px solid #eee' }} />
+
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
                     )}
                     <Form.Control
                       type="file"
                       name="images"
-                      multiple
                       accept="image/*"
+                      multiple
                       onChange={(e) => {
-                        setForm({ ...form, images: Array.from(e.target.files) });
+                        if (!e.target.files || e.target.files.length === 0) return;
+                        const files = Array.from(e.target.files);
+                        setForm({
+                          ...form,
+                          images: [...(form.images || []), ...files],
+                        });
+                        e.target.value = '';
                       }}
                     />
+                    {/* Hiển thị preview ảnh mới chọn */}
+                    {form.images && Array.isArray(form.images) && form.images.length > 0 && (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
+                        {form.images.map((file, idx) => {
+                          let src = '';
+                          if (file instanceof File) {
+                            src = URL.createObjectURL(file);
+                          } else if (typeof file === 'string') {
+                            if (file.startsWith('http')) {
+                              src = file;
+                            } else {
+                              src = `http://localhost:3000${file.startsWith('/') ? '' : '/'}${file}`;
+                            }
+                          }
+                          return (
+                            <div key={idx} style={{ position: 'relative' }}>
+                              <img
+                                src={src}
+                                alt={`preview-${idx}`}
+                                style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 4, border: '1px solid #eee' }}
+                              />
+                              <Button
+                                size="sm"
+                                variant="danger"
+                                style={{ position: 'absolute', top: -8, right: -8, borderRadius: '50%', padding: '0 6px', fontSize: 13, zIndex: 2 }}
+                                onClick={() => {
+                                  const arr = [...form.images];
+                                  arr.splice(idx, 1);
+                                  setForm({ ...form, images: arr });
+                                }}
+                              >
+                                ×
+                              </Button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
                 ) : f.name === 'isActive' ||
                   f.name === 'isRefrigerated' ||
@@ -494,15 +575,6 @@ function ProductUpdatePage() {
         <Button type="submit" variant="primary" className="me-2">
           Cập nhật sản phẩm
         </Button>
-        {fields.length > defaultFields.length && (
-          <Button
-            variant="outline-danger"
-            className="ms-2"
-            onClick={handleRemoveCustomFields}
-          >
-            Xóa tất cả thuộc tính
-          </Button>
-        )}
       </Form>
       <hr />
       <h5>Thêm thuộc tính mới (tùy chọn)</h5>

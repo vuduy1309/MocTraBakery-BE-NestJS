@@ -11,6 +11,7 @@ import { AuthModule } from './auth/auth.module';
 
 import { CommentModule } from './comment/comment.module';
 import { UploadModule } from './upload/upload.module';
+import { OrderModule } from './order/order.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { UploadModule } from './upload/upload.module';
     AuthModule,
     CommentModule,
     UploadModule,
+    OrderModule,
   ],
   controllers: [AppController],
   providers: [AppService],

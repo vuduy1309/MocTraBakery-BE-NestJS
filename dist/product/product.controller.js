@@ -31,10 +31,11 @@ let ProductController = class ProductController {
         if (typeof body.images === 'string') {
             body.images = body.images.split(',').map((s) => s.trim());
         }
-        if (typeof this.productService['update'] !== 'function') {
-            throw new common_1.NotFoundException('Update method not implemented in ProductService');
+        let updateBody = { ...body };
+        if (body.$unset) {
+            updateBody = { ...body };
         }
-        const updated = await this.productService.update(id, body);
+        const updated = await this.productService.update(id, updateBody);
         if (!updated) {
             throw new common_1.NotFoundException('Product not found');
         }

@@ -12,11 +12,7 @@ export declare class AppController {
     constructor(appService: AppService, productService: ProductService, categoryService: CategoryService, discountService: DiscountService, commentService: CommentService);
     getHomepageData(): Promise<{
         featuredProducts: import("./product/product.schema").Product[];
-        discounts: (import("mongoose").Document<unknown, {}, import("./discount/discount.schema").Discount, {}> & import("./discount/discount.schema").Discount & Required<{
-            _id: unknown;
-        }> & {
-            __v: number;
-        })[];
+        discounts: any[];
         reviews: (import("mongoose").Document<unknown, {}, import("./comment/comment.schema").Comment, {}> & import("./comment/comment.schema").Comment & Required<{
             _id: unknown;
         }> & {

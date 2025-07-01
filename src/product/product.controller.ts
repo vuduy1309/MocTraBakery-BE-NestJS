@@ -28,13 +28,12 @@ export class ProductController {
     if (typeof body.images === 'string') {
       body.images = body.images.split(',').map((s: string) => s.trim());
     }
-    // Gọi service để cập nhật sản phẩm (cần có phương thức update trong ProductService)
-    if (typeof this.productService['update'] !== 'function') {
-      throw new NotFoundException(
-        'Update method not implemented in ProductService',
-      );
+    // Nếu có $unset, truyền đúng cho service
+    let updateBody: any = { ...body };
+    if (body.$unset) {
+      updateBody = { ...body };
     }
-    const updated = await (this.productService as any).update(id, body);
+    const updated = await this.productService.update(id, updateBody);
     if (!updated) {
       throw new NotFoundException('Product not found');
     }

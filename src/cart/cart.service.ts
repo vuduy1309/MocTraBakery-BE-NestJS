@@ -26,16 +26,19 @@ export class CartService {
       })
       .exec();
     if (!cart) return { items: [], total: 0 };
-    const total = cart.items.reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0,
-    );
-    // Chỉ trả về các trường cần thiết cho FE
+    // Tính tổng tiền đã trừ discount
+    let total = 0;
     const items = cart.items.map((item) => {
       const prod: any =
         item.productId && typeof item.productId === 'object'
           ? item.productId
           : null;
+      let discountPercent = 0;
+      if (prod && prod.discountId && typeof prod.discountId === 'object' && prod.discountId.percent) {
+        discountPercent = prod.discountId.percent;
+      }
+      const priceAfterDiscount = discountPercent ? Math.round(item.price * (1 - discountPercent / 100)) : item.price;
+      total += priceAfterDiscount * item.quantity;
       return {
         productId: prod
           ? {
@@ -66,6 +69,8 @@ export class CartService {
         size: item.size,
         quantity: item.quantity,
         price: item.price,
+        priceAfterDiscount,
+        discountPercent,
       };
     });
     return { items, total };

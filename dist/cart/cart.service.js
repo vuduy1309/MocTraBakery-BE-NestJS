@@ -39,11 +39,17 @@ let CartService = class CartService {
             .exec();
         if (!cart)
             return { items: [], total: 0 };
-        const total = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+        let total = 0;
         const items = cart.items.map((item) => {
             const prod = item.productId && typeof item.productId === 'object'
                 ? item.productId
                 : null;
+            let discountPercent = 0;
+            if (prod && prod.discountId && typeof prod.discountId === 'object' && prod.discountId.percent) {
+                discountPercent = prod.discountId.percent;
+            }
+            const priceAfterDiscount = discountPercent ? Math.round(item.price * (1 - discountPercent / 100)) : item.price;
+            total += priceAfterDiscount * item.quantity;
             return {
                 productId: prod
                     ? {
@@ -72,6 +78,8 @@ let CartService = class CartService {
                 size: item.size,
                 quantity: item.quantity,
                 price: item.price,
+                priceAfterDiscount,
+                discountPercent,
             };
         });
         return { items, total };

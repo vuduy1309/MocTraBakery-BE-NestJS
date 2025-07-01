@@ -99,166 +99,422 @@ function ProductManagerProducts() {
     return nameMatch && categoryMatch && isActiveMatch && originMatch;
   });
 
+  // Styles cho giao diện vừa với layout - Bakery theme
+  const containerStyle = {
+    backgroundColor: '#f7f3f0', // Light beige background
+    minHeight: 'calc(100vh - 120px)',
+    width: '100%',
+    padding: '1.5rem',
+    boxSizing: 'border-box',
+    fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+    overflow: 'auto'
+  };
+
+  const headerStyle = {
+    color: '#8b4513', // Saddle brown
+    fontWeight: '700',
+    fontSize: '1.8rem',
+    marginBottom: '1.5rem',
+    textAlign: 'left'
+  };
+
+  const addButtonStyle = {
+    background: 'linear-gradient(135deg, #d2b48c 0%, #bc9a6a 100%)', // Tan to darker tan
+    border: 'none',
+    borderRadius: '12px',
+    color: '#8b4513', // Dark brown text
+    fontWeight: '600',
+    fontSize: '1.1rem',
+    padding: '12px 24px',
+    boxShadow: '0 8px 20px rgba(210, 180, 140, 0.3)',
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    transform: 'translateY(0)'
+  };
+
+  const filterContainerStyle = {
+    background: '#faf8f5', // Very light beige
+    borderRadius: '12px',
+    padding: '1.25rem',
+    marginBottom: '1.5rem',
+    boxShadow: '0 2px 8px rgba(139, 69, 19, 0.08)',
+    border: '1px solid #e6d7c3' // Light brown border
+  };
+
+  const filterInputStyle = {
+    border: '2px solid #d4c4b0', // Light brown border
+    borderRadius: '12px',
+    padding: '12px 16px',
+    backgroundColor: '#fefcfa', // Off-white background
+    color: '#8b4513', // Dark brown text
+    fontSize: '0.95rem',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 2px 4px rgba(139, 69, 19, 0.05)'
+  };
+
+  const tableContainerStyle = {
+    background: '#fefcfa', // Off-white
+    borderRadius: '12px',
+    padding: '0',
+    boxShadow: '0 2px 8px rgba(139, 69, 19, 0.08)',
+    border: '1px solid #e6d7c3',
+    overflow: 'hidden'
+  };
+
+  const tableHeaderStyle = {
+    background: 'linear-gradient(135deg, #d2b48c 0%, #bc9a6a 100%)', // Tan gradient
+    color: '#8b4513', // Dark brown text
+    fontWeight: '700',
+    fontSize: '0.9rem',
+    padding: '16px 12px',
+    textAlign: 'center',
+    borderColor: 'rgba(139, 69, 19, 0.2)'
+  };
+
+  const getStatusStyle = (isActive) => {
+    if (isActive === undefined) return { 
+      backgroundColor: '#a0826d', // Medium brown
+      color: 'white',
+      padding: '6px 12px',
+      borderRadius: '20px',
+      fontSize: '0.8rem',
+      fontWeight: '600'
+    };
+    return isActive 
+      ? { 
+          backgroundColor: '#9b7653', // Brown-green for active
+          color: 'white',
+          padding: '6px 12px',
+          borderRadius: '20px',
+          fontSize: '0.8rem',
+          fontWeight: '600'
+        }
+      : { 
+          backgroundColor: '#b8860b', // Dark goldenrod for inactive
+          color: 'white',
+          padding: '6px 12px',
+          borderRadius: '20px',
+          fontSize: '0.8rem',
+          fontWeight: '600'
+        };
+  };
+
+  const getButtonStyle = (variant) => {
+    const baseStyle = {
+      borderRadius: '10px',
+      fontWeight: '600',
+      fontSize: '0.85rem',
+      padding: '8px 16px',
+      border: 'none',
+      transition: 'all 0.2s ease',
+      minWidth: '80px'
+    };
+
+    switch (variant) {
+      case 'edit':
+        return {
+          ...baseStyle,
+          background: 'linear-gradient(135deg, #ddbf94 0%, #d4a574 100%)', // Light brown gradient
+          color: '#8b4513' // Dark brown text
+        };
+      case 'delete':
+        return {
+          ...baseStyle,
+          background: 'linear-gradient(135deg, #cd853f 0%, #a0522d 100%)', // Peru to sienna
+          color: '#ffffff'
+        };
+      case 'feedback':
+        return {
+          ...baseStyle,
+          background: 'linear-gradient(135deg, #bc9a6a 0%, #a0826d 100%)', // Medium brown gradient
+          color: '#ffffff'
+        };
+      default:
+        return baseStyle;
+    }
+  };
+
+  // Component hiển thị nhiều ảnh
+  const ImageGallery = ({ product }) => {
+    let images = [];
+    
+    if (Array.isArray(product.images) && product.images.length > 0) {
+      images = product.images.map(img => {
+        if (typeof img === 'string') {
+          return img;
+        } else if (img && typeof img === 'object') {
+          return img.image || img.url || '';
+        }
+        return '';
+      }).filter(Boolean);
+    } else if (product.image) {
+      if (typeof product.image === 'object') {
+        const imgUrl = product.image.image || product.image.url || '';
+        if (imgUrl) images = [imgUrl];
+      } else if (typeof product.image === 'string') {
+        images = [product.image];
+      }
+    }
+
+    // Thêm localhost nếu cần
+    images = images.map(img => 
+      img.startsWith('/uploads') ? 'http://localhost:3000' + img : img
+    );
+
+    if (images.length === 0) {
+      return (
+        <div style={{
+          width: 80,
+          height: 80,
+          backgroundColor: '#f0ead6', // Light beige
+          borderRadius: '12px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: '#a0826d', // Medium brown
+          fontSize: '0.8rem'
+        }}>
+          Không có ảnh
+        </div>
+      );
+    }
+
+    if (images.length === 1) {
+      return (
+        <img
+          src={images[0]}
+          alt={product.name}
+          style={{
+            width: 80,
+            height: 80,
+            objectFit: 'cover',
+            borderRadius: '12px',
+            boxShadow: '0 4px 12px rgba(139, 69, 19, 0.15)'
+          }}
+        />
+      );
+    }
+
+    // Hiển thị nhiều ảnh dạng grid
+    return (
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: images.length === 2 ? '1fr 1fr' : '1fr 1fr',
+        gap: '2px',
+        width: 80,
+        height: 80
+      }}>
+        {images.slice(0, 4).map((img, idx) => (
+          <div key={idx} style={{ position: 'relative' }}>
+            <img
+              src={img}
+              alt={`${product.name} ${idx + 1}`}
+              style={{
+                width: '100%',
+                height: images.length <= 2 ? '80px' : '39px',
+                objectFit: 'cover',
+                borderRadius: '6px'
+              }}
+            />
+            {idx === 3 && images.length > 4 && (
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(139, 69, 19, 0.7)', // Dark brown overlay
+                borderRadius: '6px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'white',
+                fontSize: '0.7rem',
+                fontWeight: '600'
+              }}>
+                +{images.length - 4}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   return (
-    <Container className="mt-4">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 className="fw-bold text-primary mb-0">Quản lý sản phẩm</h2>
-        <Button
-          variant="success"
-          size="lg"
-          className="px-4 py-2 fw-bold shadow"
-          onClick={handleAdd}
-        >
-          + Thêm sản phẩm
-        </Button>
-      </div>
-      {/* Bộ lọc */}
-      <div className="row g-3 mb-3">
-        <div className="col-md-3">
-          <input
-            type="text"
-            className="form-control"
-            placeholder="Tìm theo tên..."
-            value={filter.name}
-            onChange={(e) => setFilter((f) => ({ ...f, name: e.target.value }))}
-          />
-        </div>
-        <div className="col-md-3">
-          <select
-            className="form-select"
-            value={filter.category}
-            onChange={(e) =>
-              setFilter((f) => ({ ...f, category: e.target.value }))
-            }
+    <div style={containerStyle}>
+      <div style={{ maxWidth: '100%' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+          <h1 style={headerStyle}>Quản lý sản phẩm</h1>
+          <Button
+            style={addButtonStyle}
+            onClick={handleAdd}
+            onMouseEnter={(e) => {
+              e.target.style.transform = 'translateY(-2px)';
+              e.target.style.boxShadow = '0 12px 24px rgba(210, 180, 140, 0.4)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.transform = 'translateY(0)';
+              e.target.style.boxShadow = '0 8px 20px rgba(210, 180, 140, 0.3)';
+            }}
           >
-            <option value="">Tất cả danh mục</option>
-            {categories.map((cat) => (
-              <option key={cat._id} value={cat.name}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
+            Thêm sản phẩm mới
+          </Button>
         </div>
-        <div className="col-md-2">
-          <select
-            className="form-select"
-            value={filter.isActive}
-            onChange={(e) =>
-              setFilter((f) => ({ ...f, isActive: e.target.value }))
-            }
-          >
-            <option value="">Tất cả trạng thái</option>
-            <option value="active">Đang bán</option>
-            <option value="inactive">Ngừng bán</option>
-          </select>
-        </div>
-        <div className="col-md-2">
-          <input
-            type="text"
-            className="form-control"
-            placeholder="Tìm theo nguồn gốc..."
-            value={filter.origin}
-            onChange={(e) =>
-              setFilter((f) => ({ ...f, origin: e.target.value }))
-            }
-          />
-        </div>
-      </div>
-      <div className="table-responsive rounded shadow-sm bg-white p-3">
-        <Table
-          bordered
-          hover
-          className="align-middle mb-0"
-          style={{ minWidth: 1200 }}
-        >
-          <thead className="table-light">
-            <tr style={{ verticalAlign: 'middle', textAlign: 'center' }}>
-              <th>#</th>
-              <th>Ảnh</th>
-              <th>Tên</th>
-              <th>Mô tả</th>
-              <th>Giá</th>
-              <th>Tồn kho</th>
-              <th>Hoạt động</th>
-              <th>Danh mục</th>
-              <th>Khuyến mãi</th>
-              <th>Ngày tạo</th>
-              <th>Thuần chay</th>
-              <th>HSD (ngày)</th>
-              <th>Bảo quản lạnh</th>
-              <th>Không gluten</th>
-              <th>Nguồn gốc</th>
-              <th>Hành động</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredProducts.map((p, idx) => {
-              // Lấy ảnh đầu tiên hợp lệ
-              let imageUrl = '';
-              if (Array.isArray(p.images) && p.images.length > 0) {
-                let first = p.images[0];
-                if (typeof first === 'string') {
-                  imageUrl = first;
-                } else if (first && typeof first === 'object') {
-                  imageUrl = first.image || first.url || '';
+
+        {/* Bộ lọc */}
+        <div style={filterContainerStyle}>
+          <div className="row g-3">
+            <div className="col-md-3">
+              <input
+                type="text"
+                style={filterInputStyle}
+                className="form-control"
+                placeholder="Tìm theo tên sản phẩm..."
+                value={filter.name}
+                onChange={(e) => setFilter((f) => ({ ...f, name: e.target.value }))}
+                onFocus={(e) => e.target.style.borderColor = '#bc9a6a'}
+                onBlur={(e) => e.target.style.borderColor = '#d4c4b0'}
+              />
+            </div>
+            <div className="col-md-3">
+              <select
+                style={filterInputStyle}
+                className="form-select"
+                value={filter.category}
+                onChange={(e) =>
+                  setFilter((f) => ({ ...f, category: e.target.value }))
                 }
-              } else if (p.image && typeof p.image === 'object') {
-                imageUrl = p.image.image || p.image.url || '';
-              } else if (typeof p.image === 'string') {
-                imageUrl = p.image;
-              }
-              if (imageUrl && imageUrl.startsWith('/uploads')) {
-                imageUrl = 'http://localhost:3000' + imageUrl;
-              }
-              return (
+              >
+                <option value="">Tất cả danh mục</option>
+                {categories.map((cat) => (
+                  <option key={cat._id} value={cat.name}>
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="col-md-3">
+              <select
+                style={filterInputStyle}
+                className="form-select"
+                value={filter.isActive}
+                onChange={(e) =>
+                  setFilter((f) => ({ ...f, isActive: e.target.value }))
+                }
+              >
+                <option value="">Tất cả trạng thái</option>
+                <option value="active">Có sẵn</option>
+                <option value="inactive">Hết hàng</option>
+              </select>
+            </div>
+            <div className="col-md-3">
+              <input
+                type="text"
+                style={filterInputStyle}
+                className="form-control"
+                placeholder="Nguồn gốc..."
+                value={filter.origin}
+                onChange={(e) =>
+                  setFilter((f) => ({ ...f, origin: e.target.value }))
+                }
+                onFocus={(e) => e.target.style.borderColor = '#bc9a6a'}
+                onBlur={(e) => e.target.style.borderColor = '#d4c4b0'}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div style={tableContainerStyle} className="table-responsive">
+          <Table
+            hover
+            className="align-middle mb-0"
+            style={{ 
+              minWidth: '100%', 
+              backgroundColor: 'transparent',
+              borderCollapse: 'separate',
+              borderSpacing: 0
+            }}
+          >
+            <thead>
+              <tr>
+                <th style={tableHeaderStyle}>STT</th>
+                <th style={tableHeaderStyle}>Hình ảnh</th>
+                <th style={tableHeaderStyle}>Tên sản phẩm</th>
+                <th style={tableHeaderStyle}>Mô tả</th>
+                <th style={tableHeaderStyle}>Giá</th>
+                <th style={tableHeaderStyle}>Số lượng</th>
+                <th style={tableHeaderStyle}>Trạng thái</th>
+                <th style={tableHeaderStyle}>Danh mục</th>
+                <th style={tableHeaderStyle}>Khuyến mãi</th>
+                <th style={tableHeaderStyle}>Ngày tạo</th>
+                <th style={tableHeaderStyle}>Thuần chay</th>
+                <th style={tableHeaderStyle}>HSD (ngày)</th>
+                <th style={tableHeaderStyle}>Bảo quản lạnh</th>
+                <th style={tableHeaderStyle}>Không gluten</th>
+                <th style={tableHeaderStyle}>Nguồn gốc</th>
+                <th style={tableHeaderStyle}>Hành động</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredProducts.map((p, idx) => (
                 <tr
                   key={p._id}
-                  style={{ verticalAlign: 'middle', textAlign: 'center' }}
+                  style={{ 
+                    verticalAlign: 'middle', 
+                    textAlign: 'center',
+                    backgroundColor: idx % 2 === 0 ? '#fefcfa' : '#f7f3f0', // Alternating beige rows
+                    borderBottom: '1px solid #e6d7c3'
+                  }}
                 >
-                  <td>{idx + 1}</td>
-                  <td>
-                    <img
-                      src={imageUrl || '/default-product.png'}
-                      alt={p.name}
-                      style={{
-                        width: 60,
-                        height: 60,
-                        objectFit: 'cover',
-                        borderRadius: 8,
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                      }}
-                    />
+                  <td style={{ fontWeight: '600', color: '#8b4513', padding: '12px 8px' }}>
+                    {idx + 1}
                   </td>
-                  <td className="fw-bold text-dark">{p.name || 'Không'}</td>
-                  <td
-                    style={{
-                      maxWidth: 200,
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                    }}
-                  >
-                    {p.description || 'Không'}
+                  <td style={{ padding: '12px 8px' }}>
+                    <ImageGallery product={p} />
                   </td>
-                  <td className="text-success fw-bold">
-                    {p.price ? p.price.toLocaleString('vi-VN') + ' đ' : 'Không'}
+                  <td style={{ 
+                    fontWeight: '700', 
+                    color: '#8b4513', 
+                    fontSize: '0.9rem',
+                    padding: '12px 8px'
+                  }}>
+                    {p.name || 'Không có tên'}
                   </td>
-                  <td>{p.stock ?? 'Không'}</td>
-                  <td>
-                    <span
-                      className={
-                        p.isActive ? 'badge bg-success' : 'badge bg-secondary'
-                      }
-                    >
+                  <td style={{
+                    maxWidth: 260,
+                    whiteSpace: 'pre-line',
+                    wordBreak: 'break-word',
+                    color: '#a0826d', // Medium brown
+                    padding: '12px 8px',
+                    fontSize: '0.97rem',
+                  }}>
+                    {p.description || 'Không có mô tả'}
+                  </td>
+                  <td style={{ 
+                    fontWeight: '700', 
+                    color: '#9b7653', // Brown-green for price
+                    fontSize: '1.1rem',
+                    padding: '16px 12px'
+                  }}>
+                    {p.price ? p.price.toLocaleString('vi-VN') + ' đ' : 'Chưa có giá'}
+                  </td>
+                  <td style={{ 
+                    fontWeight: '600', 
+                    color: p.stock > 10 ? '#9b7653' : '#cd853f', // Brown tones
+                    padding: '16px 12px'
+                  }}>
+                    {p.stock ?? 'Không có'}
+                  </td>
+                  <td style={{ padding: '16px 12px' }}>
+                    <span style={getStatusStyle(p.isActive)}>
                       {p.isActive === undefined
-                        ? 'Không'
+                        ? 'Không '
                         : p.isActive
-                          ? 'Đang bán'
-                          : 'Ngừng bán'}
+                          ? 'Có sẵn'
+                          : 'Hết hàng'}
                     </span>
                   </td>
-                  <td>
-                    {/* Hiển thị tên danh mục từ object hoặc từ categories */}
+                  <td style={{ color: '#a0826d', fontWeight: '500', padding: '16px 12px' }}>
                     {p.categoryId &&
                     typeof p.categoryId === 'object' &&
                     p.categoryId.name
@@ -266,81 +522,97 @@ function ProductManagerProducts() {
                       : typeof p.categoryId === 'string' &&
                           categories.length > 0
                         ? categories.find((c) => c._id === p.categoryId)
-                            ?.name || 'Không'
-                        : 'Không'}
+                            ?.name || 'Chưa phân loại'
+                        : 'Chưa phân loại'}
                   </td>
-                  <td>
+                  <td style={{ color: '#d2b48c', fontWeight: '500', padding: '16px 12px' }}>
                     {p.discountId &&
                     typeof p.discountId === 'object' &&
                     p.discountId.name
                       ? p.discountId.name
-                      : 'Không'}
+                      : 'Không có'}
                   </td>
-                  <td>
+                  <td style={{ fontSize: '0.9rem', color: '#a0826d', padding: '16px 12px' }}>
                     {p.createdAt
-                      ? new Date(p.createdAt).toLocaleString('vi-VN')
-                      : 'Không'}
+                      ? new Date(p.createdAt).toLocaleDateString('vi-VN')
+                      : 'Không '}
                   </td>
-                  <td>
-                    {p.isVegetarian === undefined
-                      ? 'Không'
-                      : p.isVegetarian
-                        ? '✔️'
-                        : 'Không'}
+                  <td style={{ padding: '16px 12px' }}>
+                    <span style={{
+                      padding: '4px 8px',
+                      borderRadius: '12px',
+                      fontSize: '0.8rem',
+                      fontWeight: '600',
+                      backgroundColor: p.isVegetarian === undefined ? '#a0826d' : p.isVegetarian ? '#9b7653' : '#cd853f',
+                      color: 'white'
+                    }}>
+                      {p.isVegetarian === undefined ? 'Không ' : p.isVegetarian ? 'Có' : 'Không'}
+                    </span>
                   </td>
-                  <td>{p.shelfLifeDays ?? 'Không'}</td>
-                  <td>
-                    {p.isRefrigerated === undefined
-                      ? 'Không'
-                      : p.isRefrigerated
-                        ? '✔️'
-                        : 'Không'}
+                  <td style={{ fontWeight: '600', color: '#bc9a6a', padding: '16px 12px' }}>
+                    {p.shelfLifeDays ?? 'Không '}
                   </td>
-                  <td>
-                    {p.isGlutenFree === undefined
-                      ? 'Không'
-                      : p.isGlutenFree
-                        ? '✔️'
-                        : 'Không'}
+                  <td style={{ padding: '16px 12px' }}>
+                    <span style={{
+                      padding: '4px 8px',
+                      borderRadius: '12px',
+                      fontSize: '0.8rem',
+                      fontWeight: '600',
+                      backgroundColor: p.isRefrigerated === undefined ? '#a0826d' : p.isRefrigerated ? '#bc9a6a' : '#d2b48c',
+                      color: 'white'
+                    }}>
+                      {p.isRefrigerated === undefined ? 'Không ' : p.isRefrigerated ? 'Có' : 'Không'}
+                    </span>
                   </td>
-                  <td>{p.origin || 'Không'}</td>
-                  <td>
-                    <div className="d-flex flex-column gap-2">
+                  <td style={{ padding: '16px 12px' }}>
+                    <span style={{
+                      padding: '4px 8px',
+                      borderRadius: '12px',
+                      fontSize: '0.8rem',
+                      fontWeight: '600',
+                      backgroundColor: p.isGlutenFree === undefined ? '#a0826d' : p.isGlutenFree ? '#9b7653' : '#cd853f',
+                      color: 'white'
+                    }}>
+                      {p.isGlutenFree === undefined ? 'Không ' : p.isGlutenFree ? 'Có' : 'Không'}
+                    </span>
+                  </td>
+                  <td style={{ color: '#a0826d', fontWeight: '500', padding: '16px 12px' }}>
+                    {p.origin || 'Không '}
+                  </td>
+                  <td style={{ padding: '16px 12px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }}>
                       <Button
-                        variant="outline-primary"
                         size="sm"
-                        className="fw-bold shadow-sm"
+                        style={getButtonStyle('edit')}
                         onClick={() => handleEdit(p._id)}
                       >
                         Sửa
                       </Button>
                       <Button
-                        variant="outline-danger"
                         size="sm"
-                        className="fw-bold shadow-sm"
+                        style={getButtonStyle('delete')}
                         onClick={() => handleDelete(p._id)}
                       >
                         Xóa
                       </Button>
                       <Button
-                        variant="outline-info"
                         size="sm"
-                        className="fw-bold shadow-sm"
+                        style={getButtonStyle('feedback')}
                         onClick={() =>
                           alert('Demo: Xem feedback cho sản phẩm ' + p.name)
                         }
                       >
-                        Feedback
+                        Phản hồi
                       </Button>
                     </div>
                   </td>
                 </tr>
-              );
-            })}
-          </tbody>
-        </Table>
+              ))}
+            </tbody>
+          </Table>
+        </div>
       </div>
-    </Container>
+    </div>
   );
 }
 

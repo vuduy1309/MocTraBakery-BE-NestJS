@@ -7,12 +7,24 @@ import { Product, ProductDocument } from './product.schema';
 export class ProductService {
   constructor(@InjectModel(Product.name) private productModel: Model<ProductDocument>) {}
 
-  // Cập nhật sản phẩm
+  // Cập nhật sản phẩm, hỗ trợ $unset
   async update(id: string, data: any): Promise<Product | null> {
-    return this.productModel.findByIdAndUpdate(id, data, { new: true })
-      .populate('categoryId')
-      .populate('discountId')
-      .exec();
+    // Nếu có $unset thì dùng updateOne với $set và $unset, sau đó trả về bản ghi mới nhất
+    if (data.$unset) {
+      const unset = data.$unset;
+      const setData = { ...data };
+      delete setData.$unset;
+      await this.productModel.updateOne({ _id: id }, { $set: setData, $unset: unset });
+      return this.productModel.findById(id)
+        .populate('categoryId')
+        .populate('discountId')
+        .exec();
+    } else {
+      return this.productModel.findByIdAndUpdate(id, data, { new: true })
+        .populate('categoryId')
+        .populate('discountId')
+        .exec();
+    }
   }
 
   // Xóa sản phẩm

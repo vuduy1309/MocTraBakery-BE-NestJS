@@ -5,7 +5,7 @@ import { BsBarChart, BsBoxSeam, BsTag, BsCartCheck, BsPeople, BsShieldLock, BsJo
 
 function getActiveKey(pathname) {
   if (pathname.includes('/admin/products')) return 'products';
-  if (pathname.includes('/admin/promotions')) return 'promotions';
+  if (pathname.includes('/manager/discounts')) return 'discounts';
   if (pathname.includes('/admin/orders')) return 'orders';
   if (pathname.includes('/admin/customers')) return 'customers';
   if (pathname.includes('/admin/users')) return 'users';
@@ -26,7 +26,7 @@ function AdminSidebar({ activeKey, navigate }) {
         <ListGroup.Item action active={activeKey === 'products'} onClick={() => navigate('/admin/products')}>
           <BsBoxSeam className="me-2" /> Sản phẩm
         </ListGroup.Item>
-        <ListGroup.Item action active={activeKey === 'promotions'} onClick={() => navigate('/admin/promotions')}>
+        <ListGroup.Item action active={activeKey === 'discounts'} onClick={() => navigate('/admin/discounts')}>
           <BsTag className="me-2" /> Khuyến mãi
         </ListGroup.Item>
         <ListGroup.Item action active={activeKey === 'orders'} onClick={() => navigate('/admin/orders')}>
