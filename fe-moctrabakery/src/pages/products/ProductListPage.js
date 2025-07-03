@@ -121,10 +121,23 @@ function ProductListPage() {
   };
 
   return (
+
     <div className="product-list-page" style={{ background: '#F8F5F0', minHeight: '100vh', padding: '1.5rem 0' }}>
       <Container fluid className="px-4">
 
-        {/* Header Section đã bị loại bỏ theo yêu cầu */}
+        {/* Header Section - ĐÃ KHÔI PHỤC */}
+        <Row className="mb-4">
+          <Col>
+            <div className="py-4 text-center">
+              <h1 className="fw-bold mb-2" style={{ color: '#6B4F27', fontSize: '2.5rem', letterSpacing: '1px' }}>
+                Danh sách sản phẩm
+              </h1>
+              <p className="lead mb-0" style={{ color: '#8B6F3A' }}>
+                Khám phá các sản phẩm bánh tươi, trà và đồ ăn vặt chất lượng từ Mộc Trà Bakery. Lọc, tìm kiếm và chọn món bạn yêu thích!
+              </p>
+            </div>
+          </Col>
+        </Row>
 
         {/* Search Section - Giữ nguyên vị trí */}
         <Row className="mb-4">
@@ -188,188 +201,105 @@ function ProductListPage() {
                 </h5>
               </Card.Header>
               <Card.Body className="pt-2">
-                {/* Category Filter */}
-                <div className="mb-4">
-                  <Form.Label className="fw-semibold mb-3 d-block" style={{ color: '#8B6F3A' }}>
-                    <i className="fas fa-tag me-2" style={{ color: '#A4907C' }}></i>
-                    Danh mục
-                  </Form.Label>
-                  <div className="category-list">
-                    <Form.Check
-                      type="radio"
-                      id="category-all"
-                      name="category"
-                      label="Tất cả danh mục"
-                      checked={category === ''}
-                      onChange={() => setCategory('')}
-                      className="mb-2 category-radio"
-                    />
-                    {categories.map(c => (
-                      <Form.Check
-                        key={c._id}
-                        type="radio"
-                        id={`category-${c._id}`}
-                        name="category"
-                        label={c.name}
-                        checked={category === c._id}
-                        onChange={() => setCategory(c._id)}
-                        className="mb-2 category-radio"
-                      />
-                    ))}
-                  </div>
-                </div>
-                {/* Origin Filter */}
-                <div className="mb-4">
-                  <Form.Label className="fw-semibold mb-3 d-block" style={{ color: '#8B6F3A' }}>
-                    <i className="fas fa-globe me-2" style={{ color: '#A4907C' }}></i>
-                    Xuất xứ
-                  </Form.Label>
-                  <Form.Control
-                    type="text"
-                    placeholder="Nhập xuất xứ..."
-                    value={origin}
-                    onChange={e => setOrigin(e.target.value)}
-                    style={{ boxShadow: 'none', borderColor: '#D4C4B0' }}
-                  />
-                </div>
+        {/* Category Filter - Đầu tiên */}
+        <div className="mb-4">
+          <Form.Label className="fw-semibold mb-3 d-block" style={{ color: '#8B6F3A' }}>
+            <i className="fas fa-tag me-2" style={{ color: '#A4907C' }}></i>
+            Danh mục
+          </Form.Label>
+          <div className="category-list">
+            <Form.Check
+              type="radio"
+              id="category-all"
+              name="category"
+              label="Tất cả danh mục"
+              checked={category === ''}
+              onChange={() => setCategory('')}
+              className="mb-2 category-radio"
+            />
+            {categories.map(c => (
+              <Form.Check
+                key={c._id}
+                type="radio"
+                id={`category-${c._id}`}
+                name="category"
+                label={c.name}
+                checked={category === c._id}
+                onChange={() => setCategory(c._id)}
+                className="mb-2 category-radio"
+              />
+            ))}
+          </div>
+        </div>
 
+        {/* Origin Filter - Thứ hai */}
+        <div className="mb-4">
+          <Form.Label className="fw-semibold mb-3 d-block" style={{ color: '#8B6F3A' }}>
+            <i className="fas fa-globe me-2" style={{ color: '#A4907C' }}></i>
+            Xuất xứ
+          </Form.Label>
+          <Form.Control
+            type="text"
+            placeholder="Nhập xuất xứ..."
+            value={origin}
+            onChange={e => setOrigin(e.target.value)}
+            style={{ boxShadow: 'none', borderColor: '#D4C4B0' }}
+          />
+        </div>
 
-                {/* Bảo quản lạnh & Chay */}
-                <div className="mb-4">
-                  <Form.Check
-                    type="checkbox"
-                    id="refrigerated"
-                    label="Bảo quản lạnh"
-                    checked={isRefrigerated === 'true'}
-                    onChange={e => setIsRefrigerated(e.target.checked ? 'true' : '')}
-                    className="mb-2"
-                  />
-                  <Form.Check
-                    type="checkbox"
-                    id="vegetarian"
-                    label="Sản phẩm chay"
-                    checked={isVegetarian === 'true'}
-                    onChange={e => setIsVegetarian(e.target.checked ? 'true' : '')}
-                  />
-                </div>
+        {/* Bảo quản lạnh & Chay - Thứ ba */}
+        <div className="mb-4">
+          <Form.Check
+            type="checkbox"
+            id="refrigerated"
+            label="Bảo quản lạnh"
+            checked={isRefrigerated === 'true'}
+            onChange={e => setIsRefrigerated(e.target.checked ? 'true' : '')}
+            className="mb-2"
+          />
+          <Form.Check
+            type="checkbox"
+            id="vegetarian"
+            label="Sản phẩm chay"
+            checked={isVegetarian === 'true'}
+            onChange={e => setIsVegetarian(e.target.checked ? 'true' : '')}
+          />
+        </div>
 
-
-                {/* Calories Filter */}
-                <div className="mb-4">
-                  <Form.Label className="fw-semibold mb-3 d-block" style={{ color: '#8B6F3A' }}>
-                    <i className="fas fa-fire me-2" style={{ color: '#A4907C' }}></i>
-                    Calories
-                  </Form.Label>
-                  <Row className="g-2">
-                    <Col>
-                      <Form.Control
-                        type="number"
-                        placeholder="Từ"
-                        value={minCalories}
-                        onChange={e => setMinCalories(e.target.value)}
-                        style={{ boxShadow: 'none', borderColor: '#D4C4B0' }}
-                        min="0"
-                      />
-                    </Col>
-                    <Col xs="auto" className="d-flex align-items-center">
-                      <span style={{ color: '#A4907C' }}>-</span>
-                    </Col>
-                    <Col>
-                      <Form.Control
-                        type="number"
-                        placeholder="Đến"
-                        value={maxCalories}
-                        onChange={e => setMaxCalories(e.target.value)}
-                        style={{ boxShadow: 'none', borderColor: '#D4C4B0' }}
-                        min="0"
-                      />
-                    </Col>
-                  </Row>
-                </div>
-
-                {/* Shelf Life Filter */}
-                <div className="mb-4">
-                  <Form.Label className="fw-semibold mb-3 d-block" style={{ color: '#8B6F3A' }}>
-                    <i className="fas fa-hourglass-half me-2" style={{ color: '#A4907C' }}></i>
-                    Hạn sử dụng (ngày)
-                  </Form.Label>
-                  <Row className="g-2">
-                    <Col>
-                      <Form.Control
-                        type="number"
-                        placeholder="Từ"
-                        value={minShelfLife}
-                        onChange={e => setMinShelfLife(e.target.value)}
-                        style={{ boxShadow: 'none', borderColor: '#D4C4B0' }}
-                        min="0"
-                      />
-                    </Col>
-                    <Col xs="auto" className="d-flex align-items-center">
-                      <span style={{ color: '#A4907C' }}>-</span>
-                    </Col>
-                    <Col>
-                      <Form.Control
-                        type="number"
-                        placeholder="Đến"
-                        value={maxShelfLife}
-                        onChange={e => setMaxShelfLife(e.target.value)}
-                        style={{ boxShadow: 'none', borderColor: '#D4C4B0' }}
-                        min="0"
-                      />
-                    </Col>
-                  </Row>
-                </div>
-
-                {/* Flavor Filter */}
-                <div className="mb-4">
-                  <Form.Label className="fw-semibold mb-3 d-block" style={{ color: '#8B6F3A' }}>
-                    <i className="fas fa-lemon me-2" style={{ color: '#A4907C' }}></i>
-                    Hương vị
-                  </Form.Label>
-                  <Form.Control
-                    type="text"
-                    placeholder="Nhập hương vị..."
-                    value={flavor}
-                    onChange={e => setFlavor(e.target.value)}
-                    style={{ boxShadow: 'none', borderColor: '#D4C4B0' }}
-                  />
-                </div>
-
-
-                {/* Price Range Filter */}
-                <div className="mb-4">
-                  <Form.Label className="fw-semibold mb-3 d-block" style={{ color: '#8B6F3A' }}>
-                    <i className="fas fa-money-bill-wave me-2" style={{ color: '#A4907C' }}></i>
-                    Khoảng giá
-                  </Form.Label>
-                  <Row className="g-2">
-                    <Col>
-                      <Form.Control
-                        type="number"
-                        placeholder="Từ"
-                        value={minPrice}
-                        onChange={e => setMinPrice(e.target.value)}
-                        style={{ boxShadow: 'none', borderColor: '#D4C4B0' }}
-                        min="0"
-                      />
-                      <small className="text-muted">VNĐ</small>
-                    </Col>
-                    <Col xs="auto" className="d-flex align-items-center">
-                      <span style={{ color: '#A4907C' }}>-</span>
-                    </Col>
-                    <Col>
-                      <Form.Control
-                        type="number"
-                        placeholder="Đến"
-                        value={maxPrice}
-                        onChange={e => setMaxPrice(e.target.value)}
-                        style={{ boxShadow: 'none', borderColor: '#D4C4B0' }}
-                        min="0"
-                      />
-                      <small className="text-muted">VNĐ</small>
-                    </Col>
-                  </Row>
-                </div>
+        {/* Price Range Filter - Cuối cùng */}
+        <div className="mb-4">
+          <Form.Label className="fw-semibold mb-3 d-block" style={{ color: '#8B6F3A' }}>
+            <i className="fas fa-money-bill-wave me-2" style={{ color: '#A4907C' }}></i>
+            Khoảng giá
+          </Form.Label>
+          <Row className="g-2">
+            <Col>
+              <Form.Control
+                type="number"
+                placeholder="Từ"
+                value={minPrice}
+                onChange={e => setMinPrice(e.target.value)}
+                style={{ boxShadow: 'none', borderColor: '#D4C4B0' }}
+                min="0"
+              />
+              <small className="text-muted">VNĐ</small>
+            </Col>
+            <Col xs="auto" className="d-flex align-items-center">
+              <span style={{ color: '#A4907C' }}>-</span>
+            </Col>
+            <Col>
+              <Form.Control
+                type="number"
+                placeholder="Đến"
+                value={maxPrice}
+                onChange={e => setMaxPrice(e.target.value)}
+                style={{ boxShadow: 'none', borderColor: '#D4C4B0' }}
+                min="0"
+              />
+              <small className="text-muted">VNĐ</small>
+            </Col>
+          </Row>
+        </div>
 
                 {/* Filter Summary & Clear */}
                 <div className="border-top pt-3">
