@@ -7,7 +7,7 @@ import { ProductService } from '../product/product.service';
 @Injectable()
 export class CartService {
   constructor(
-    @InjectModel(Cart.name) private cartModel: Model<Cart>,
+    @InjectModel(Cart.name) public cartModel: Model<Cart>,
     private readonly productService: ProductService,
   ) {}
 
@@ -146,5 +146,11 @@ export class CartService {
       { userId: new Types.ObjectId(userId) },
       { $pull: { items: { productId: new Types.ObjectId(productId), size } } },
     );
+  }
+
+  // Xóa toàn bộ cart của user
+  async deleteCartByUserId(userId: string | Types.ObjectId) {
+    const id = typeof userId === 'string' ? new Types.ObjectId(userId) : userId;
+    return this.cartModel.deleteOne({ userId: id });
   }
 }

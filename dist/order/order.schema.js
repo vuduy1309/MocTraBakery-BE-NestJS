@@ -16,16 +16,29 @@ let Order = class Order extends mongoose_2.Document {
     items;
     total;
     paymentMethod;
+    address;
+    phone;
+    note;
+    deliveryTime;
     status;
     userId;
 };
 exports.Order = Order;
 __decorate([
-    (0, mongoose_1.Prop)({ type: [{
+    (0, mongoose_1.Prop)({
+        type: [
+            {
                 productId: { type: mongoose_2.Types.ObjectId, ref: 'Product', required: true },
                 quantity: { type: Number, required: true },
                 size: { type: String },
-            }], required: true }),
+                name: { type: String, required: true },
+                price: { type: Number, required: true },
+                discountPercent: { type: Number },
+                priceAfterDiscount: { type: Number },
+            },
+        ],
+        required: true,
+    }),
     __metadata("design:type", Array)
 ], Order.prototype, "items", void 0);
 __decorate([
@@ -36,6 +49,22 @@ __decorate([
     (0, mongoose_1.Prop)({ required: true }),
     __metadata("design:type", String)
 ], Order.prototype, "paymentMethod", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ required: true }),
+    __metadata("design:type", String)
+], Order.prototype, "address", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ required: true }),
+    __metadata("design:type", String)
+], Order.prototype, "phone", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], Order.prototype, "note", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ required: true }),
+    __metadata("design:type", Date)
+], Order.prototype, "deliveryTime", void 0);
 __decorate([
     (0, mongoose_1.Prop)({ default: 'pending' }),
     __metadata("design:type", String)

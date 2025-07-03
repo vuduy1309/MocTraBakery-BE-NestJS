@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsArray, IsOptional } from 'class-validator';
+import { IsString, IsNumber, IsArray, IsOptional, IsDateString } from 'class-validator';
 
 export class CreateOrderDto {
   @IsArray()
@@ -6,6 +6,10 @@ export class CreateOrderDto {
     productId: string;
     quantity: number;
     size?: string;
+    name: string;
+    price: number;
+    discountPercent?: number;
+    priceAfterDiscount?: number;
   }[];
 
   @IsNumber()
@@ -13,4 +17,17 @@ export class CreateOrderDto {
 
   @IsString()
   paymentMethod: string;
+
+  @IsString()
+  address: string;
+
+  @IsString()
+  phone: string;
+
+  @IsString()
+  @IsOptional()
+  note?: string;
+
+  @IsDateString()
+  deliveryTime: string;
 }

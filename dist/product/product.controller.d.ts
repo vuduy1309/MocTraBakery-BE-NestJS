@@ -1,7 +1,11 @@
 import { ProductService } from './product.service';
+import { OrderService } from '../order/order.service';
+import { UserService } from '../user/user.service';
 export declare class ProductController {
     private readonly productService;
-    constructor(productService: ProductService);
+    private readonly orderService;
+    private readonly userService;
+    constructor(productService: ProductService, orderService: OrderService, userService: UserService);
     update(id: string, body: any): Promise<import("./product.schema").Product>;
     remove(id: string): Promise<{
         success: boolean;
@@ -17,7 +21,6 @@ export declare class ProductController {
         }> & {
             __v: number;
         })[];
-        recentOrders: never[];
     }>;
     getAll(): Promise<{
         _id: any;

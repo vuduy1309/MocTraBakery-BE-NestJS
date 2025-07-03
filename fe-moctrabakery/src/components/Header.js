@@ -68,7 +68,6 @@ function Header() {
   return (
     <Navbar
       expand="lg"
-      sticky="top"
       className="shadow-sm border-bottom header-soft-brown"
       style={{
         minHeight: '80px',
@@ -191,7 +190,7 @@ function Header() {
             (user.role === 'Admin' || user.role === 'ProductManager') && (
               <Nav.Link
                 as={Link}
-                to={user.role === 'Admin' ? '/admin/dashboard' : '/manager/dashboard'}
+                to={user.role === 'Admin' ? '/admin' : '/manager/dashboard'}
                 className={`px-4 fw-medium text-dark`}
                 style={{
                   fontSize: '1rem',
@@ -266,7 +265,7 @@ function Header() {
 
             <Button
               as={Link}
-              to="/notifications"
+              to="/orders"
               size="sm"
               className="position-relative me-2 rounded-circle d-flex align-items-center justify-content-center"
               style={{
@@ -277,7 +276,7 @@ function Header() {
                 color: '#D2691E',
                 transition: 'all 0.3s ease',
               }}
-              title="Thông báo"
+              title="Lịch sử đơn hàng"
               onMouseEnter={(e) => {
                 e.target.style.backgroundColor = '#D2691E';
                 e.target.style.borderColor = '#D2691E';
@@ -291,21 +290,7 @@ function Header() {
                 e.target.style.transform = 'scale(1)';
               }}
             >
-              <BsBell size={18} />
-              {notificationCount > 0 && (
-                <Badge
-                  bg="primary"
-                  className="position-absolute top-0 start-100 translate-middle rounded-pill"
-                  style={{
-                    fontSize: '0.7rem',
-                    animation: 'pulse 2s infinite',
-                    backgroundColor: '#4A7C59',
-                    border: 'none',
-                  }}
-                >
-                  {notificationCount}
-                </Badge>
-              )}
+              <BsJournalText size={18} />
             </Button>
 
             <Button

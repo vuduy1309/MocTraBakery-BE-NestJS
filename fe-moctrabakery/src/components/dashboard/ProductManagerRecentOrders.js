@@ -34,7 +34,9 @@ function ProductManagerRecentOrders({ recentOrders }) {
 
   return (
     <Card style={cardStyle}>
-      <Card.Header style={headerStyle}>📋 Đơn hàng gần đây</Card.Header>
+      <Card.Header style={headerStyle}>
+        📋 Đơn hàng gần đây
+      </Card.Header>
       <ListGroup variant="flush">
         {recentOrders && recentOrders.length > 0 ? (
           recentOrders.map((order, idx) => (
@@ -55,6 +57,26 @@ function ProductManagerRecentOrders({ recentOrders }) {
           <ListGroup.Item style={itemStyle}>Không có dữ liệu</ListGroup.Item>
         )}
       </ListGroup>
+      <div style={{ display: 'flex', justifyContent: 'center', padding: '16px' }}>
+        <a
+          href="/manager/orders"
+          style={{
+            background: '#D4A574',
+            color: '#fff',
+            padding: '8px 24px',
+            borderRadius: '6px',
+            fontWeight: 600,
+            fontSize: '1rem',
+            textDecoration: 'none',
+            boxShadow: '0 2px 8px rgba(139, 69, 19, 0.08)',
+            transition: 'background 0.2s',
+          }}
+          onMouseOver={e => (e.currentTarget.style.background = '#b8860b')}
+          onMouseOut={e => (e.currentTarget.style.background = '#D4A574')}
+        >
+          Xem thêm
+        </a>
+      </div>
     </Card>
   );
 }

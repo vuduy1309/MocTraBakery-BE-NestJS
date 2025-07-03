@@ -135,6 +135,10 @@ let CartService = class CartService {
     async removeFromCart(userId, productId, size) {
         return this.cartModel.updateOne({ userId: new mongoose_2.Types.ObjectId(userId) }, { $pull: { items: { productId: new mongoose_2.Types.ObjectId(productId), size } } });
     }
+    async deleteCartByUserId(userId) {
+        const id = typeof userId === 'string' ? new mongoose_2.Types.ObjectId(userId) : userId;
+        return this.cartModel.deleteOne({ userId: id });
+    }
 };
 exports.CartService = CartService;
 exports.CartService = CartService = __decorate([

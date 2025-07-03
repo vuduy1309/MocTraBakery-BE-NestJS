@@ -1,8 +1,8 @@
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Cart } from './cart.schema';
 import { ProductService } from '../product/product.service';
 export declare class CartService {
-    private cartModel;
+    cartModel: Model<Cart>;
     private readonly productService;
     constructor(cartModel: Model<Cart>, productService: ProductService);
     getCartByUser(userId: string): Promise<{
@@ -41,4 +41,5 @@ export declare class CartService {
         __v: number;
     }>;
     removeFromCart(userId: string, productId: string, size: string): Promise<import("mongoose").UpdateWriteOpResult>;
+    deleteCartByUserId(userId: string | Types.ObjectId): Promise<import("mongodb").DeleteResult>;
 }

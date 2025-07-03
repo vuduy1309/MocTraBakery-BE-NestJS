@@ -9,6 +9,7 @@ export declare class User {
     address: string;
     avatarUrl: string;
     createdAt: Date;
+    isActive: boolean;
 }
 export declare const UserSchema: import("mongoose").Schema<User, import("mongoose").Model<User, any, any, any, Document<unknown, any, User, any> & User & {
     _id: import("mongoose").Types.ObjectId;

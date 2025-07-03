@@ -4,9 +4,17 @@ export declare class Order extends Document {
         productId: Types.ObjectId;
         quantity: number;
         size?: string;
+        name: string;
+        price: number;
+        discountPercent?: number;
+        priceAfterDiscount?: number;
     }>;
     total: number;
     paymentMethod: string;
+    address: string;
+    phone: string;
+    note?: string;
+    deliveryTime: Date;
     status: string;
     userId: Types.ObjectId;
 }

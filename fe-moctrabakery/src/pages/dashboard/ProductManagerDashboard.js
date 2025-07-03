@@ -24,20 +24,27 @@ function getUserFromToken() {
 
 function ProductManagerDashboard() {
   const [stats, setStats] = React.useState(null);
+  const [recentOrders, setRecentOrders] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState(null);
   const navigate = useNavigate();
 
   React.useEffect(() => {
     const user = getUserFromToken();
-    if (!user || user.role !== 'ProductManager') {
+    if (!user || (user.role !== 'ProductManager' && user.role !== 'Admin')) {
       navigate('/login');
       return;
     }
-    api
-      .get('/products/dashboard-stats')
-      .then((res) => {
-        setStats(res.data);
+    setLoading(true);
+    Promise.all([
+      api.get('/products/dashboard-stats'),
+      api.get('/orders/recent', {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      }),
+    ])
+      .then(([statsRes, ordersRes]) => {
+        setStats(statsRes.data);
+        setRecentOrders(ordersRes.data);
         setLoading(false);
       })
       .catch((err) => {
@@ -66,7 +73,7 @@ function ProductManagerDashboard() {
               <>
                 <ProductManagerStats stats={stats} />
                 <ProductManagerBestSellers bestSellers={stats.bestSellers} />
-                <ProductManagerRecentOrders recentOrders={stats.recentOrders} />
+                <ProductManagerRecentOrders recentOrders={recentOrders} />
               </>
             )
           )}

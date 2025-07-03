@@ -13,6 +13,7 @@ const passport_1 = require("@nestjs/passport");
 const user_module_1 = require("../user/user.module");
 const auth_service_1 = require("./auth.service");
 const jwt_strategy_1 = require("./jwt.strategy");
+const is_active_guard_1 = require("./is-active.guard");
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
@@ -26,7 +27,7 @@ exports.AuthModule = AuthModule = __decorate([
                 signOptions: { expiresIn: '7d' },
             }),
         ],
-        providers: [auth_service_1.AuthService, jwt_strategy_1.JwtStrategy],
+        providers: [auth_service_1.AuthService, jwt_strategy_1.JwtStrategy, is_active_guard_1.IsActiveGuard],
         exports: [auth_service_1.AuthService],
     })
 ], AuthModule);

@@ -85,8 +85,30 @@ function CartPage() {
   if (!cart || !cart.items || cart.items.length === 0) return (
     <div className="cart-page-bg p-0 m-0" style={{ minHeight: '100vh', width: '100vw' }}>
       <div style={{ height: 80 }}></div>
-      <Card className="cart-card mx-auto my-5 p-4" style={{ width: '75vw', maxWidth: 1400, minWidth: 340 }}>
-        <Alert className="cart-empty-alert" variant="info">Giỏ hàng trống.</Alert>
+      <Card className="cart-card mx-auto my-5 p-4 text-center" style={{ width: '75vw', maxWidth: 1400, minWidth: 340 }}>
+        <Alert className="cart-empty-alert" variant="info">
+          <div style={{ fontSize: 22, fontWeight: 600, color: '#6B4F27' }}>Giỏ hàng của bạn đang trống!</div>
+          <div style={{ fontSize: 16, color: '#A4907C', margin: '12px 0 20px 0' }}>
+            Hãy khám phá các sản phẩm hấp dẫn của Mộc Trà Bakery ngay nhé.
+          </div>
+          <Button
+            variant="success"
+            size="lg"
+            href="/products"
+            style={{
+              background: 'linear-gradient(135deg, #28a745 0%, #20c997 100%)',
+              border: 'none',
+              borderRadius: 12,
+              fontWeight: 700,
+              fontSize: 18,
+              padding: '12px 32px',
+              marginTop: 8
+            }}
+          >
+            <i className="fas fa-shopping-bag me-2"></i>
+            Mua hàng ngay
+          </Button>
+        </Alert>
       </Card>
     </div>
   );

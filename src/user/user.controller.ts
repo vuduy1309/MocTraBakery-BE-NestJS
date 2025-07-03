@@ -1,5 +1,8 @@
+import { Param, Patch, Body, Controller, Post, Get, UsePipes, ValidationPipe, BadRequestException } from '@nestjs/common';
+
+
 // Controller xử lý các route liên quan đến User
-import { Body, Controller, Post, UsePipes, ValidationPipe, BadRequestException } from '@nestjs/common';
+
 import { UserService } from './user.service';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
@@ -11,6 +14,34 @@ export class UserController {
     private readonly userService: UserService,
     private readonly authService: AuthService,
   ) {}
+  
+  // API: PATCH /users/:id/lock (khoá tài khoản user)
+  @Patch(':id/lock')
+  async lockUser(@Param('id') id: string) {
+    const user = await this.userService.lockUser(id);
+    return user;
+  }
+  // API: PATCH /users/:id/unlock (mở khoá tài khoản user)
+  @Patch(':id/unlock')
+  async unlockUser(@Param('id') id: string) {
+    const user = await this.userService.unlockUser(id);
+    return user;
+  }
+  // API: GET /users (lấy danh sách user, trả về đầy đủ thông tin)
+  @Get()
+  async getAllUsers() {
+    // Lấy tất cả user, trả về các trường: _id, email, fullName, role, phone, address, createdAt, isActive
+    const users = await this.userService['userModel'].find({}, {
+      email: 1,
+      fullName: 1,
+      role: 1,
+      phone: 1,
+      address: 1,
+      createdAt: 1,
+      isActive: 1,
+    }).lean();
+    return users;
+  }
 
   // API đăng ký user mới: POST /users/register
   @Post('register')

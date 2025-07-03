@@ -15,6 +15,10 @@ class CreateOrderDto {
     items;
     total;
     paymentMethod;
+    address;
+    phone;
+    note;
+    deliveryTime;
 }
 exports.CreateOrderDto = CreateOrderDto;
 __decorate([
@@ -29,4 +33,21 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateOrderDto.prototype, "paymentMethod", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateOrderDto.prototype, "address", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateOrderDto.prototype, "phone", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateOrderDto.prototype, "note", void 0);
+__decorate([
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", String)
+], CreateOrderDto.prototype, "deliveryTime", void 0);
 //# sourceMappingURL=create-order.dto.js.map

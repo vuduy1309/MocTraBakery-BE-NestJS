@@ -46,10 +46,19 @@ let UserService = class UserService {
         });
         return createdUser.save();
     }
+    async lockUser(userId) {
+        return this.userModel.findByIdAndUpdate(userId, { isActive: false }, { new: true });
+    }
+    async unlockUser(userId) {
+        return this.userModel.findByIdAndUpdate(userId, { isActive: true }, { new: true });
+    }
     async login(data) {
         const user = await this.userModel.findOne({ email: data.email });
         if (!user) {
             throw new common_1.BadRequestException('Email hoặc mật khẩu không đúng');
+        }
+        if (user.isActive === false) {
+            throw new common_1.BadRequestException('Tài khoản đã bị khoá. Vui lòng liên hệ quản trị viên.');
         }
         const isMatch = await bcrypt.compare(data.password, user.passwordHash);
         if (!isMatch) {

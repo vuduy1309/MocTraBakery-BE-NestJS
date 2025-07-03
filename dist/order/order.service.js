@@ -23,12 +23,41 @@ let OrderService = class OrderService {
         this.orderModel = orderModel;
     }
     async create(createOrderDto, userId) {
+        const items = createOrderDto.items.map((item) => ({
+            productId: item.productId,
+            quantity: item.quantity,
+            size: item.size,
+            name: item.name,
+            price: item.price,
+            discountPercent: item.discountPercent,
+            priceAfterDiscount: item.priceAfterDiscount,
+        }));
         const order = new this.orderModel({
             ...createOrderDto,
+            items,
             userId,
             status: 'pending',
         });
         return order.save();
+    }
+    async findById(orderId) {
+        return this.orderModel.findById(orderId);
+    }
+    async markPaid(orderId) {
+        return this.orderModel.findByIdAndUpdate(orderId, { status: 'paid' }, { new: true });
+    }
+    async findAll(filter = {}, options = {}) {
+        const query = this.orderModel.find(filter).populate('userId', 'email');
+        if (options.sort)
+            query.sort(options.sort);
+        if (options.limit)
+            query.limit(options.limit);
+        if (options.skip)
+            query.skip(options.skip);
+        return query.exec();
+    }
+    async updateStatus(orderId, status) {
+        return this.orderModel.findByIdAndUpdate(orderId, { status }, { new: true });
     }
 };
 exports.OrderService = OrderService;

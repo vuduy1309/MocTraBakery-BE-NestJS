@@ -16,10 +16,16 @@ exports.ProductController = void 0;
 const common_1 = require("@nestjs/common");
 const mongoose_1 = require("mongoose");
 const product_service_1 = require("./product.service");
+const order_service_1 = require("../order/order.service");
+const user_service_1 = require("../user/user.service");
 let ProductController = class ProductController {
     productService;
-    constructor(productService) {
+    orderService;
+    userService;
+    constructor(productService, orderService, userService) {
         this.productService = productService;
+        this.orderService = orderService;
+        this.userService = userService;
     }
     async update(id, body) {
         if (!mongoose_1.Types.ObjectId.isValid(id)) {
@@ -66,18 +72,17 @@ let ProductController = class ProductController {
     }
     async getDashboardStats() {
         const totalProducts = await this.productService.countDocuments();
-        const totalOrders = 0;
-        const totalCustomers = 0;
-        const totalRevenue = 0;
-        const bestSellers = await this.productService.findBestSellers(3);
-        const recentOrders = [];
+        const totalOrders = await this.orderService['orderModel'].countDocuments();
+        const totalCustomers = await this.userService['userModel'].countDocuments({ role: 'Customer' });
+        const orders = await this.orderService['orderModel'].find({}, { total: 1 });
+        const totalRevenue = orders.reduce((sum, o) => sum + (o.total || 0), 0);
+        const bestSellers = await this.productService.findBestSellers(5);
         return {
             totalProducts,
             totalOrders,
             totalCustomers,
             totalRevenue,
             bestSellers,
-            recentOrders,
         };
     }
     async getAll() {
@@ -183,6 +188,8 @@ __decorate([
 ], ProductController.prototype, "getById", null);
 exports.ProductController = ProductController = __decorate([
     (0, common_1.Controller)('products'),
-    __metadata("design:paramtypes", [product_service_1.ProductService])
+    __metadata("design:paramtypes", [product_service_1.ProductService,
+        order_service_1.OrderService,
+        user_service_1.UserService])
 ], ProductController);
 //# sourceMappingURL=product.controller.js.map

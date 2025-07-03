@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../api';
 import {
   Container,
@@ -33,6 +33,32 @@ import {
 import './ProductDetailPage.css';
 
 function ProductDetailPage() {
+  const navigate = useNavigate();
+  // Xử lý mua ngay
+  const handleBuyNow = () => {
+    if (product.sizes && product.sizes.length > 0 && !selectedSize) return;
+    // Chuẩn bị dữ liệu sản phẩm cho checkout
+    const buyNowCart = {
+      items: [
+        {
+          productId: product._id,
+          name: product.name,
+          price: getSelectedSizePrice(),
+          size: selectedSize,
+          quantity,
+          discountPercent: product.discountId?.percent || 0,
+          priceAfterDiscount: product.discountId?.percent
+            ? Math.round(getSelectedSizePrice() * (1 - product.discountId.percent / 100))
+            : getSelectedSizePrice(),
+        },
+      ],
+      total: product.discountId?.percent
+        ? Math.round(getSelectedSizePrice() * (1 - product.discountId.percent / 100)) * quantity
+        : getSelectedSizePrice() * quantity,
+      buyNow: true,
+    };
+    navigate('/cart/checkout', { state: { cart: buyNowCart } });
+  };
   const { id } = useParams();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -780,6 +806,8 @@ function ProductDetailPage() {
                           boxShadow: '0 4px 15px rgba(139,111,58,0.3)',
                           transition: 'all 0.3s ease'
                         }}
+                        onClick={handleBuyNow}
+                        disabled={product.sizes && product.sizes.length > 0 && !selectedSize}
                       >
                         Mua ngay
                       </Button>

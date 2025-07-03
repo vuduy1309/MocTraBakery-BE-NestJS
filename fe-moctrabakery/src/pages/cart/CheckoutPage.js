@@ -3,14 +3,20 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Card, Button, Form, Alert, Row, Col } from 'react-bootstrap';
 import api from '../../api';
 
+
 function CheckoutPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  // Nếu là mua ngay thì cart.items sẽ chỉ có 1 sản phẩm, và có cờ buyNow
   const cart = location.state?.cart;
   const [paymentMethod, setPaymentMethod] = useState('cod');
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState('');
   const [error, setError] = useState('');
+  const [address, setAddress] = useState('');
+  const [phone, setPhone] = useState('');
+  const [note, setNote] = useState('');
+  const [deliveryTime, setDeliveryTime] = useState('');
 
   if (!cart) {
     return (
@@ -28,21 +34,74 @@ function CheckoutPage() {
     setLoading(true);
     setError('');
     setMsg('');
+    // Validate các trường bắt buộc
+    if (!address.trim() || !phone.trim() || !deliveryTime) {
+      setError('Vui lòng nhập đầy đủ địa chỉ, số điện thoại và thời gian nhận hàng!');
+      setLoading(false);
+      return;
+    }
+    // Validate số điện thoại (10-11 số, chỉ số, bắt đầu bằng 0)
+    const phonePattern = /^0\d{9,10}$/;
+    if (!phonePattern.test(phone.trim())) {
+      setError('Số điện thoại không hợp lệ!');
+      setLoading(false);
+      return;
+    }
+    // Thời gian nhận hàng phải sau thời điểm hiện tại
+    const now = new Date();
+    const selected = new Date(deliveryTime);
+    if (selected <= now) {
+      setError('Thời gian nhận hàng phải sau thời điểm hiện tại!');
+      setLoading(false);
+      return;
+    }
     try {
       const token = localStorage.getItem('token');
-      const res = await api.post('/orders', {
+      // Nếu là mua ngay thì item.productId là id, còn cart thường thì là object
+      const orderPayload = {
         items: cart.items.map(item => ({
-          productId: item.productId._id,
+          productId: item.productId._id || item.productId,
           quantity: item.quantity,
           size: item.size,
+          name: item.name || item.productId.name,
+          price: item.price,
+          discountPercent: item.discountPercent || item.productId?.discount?.percent || 0,
+          priceAfterDiscount: item.priceAfterDiscount !== undefined
+            ? item.priceAfterDiscount
+            : (item.discountPercent || item.productId?.discount?.percent
+                ? Math.round(item.price * (1 - (item.discountPercent || item.productId?.discount?.percent) / 100))
+                : item.price),
         })),
         total: cart.total,
         paymentMethod,
-      }, {
+        address,
+        phone,
+        note,
+        deliveryTime,
+      };
+      // Luôn tạo order trước
+      const orderRes = await api.post('/orders', orderPayload, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setMsg('Đặt hàng thành công!');
-      setTimeout(() => navigate('/orders'), 1500);
+      const order = orderRes.data;
+      if (paymentMethod === 'vnpay') {
+        // Sau khi tạo order, lấy link VNPAY
+        const vnpayRes = await api.post('/orders/vnpay-url', { orderId: order._id }, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        // Chấp nhận cả url hoặc paymentUrl (tùy backend trả về)
+        const redirectUrl = vnpayRes.data?.url || vnpayRes.data?.paymentUrl;
+        if (redirectUrl) {
+          window.location.href = redirectUrl;
+          return;
+        } else {
+          setError('Không lấy được link thanh toán VNPAY!');
+        }
+      } else {
+
+        setMsg('Đặt hàng thành công!');
+        setTimeout(() => navigate('/orders'), 1500);
+      }
     } catch (err) {
       setError('Không thể tạo đơn hàng!');
     }
@@ -176,6 +235,66 @@ function CheckoutPage() {
 
                 {/* Form thanh toán */}
                 <Form onSubmit={handleOrder}>
+                  <div className="mb-4">
+                    <Form.Label className="fw-bold fs-5 mb-3" style={{ color: '#6B4F27' }}>
+                      <i className="fas fa-map-marker-alt me-2"></i>
+                      Địa chỉ nhận hàng <span style={{ color: 'red' }}>*</span>
+                    </Form.Label>
+                    <Form.Control
+                      type="text"
+                      value={address}
+                      onChange={e => setAddress(e.target.value)}
+                      placeholder="Nhập địa chỉ nhận hàng"
+                      className="form-control-lg border-2 rounded-3"
+                      style={{ borderColor: '#6B4F27', fontSize: '1.1rem', padding: '12px 16px' }}
+                      required
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <Form.Label className="fw-bold fs-5 mb-3" style={{ color: '#6B4F27' }}>
+                      <i className="fas fa-phone-alt me-2"></i>
+                      Số điện thoại <span style={{ color: 'red' }}>*</span>
+                    </Form.Label>
+                    <Form.Control
+                      type="tel"
+                      value={phone}
+                      onChange={e => setPhone(e.target.value)}
+                      placeholder="Nhập số điện thoại"
+                      className="form-control-lg border-2 rounded-3"
+                      style={{ borderColor: '#6B4F27', fontSize: '1.1rem', padding: '12px 16px' }}
+                      required
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <Form.Label className="fw-bold fs-5 mb-3" style={{ color: '#6B4F27' }}>
+                      <i className="fas fa-calendar-alt me-2"></i>
+                      Thời gian nhận hàng <span style={{ color: 'red' }}>*</span>
+                    </Form.Label>
+                    <Form.Control
+                      type="datetime-local"
+                      value={deliveryTime}
+                      onChange={e => setDeliveryTime(e.target.value)}
+                      className="form-control-lg border-2 rounded-3"
+                      style={{ borderColor: '#6B4F27', fontSize: '1.1rem', padding: '12px 16px' }}
+                      required
+                      min={new Date().toISOString().slice(0,16)}
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <Form.Label className="fw-bold fs-5 mb-3" style={{ color: '#6B4F27' }}>
+                      <i className="fas fa-sticky-note me-2"></i>
+                      Ghi chú (tuỳ chọn)
+                    </Form.Label>
+                    <Form.Control
+                      as="textarea"
+                      rows={2}
+                      value={note}
+                      onChange={e => setNote(e.target.value)}
+                      placeholder="Ghi chú cho đơn hàng (nếu có)"
+                      className="form-control-lg border-2 rounded-3"
+                      style={{ borderColor: '#6B4F27', fontSize: '1.1rem', padding: '12px 16px' }}
+                    />
+                  </div>
                   <div className="mb-4">
                     <Form.Label className="fw-bold fs-5 mb-3" style={{ color: '#6B4F27' }}>
                       <i className="fas fa-credit-card me-2"></i>

@@ -3,9 +3,21 @@ import { ListGroup } from 'react-bootstrap';
 import { BsBarChart, BsBoxSeam, BsTag, BsCartCheck, BsPeople } from 'react-icons/bs';
 import { useNavigate } from 'react-router-dom';
 
+function getUserRole() {
+  const token = localStorage.getItem('token');
+  if (!token) return null;
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload.role;
+  } catch {
+    return null;
+  }
+}
+
 function ProductManagerSidebar({ activeKey }) {
   const navigate = useNavigate();
-  
+  const role = getUserRole();
+
   const sidebarStyle = {
     position: 'sticky',
     top: '0',
@@ -135,24 +147,48 @@ function ProductManagerSidebar({ activeKey }) {
           <BsCartCheck className="me-2" /> Đơn hàng
         </ListGroup.Item>
         
-        <ListGroup.Item 
-          action 
-          active={activeKey === 'customers'} 
-          onClick={() => navigate('/manager/customers')}
-          style={activeKey === 'customers' ? activeItemStyle : itemStyle}
-          onMouseEnter={(e) => {
-            if (activeKey !== 'customers') {
-              Object.assign(e.target.style, hoverStyle);
-            }
-          }}
-          onMouseLeave={(e) => {
-            if (activeKey !== 'customers') {
-              Object.assign(e.target.style, itemStyle);
-            }
-          }}
-        >
-          <BsPeople className="me-2" /> Khách hàng
-        </ListGroup.Item>
+
+        {/* Nếu là admin thì thêm các mục quản lý user, blog */}
+        {role === 'Admin' && (
+          <>
+            <ListGroup.Item
+              action
+              active={activeKey === 'users'}
+              onClick={() => navigate('/manager/users')}
+              style={activeKey === 'users' ? activeItemStyle : itemStyle}
+              onMouseEnter={(e) => {
+                if (activeKey !== 'users') {
+                  Object.assign(e.target.style, hoverStyle);
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (activeKey !== 'users') {
+                  Object.assign(e.target.style, itemStyle);
+                }
+              }}
+            >
+              <BsPeople className="me-2" /> Quản lý người dùng
+            </ListGroup.Item>
+            <ListGroup.Item
+              action
+              active={activeKey === 'blogs'}
+              onClick={() => navigate('/manager/blogs')}
+              style={activeKey === 'blogs' ? activeItemStyle : itemStyle}
+              onMouseEnter={(e) => {
+                if (activeKey !== 'blogs') {
+                  Object.assign(e.target.style, hoverStyle);
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (activeKey !== 'blogs') {
+                  Object.assign(e.target.style, itemStyle);
+                }
+              }}
+            >
+              <BsTag className="me-2" /> Quản lý Blogpost
+            </ListGroup.Item>
+          </>
+        )}
       </ListGroup>
     </div>
   );

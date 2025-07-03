@@ -25,6 +25,26 @@ let UserController = class UserController {
         this.userService = userService;
         this.authService = authService;
     }
+    async lockUser(id) {
+        const user = await this.userService.lockUser(id);
+        return user;
+    }
+    async unlockUser(id) {
+        const user = await this.userService.unlockUser(id);
+        return user;
+    }
+    async getAllUsers() {
+        const users = await this.userService['userModel'].find({}, {
+            email: 1,
+            fullName: 1,
+            role: 1,
+            phone: 1,
+            address: 1,
+            createdAt: 1,
+            isActive: 1,
+        }).lean();
+        return users;
+    }
     async register(body) {
         return this.userService.register(body);
     }
@@ -40,6 +60,26 @@ let UserController = class UserController {
     }
 };
 exports.UserController = UserController;
+__decorate([
+    (0, common_1.Patch)(':id/lock'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "lockUser", null);
+__decorate([
+    (0, common_1.Patch)(':id/unlock'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "unlockUser", null);
+__decorate([
+    (0, common_1.Get)(),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getAllUsers", null);
 __decorate([
     (0, common_1.Post)('register'),
     (0, common_1.UsePipes)(new common_1.ValidationPipe({ whitelist: true, forbidNonWhitelisted: true })),

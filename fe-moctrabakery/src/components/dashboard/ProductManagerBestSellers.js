@@ -42,6 +42,25 @@ function ProductManagerBestSellers({ bestSellers }) {
           <ListGroup.Item style={itemStyle}>Không có dữ liệu</ListGroup.Item>
         )}
       </ListGroup>
+      <div style={{ display: 'flex', justifyContent: 'center', padding: '16px' }}>
+        <button
+          style={{
+            background: '#D4A574',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '6px',
+            padding: '8px 24px',
+            fontWeight: 600,
+            cursor: 'pointer',
+            fontSize: '1rem',
+            boxShadow: '0 2px 8px rgba(139, 69, 19, 0.08)',
+            transition: 'all 0.2s',
+          }}
+          onClick={() => window.location.href = '/manager/products'}
+        >
+          Xem thêm
+        </button>
+      </div>
     </Card>
   );
 }

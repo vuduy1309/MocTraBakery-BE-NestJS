@@ -20,6 +20,7 @@ let User = class User {
     address;
     avatarUrl;
     createdAt;
+    isActive;
 };
 exports.User = User;
 __decorate([
@@ -54,6 +55,10 @@ __decorate([
     (0, mongoose_1.Prop)({ default: Date.now }),
     __metadata("design:type", Date)
 ], User.prototype, "createdAt", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ default: true }),
+    __metadata("design:type", Boolean)
+], User.prototype, "isActive", void 0);
 exports.User = User = __decorate([
     (0, mongoose_1.Schema)()
 ], User);

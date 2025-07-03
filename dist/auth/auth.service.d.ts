@@ -13,6 +13,7 @@ export declare class AuthService {
             email: string;
             fullName: string;
             role: string;
+            isActive: boolean;
         };
     }>;
 }

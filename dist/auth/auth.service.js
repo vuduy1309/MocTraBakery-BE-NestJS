@@ -29,14 +29,25 @@ let AuthService = class AuthService {
     }
     async login(user) {
         const id = user._id || user.id;
-        const payload = { sub: id, email: user.email, role: user.role, fullName: user.fullName };
+        const payload = {
+            sub: id,
+            email: user.email,
+            role: user.role,
+            fullName: user.fullName,
+            isActive: user.isActive,
+        };
+        const token = this.jwtService.sign(payload);
+        console.log('[AuthService.login] user:', user);
+        console.log('[AuthService.login] payload:', payload);
+        console.log('[AuthService.login] access_token:', token);
         return {
-            access_token: this.jwtService.sign(payload),
+            access_token: token,
             user: {
                 _id: id,
                 email: user.email,
                 fullName: user.fullName,
                 role: user.role,
+                isActive: user.isActive,
             },
         };
     }

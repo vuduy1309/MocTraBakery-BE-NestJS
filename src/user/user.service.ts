@@ -44,6 +44,16 @@ export class UserService {
     });
     return createdUser.save(); // Lưu vào database
   }
+  
+  // Khoá tài khoản user (set isActive = false)
+  async lockUser(userId: string): Promise<any> {
+    return this.userModel.findByIdAndUpdate(userId, { isActive: false }, { new: true });
+  }
+
+  // Mở khoá tài khoản user (set isActive = true)
+  async unlockUser(userId: string): Promise<any> {
+    return this.userModel.findByIdAndUpdate(userId, { isActive: true }, { new: true });
+  }
 
   // Hàm đăng nhập user
   async login(data: import('./dto/login-user.dto').LoginUserDto) {
@@ -51,6 +61,10 @@ export class UserService {
     const user = await this.userModel.findOne({ email: data.email });
     if (!user) {
       throw new BadRequestException('Email hoặc mật khẩu không đúng');
+    }
+    // Kiểm tra tài khoản có bị khoá không
+    if (user.isActive === false) {
+      throw new BadRequestException('Tài khoản đã bị khoá. Vui lòng liên hệ quản trị viên.');
     }
     // So sánh mật khẩu
     const isMatch = await bcrypt.compare(data.password, user.passwordHash);

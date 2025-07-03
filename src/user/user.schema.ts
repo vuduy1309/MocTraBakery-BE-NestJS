@@ -39,6 +39,10 @@ export class User {
   // Thời gian tạo tài khoản
   @Prop({ default: Date.now })
   createdAt: Date;
+
+  // Trạng thái hoạt động (true: hoạt động, false: bị khoá)
+  @Prop({ default: true })
+  isActive: boolean;
 }
 
 // Tạo schema từ class User

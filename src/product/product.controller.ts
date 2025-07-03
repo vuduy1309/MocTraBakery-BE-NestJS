@@ -10,11 +10,18 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { Types } from 'mongoose';
+
 import { ProductService } from './product.service';
+import { OrderService } from '../order/order.service';
+import { UserService } from '../user/user.service';
 
 @Controller('products')
 export class ProductController {
-  constructor(private readonly productService: ProductService) {}
+  constructor(
+    private readonly productService: ProductService,
+    private readonly orderService: OrderService,
+    private readonly userService: UserService,
+  ) {}
 
   // API: PUT /products/:id (Cập nhật sản phẩm)
   @Put(':id')
@@ -81,17 +88,18 @@ export class ProductController {
     // Tổng số sản phẩm
     const totalProducts = await this.productService.countDocuments();
 
-    // TODO: Thay thế các phần dưới bằng service thực tế khi có Order/Customer/Revenue
-    // Tạm thời trả về 0 hoặc mảng rỗng nếu chưa có service
-    const totalOrders = 0;
-    const totalCustomers = 0;
-    const totalRevenue = 0;
+    // Tổng số đơn hàng
+    const totalOrders = await this.orderService['orderModel'].countDocuments();
 
-    // Sản phẩm bán chạy: lấy top 3 sản phẩm có stock thấp nhất (giả lập best seller)
-    const bestSellers = await this.productService.findBestSellers(3);
+    // Tổng số khách hàng (chỉ tính user có role là 'Customer')
+    const totalCustomers = await this.userService['userModel'].countDocuments({ role: 'Customer' });
 
-    // Đơn hàng gần đây: trả về mảng rỗng (chưa có OrderService)
-    const recentOrders = [];
+    // Tổng doanh thu (tính tổng trường total của tất cả đơn hàng)
+    const orders = await this.orderService['orderModel'].find({}, { total: 1 });
+    const totalRevenue = orders.reduce((sum, o) => sum + (o.total || 0), 0);
+
+    // Sản phẩm bán chạy: lấy top 5 sản phẩm có stock thấp nhất (giả lập best seller)
+    const bestSellers = await this.productService.findBestSellers(5);
 
     return {
       totalProducts,
@@ -99,7 +107,6 @@ export class ProductController {
       totalCustomers,
       totalRevenue,
       bestSellers,
-      recentOrders,
     };
   }
 

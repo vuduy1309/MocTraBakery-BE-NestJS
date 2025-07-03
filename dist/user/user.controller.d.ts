@@ -6,6 +6,13 @@ export declare class UserController {
     private readonly userService;
     private readonly authService;
     constructor(userService: UserService, authService: AuthService);
+    lockUser(id: string): Promise<any>;
+    unlockUser(id: string): Promise<any>;
+    getAllUsers(): Promise<(import("mongoose").FlattenMaps<import("./user.schema").UserDocument> & Required<{
+        _id: import("mongoose").FlattenMaps<unknown>;
+    }> & {
+        __v: number;
+    })[]>;
     register(body: RegisterUserDto): Promise<import("./user.schema").User>;
     login(body: LoginUserDto): Promise<{
         access_token: string;
@@ -14,6 +21,7 @@ export declare class UserController {
             email: string;
             fullName: string;
             role: string;
+            isActive: boolean;
         };
     }>;
 }

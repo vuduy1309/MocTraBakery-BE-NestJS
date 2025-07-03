@@ -9,6 +9,8 @@ export declare class UserService {
     findByEmail: typeof findByEmail;
     comparePassword: typeof comparePassword;
     register(data: RegisterUserDto): Promise<User>;
+    lockUser(userId: string): Promise<any>;
+    unlockUser(userId: string): Promise<any>;
     login(data: import('./dto/login-user.dto').LoginUserDto): Promise<{
         fullName: string;
         email: string;
@@ -17,6 +19,7 @@ export declare class UserService {
         address: string;
         avatarUrl: string;
         createdAt: Date;
+        isActive: boolean;
         _id: unknown;
         $locals: Record<string, unknown>;
         $op: "save" | "validate" | "remove" | null;
