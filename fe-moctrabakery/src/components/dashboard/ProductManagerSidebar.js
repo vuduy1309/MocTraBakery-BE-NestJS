@@ -169,24 +169,6 @@ function ProductManagerSidebar({ activeKey }) {
             >
               <BsPeople className="me-2" /> Quản lý người dùng
             </ListGroup.Item>
-            <ListGroup.Item
-              action
-              active={activeKey === 'blogs'}
-              onClick={() => navigate('/manager/blogs')}
-              style={activeKey === 'blogs' ? activeItemStyle : itemStyle}
-              onMouseEnter={(e) => {
-                if (activeKey !== 'blogs') {
-                  Object.assign(e.target.style, hoverStyle);
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (activeKey !== 'blogs') {
-                  Object.assign(e.target.style, itemStyle);
-                }
-              }}
-            >
-              <BsTag className="me-2" /> Quản lý Blogpost
-            </ListGroup.Item>
           </>
         )}
       </ListGroup>
