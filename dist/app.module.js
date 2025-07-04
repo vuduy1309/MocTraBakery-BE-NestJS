@@ -20,6 +20,7 @@ const auth_module_1 = require("./auth/auth.module");
 const comment_module_1 = require("./comment/comment.module");
 const upload_module_1 = require("./upload/upload.module");
 const order_module_1 = require("./order/order.module");
+const admin_module_1 = require("./admin/admin.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -36,6 +37,7 @@ exports.AppModule = AppModule = __decorate([
             comment_module_1.CommentModule,
             upload_module_1.UploadModule,
             order_module_1.OrderModule,
+            admin_module_1.AdminModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

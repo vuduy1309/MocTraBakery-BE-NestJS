@@ -79,12 +79,10 @@ let DiscountService = class DiscountService {
         if (productIds && Array.isArray(productIds) && productIds.length > 0) {
             await this.productService['productModel'].updateMany({ _id: { $in: productIds.map((id) => new mongoose_2.Types.ObjectId(id)) } }, { $set: { discountId: discount._id } });
         }
-        const products = productIds && productIds.length > 0
-            ? await this.productService['productModel']
-                .find({ _id: { $in: productIds.map((id) => new mongoose_2.Types.ObjectId(id)) } })
-                .select('_id name images categoryId')
-                .exec()
-            : [];
+        const products = await this.productService['productModel']
+            .find({ discountId: discount._id })
+            .select('_id name images categoryId')
+            .exec();
         return {
             ...discount.toObject(),
             products,

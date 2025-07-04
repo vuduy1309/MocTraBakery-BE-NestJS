@@ -16,6 +16,7 @@ let Comment = class Comment extends mongoose_2.Document {
     content;
     author;
     productId;
+    rating;
 };
 exports.Comment = Comment;
 __decorate([
@@ -27,9 +28,13 @@ __decorate([
     __metadata("design:type", String)
 ], Comment.prototype, "author", void 0);
 __decorate([
-    (0, mongoose_1.Prop)({ type: String }),
+    (0, mongoose_1.Prop)({ type: String, required: true }),
     __metadata("design:type", String)
 ], Comment.prototype, "productId", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ type: Number, min: 1, max: 5, required: true }),
+    __metadata("design:type", Number)
+], Comment.prototype, "rating", void 0);
 exports.Comment = Comment = __decorate([
     (0, mongoose_1.Schema)({ timestamps: true })
 ], Comment);

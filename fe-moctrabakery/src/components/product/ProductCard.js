@@ -31,11 +31,13 @@ function ProductCard({
   discount,
   isVegetarian,
   isRefrigerated,
-  rating = 4.5,
-  reviewCount = 0,
+  rating: propRating,
+  reviewCount: propReviewCount,
   buttonHoverColor = '#A4907C',
   ...rest
 }) {
+  const [rating, setRating] = useState(typeof propRating === 'number' ? propRating : 0);
+  const [reviewCount, setReviewCount] = useState(typeof propReviewCount === 'number' ? propReviewCount : 0);
   const navigate = useNavigate();
   const [isFavorite, setIsFavorite] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -52,6 +54,28 @@ function ProductCard({
     }
     return () => timer && clearInterval(timer);
   }, [images, isHovered]);
+
+  // Lấy rating/reviewCount thực tế từ API nếu chưa truyền vào hoặc luôn muốn cập nhật mới
+  React.useEffect(() => {
+    async function fetchRating() {
+      try {
+        const res = await fetch(`http://localhost:3000/comments?productId=${_id}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          const avg = data.reduce((sum, c) => sum + (c.rating || 0), 0) / data.length;
+          setRating(Number(avg.toFixed(1)));
+          setReviewCount(data.length);
+        } else {
+          setRating(0);
+          setReviewCount(0);
+        }
+      } catch {
+        // fallback giữ nguyên rating cũ
+      }
+    }
+    if (_id) fetchRating();
+  }, [_id]);
   // Khi hover thì không chuyển, khi hover vào thì giữ nguyên ảnh hiện tại
   React.useEffect(() => {
     if (isHovered) {

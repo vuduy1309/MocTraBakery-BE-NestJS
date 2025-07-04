@@ -2,7 +2,8 @@ import { Document } from 'mongoose';
 export declare class Comment extends Document {
     content: string;
     author: string;
-    productId?: string;
+    productId: string;
+    rating: number;
 }
 export declare const CommentSchema: import("mongoose").Schema<Comment, import("mongoose").Model<Comment, any, any, any, Document<unknown, any, Comment, any> & Comment & Required<{
     _id: unknown;

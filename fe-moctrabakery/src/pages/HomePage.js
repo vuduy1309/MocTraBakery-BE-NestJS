@@ -211,98 +211,87 @@ function HomePage() {
         </section>
 
         {/* Promo Section */}
-        <section className="promo-section mb-5">
-          <Card className="bg-gradient-soft-beige text-soft-beige border-0">
-            <Card.Body className="p-5 text-center">
-              <h2 className="display-6 fw-bold mb-3">
-                <FaStar className="me-2" />
-                Ưu đãi hôm nay
-              </h2>
-              <div className="lead">
-                {promo
-                  ? promo.content
-                  : 'Giảm giá 20% cho tất cả sản phẩm bánh sinh nhật! Áp dụng từ hôm nay đến hết tuần.'}
-              </div>
-              <Button
-                variant="soft-beige"
-                size="lg"
-                className="mt-3 fw-bold px-4 btn-soft-beige"
-              >
-                Áp dụng ngay
-              </Button>
-            </Card.Body>
-          </Card>
-        </section>
+        {discounts && discounts.length > 0 && (
+          <section className="promo-section mb-5">
+            <Card className="bg-gradient-soft-beige text-soft-beige border-0">
+              <Card.Body className="p-5 text-center">
+                <h2 className="display-6 fw-bold mb-3">
+                  <FaStar className="me-2" />
+                  Ưu đãi nổi bật
+                </h2>
+                <div className="lead">
+                  <div className="fw-bold mb-2">{discounts[0].name || 'Ưu đãi đặc biệt'}</div>
+                  {discounts[0].description || discounts[0].content || 'Hãy khám phá các ưu đãi hấp dẫn tại Mộc Trà Bakery!'}
+                </div>
+                {discounts[0].code && (
+                  <div className="mt-3">
+                    <Badge bg="warning" text="dark" className="fs-5 px-3 py-2">Mã: {discounts[0].code}</Badge>
+                  </div>
+                )}
+                {discounts[0].percent && (
+                  <div className="mt-2 text-success fw-bold">Giảm {discounts[0].percent}%</div>
+                )}
+                {discounts[0].amount && (
+                  <div className="mt-2 text-success fw-bold">Giảm {discounts[0].amount.toLocaleString()}đ</div>
+                )}
+              </Card.Body>
+            </Card>
+          </section>
+        )}
 
         {/* Reviews Section */}
-        <section className="review-section mb-5">
-          <Row className="text-center mb-4">
-            <Col>
-              <h2 className="display-6 fw-bold text-soft-beige mb-3">
-                Khách hàng nói gì?
-              </h2>
-              <p className="lead text-muted">
-                Những đánh giá chân thực từ khách hàng của chúng tôi
-              </p>
-            </Col>
-          </Row>
-
-          {reviews.length > 0 ? (
-            <Carousel interval={5000} className="review-carousel">
-              {reviews.map((review, index) => (
-                <Carousel.Item key={index}>
-                  <Card
-                    className="border-0 shadow-sm mx-auto"
-                    style={{ maxWidth: '600px' }}
-                  >
-                    <Card.Body className="p-4 text-center">
-                      <FaQuoteLeft className="text-soft-beige mb-3" size={30} />
-                      <blockquote className="mb-3 fs-5 fst-italic">
-                        "{review.content}"
-                      </blockquote>
-                      <div className="d-flex justify-content-center mb-2">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <FaStar key={star} className="text-warning me-1" />
-                        ))}
-                      </div>
-                      <cite className="fw-bold text-soft-beige">
-                        — {review.author}
-                      </cite>
-                    </Card.Body>
-                  </Card>
-                </Carousel.Item>
-              ))}
-            </Carousel>
-          ) : (
-            <Row className="g-4">
-              {[1, 2, 3].map((i) => (
-                <Col lg={4} key={i}>
-                  <Card className="h-100 border-0 shadow-sm">
-                    <Card.Body className="p-4 text-center">
-                      <FaQuoteLeft className="text-soft-beige mb-3" size={24} />
-                      <blockquote className="mb-3">
-                        "Bánh rất ngon, tươi và chất lượng. Tôi sẽ quay lại ủng
-                        hộ!"
-                      </blockquote>
-                      <div className="d-flex justify-content-center mb-2">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <FaStar
-                            key={star}
-                            className="text-warning me-1"
-                            size={14}
-                          />
-                        ))}
-                      </div>
-                      <cite className="fw-bold text-soft-beige">
-                        — Khách hàng {i}
-                      </cite>
-                    </Card.Body>
-                  </Card>
-                </Col>
-              ))}
+        {reviews && reviews.length > 0 && (
+          <section className="review-section mb-5">
+            <Row className="text-center mb-4">
+              <Col>
+                <h2 className="display-6 fw-bold text-soft-beige mb-3">
+                  Khách hàng nói gì?
+                </h2>
+                <p className="lead text-muted">
+                  Những đánh giá chân thực từ khách hàng của chúng tôi
+                </p>
+              </Col>
             </Row>
-          )}
-        </section>
+            <Carousel interval={5000} className="review-carousel">
+              {reviews.map((review, index) => {
+                let authorName = 'Ẩn danh';
+                if (review.author && typeof review.author === 'object') {
+                  authorName = review.author.fullName || review.author.name || review.author.email || 'Ẩn danh';
+                } else if (typeof review.author === 'string') {
+                  // Nếu là id, không hiển thị, nếu là tên thì giữ tên
+                  if (/^[0-9a-fA-F]{24}$/.test(review.author)) {
+                    authorName = 'Ẩn danh';
+                  } else {
+                    authorName = review.author;
+                  }
+                }
+                return (
+                  <Carousel.Item key={index}>
+                    <Card
+                      className="border-0 shadow-sm mx-auto"
+                      style={{ maxWidth: '600px' }}
+                    >
+                      <Card.Body className="p-4 text-center">
+                        <FaQuoteLeft className="text-soft-beige mb-3" size={30} />
+                        <blockquote className="mb-3 fs-5 fst-italic">
+                          "{review.content}"
+                        </blockquote>
+                        <div className="d-flex justify-content-center mb-2">
+                          {[...Array(Math.round(review.rating || 5))].map((_, i) => (
+                            <FaStar key={i} className="text-warning me-1" />
+                          ))}
+                        </div>
+                        <cite className="fw-bold text-soft-beige">
+                          — {authorName}
+                        </cite>
+                      </Card.Body>
+                    </Card>
+                  </Carousel.Item>
+                );
+              })}
+            </Carousel>
+          </section>
+        )}
       </Container>
     </div>
   );

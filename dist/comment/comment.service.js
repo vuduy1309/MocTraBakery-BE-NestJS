@@ -25,6 +25,13 @@ let CommentService = class CommentService {
     async findAll(limit = 5) {
         return this.commentModel.find().sort({ createdAt: -1 }).limit(limit).exec();
     }
+    async findByProduct(productId) {
+        return this.commentModel.find({ productId }).sort({ createdAt: -1 }).exec();
+    }
+    async create(data) {
+        const comment = new this.commentModel(data);
+        return comment.save();
+    }
 };
 exports.CommentService = CommentService;
 exports.CommentService = CommentService = __decorate([

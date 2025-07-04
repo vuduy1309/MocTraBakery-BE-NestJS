@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Container, Table, Button } from 'react-bootstrap';
+import { Container, Table, Button, Modal } from 'react-bootstrap';
 import api from '../../api';
 
 function getUserFromToken() {
@@ -20,11 +20,38 @@ function getUserFromToken() {
 function ProductManagerProducts() {
   const [products, setProducts] = React.useState([]);
   const [categories, setCategories] = React.useState([]);
+  const [showFeedbackModal, setShowFeedbackModal] = React.useState(false);
+  const [feedbacks, setFeedbacks] = React.useState([]);
+  const [feedbackLoading, setFeedbackLoading] = React.useState(false);
+  const [feedbackError, setFeedbackError] = React.useState('');
+  const [selectedProduct, setSelectedProduct] = React.useState(null);
   const navigate = useNavigate();
 
+  // Xem feedback cho sản phẩm
+  const handleViewFeedback = async (product) => {
+    setSelectedProduct(product);
+    setShowFeedbackModal(true);
+    setFeedbackLoading(true);
+    setFeedbackError('');
+    setFeedbacks([]);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await api.get(`/comments?productId=${product._id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setFeedbacks(res.data);
+    } catch (err) {
+      setFeedbackError('Không thể tải phản hồi.');
+    } finally {
+      setFeedbackLoading(false);
+    }
+  };
+  // ...existing code...
+
   React.useEffect(() => {
+    // Chỉ cho Admin và ProductManager truy cập
     const user = getUserFromToken();
-    if (!user || (user.role !== 'ProductManager' && user.role !== 'Admin')) {
+    if (!user || (user.role !== 'Admin' && user.role !== 'ProductManager')) {
       navigate('/login');
       return;
     }
@@ -171,7 +198,7 @@ function ProductManagerProducts() {
   };
 
   const getStatusStyle = (isActive) => {
-    if (isActive === undefined) return { 
+    if (isActive === undefined) return {
       backgroundColor: '#a0826d', // Medium brown
       color: 'white',
       padding: '6px 12px',
@@ -179,23 +206,23 @@ function ProductManagerProducts() {
       fontSize: '0.8rem',
       fontWeight: '600'
     };
-    return isActive 
-      ? { 
-          backgroundColor: '#9b7653', // Brown-green for active
-          color: 'white',
-          padding: '6px 12px',
-          borderRadius: '20px',
-          fontSize: '0.8rem',
-          fontWeight: '600'
-        }
-      : { 
-          backgroundColor: '#b8860b', // Dark goldenrod for inactive
-          color: 'white',
-          padding: '6px 12px',
-          borderRadius: '20px',
-          fontSize: '0.8rem',
-          fontWeight: '600'
-        };
+    return isActive
+      ? {
+        backgroundColor: '#9b7653', // Brown-green for active
+        color: 'white',
+        padding: '6px 12px',
+        borderRadius: '20px',
+        fontSize: '0.8rem',
+        fontWeight: '600'
+      }
+      : {
+        backgroundColor: '#b8860b', // Dark goldenrod for inactive
+        color: 'white',
+        padding: '6px 12px',
+        borderRadius: '20px',
+        fontSize: '0.8rem',
+        fontWeight: '600'
+      };
   };
 
   const getButtonStyle = (variant) => {
@@ -236,7 +263,7 @@ function ProductManagerProducts() {
   // Component hiển thị nhiều ảnh
   const ImageGallery = ({ product }) => {
     let images = [];
-    
+
     if (Array.isArray(product.images) && product.images.length > 0) {
       images = product.images.map(img => {
         if (typeof img === 'string') {
@@ -256,7 +283,7 @@ function ProductManagerProducts() {
     }
 
     // Thêm localhost nếu cần
-    images = images.map(img => 
+    images = images.map(img =>
       img.startsWith('/uploads') ? 'http://localhost:3000' + img : img
     );
 
@@ -428,8 +455,8 @@ function ProductManagerProducts() {
           <Table
             hover
             className="align-middle mb-0"
-            style={{ 
-              minWidth: '100%', 
+            style={{
+              minWidth: '100%',
               backgroundColor: 'transparent',
               borderCollapse: 'separate',
               borderSpacing: 0
@@ -459,8 +486,8 @@ function ProductManagerProducts() {
               {filteredProducts.map((p, idx) => (
                 <tr
                   key={p._id}
-                  style={{ 
-                    verticalAlign: 'middle', 
+                  style={{
+                    verticalAlign: 'middle',
                     textAlign: 'center',
                     backgroundColor: idx % 2 === 0 ? '#fefcfa' : '#f7f3f0', // Alternating beige rows
                     borderBottom: '1px solid #e6d7c3'
@@ -472,9 +499,9 @@ function ProductManagerProducts() {
                   <td style={{ padding: '12px 8px' }}>
                     <ImageGallery product={p} />
                   </td>
-                  <td style={{ 
-                    fontWeight: '700', 
-                    color: '#8b4513', 
+                  <td style={{
+                    fontWeight: '700',
+                    color: '#8b4513',
                     fontSize: '0.9rem',
                     padding: '12px 8px'
                   }}>
@@ -490,16 +517,16 @@ function ProductManagerProducts() {
                   }}>
                     {p.description || 'Không có mô tả'}
                   </td>
-                  <td style={{ 
-                    fontWeight: '700', 
+                  <td style={{
+                    fontWeight: '700',
                     color: '#9b7653', // Brown-green for price
                     fontSize: '1.1rem',
                     padding: '16px 12px'
                   }}>
                     {p.price ? p.price.toLocaleString('vi-VN') + ' đ' : 'Chưa có giá'}
                   </td>
-                  <td style={{ 
-                    fontWeight: '600', 
+                  <td style={{
+                    fontWeight: '600',
                     color: p.stock > 10 ? '#9b7653' : '#cd853f', // Brown tones
                     padding: '16px 12px'
                   }}>
@@ -516,19 +543,19 @@ function ProductManagerProducts() {
                   </td>
                   <td style={{ color: '#a0826d', fontWeight: '500', padding: '16px 12px' }}>
                     {p.categoryId &&
-                    typeof p.categoryId === 'object' &&
-                    p.categoryId.name
+                      typeof p.categoryId === 'object' &&
+                      p.categoryId.name
                       ? p.categoryId.name
                       : typeof p.categoryId === 'string' &&
-                          categories.length > 0
+                        categories.length > 0
                         ? categories.find((c) => c._id === p.categoryId)
-                            ?.name || 'Chưa phân loại'
+                          ?.name || 'Chưa phân loại'
                         : 'Chưa phân loại'}
                   </td>
                   <td style={{ color: '#d2b48c', fontWeight: '500', padding: '16px 12px' }}>
                     {p.discountId &&
-                    typeof p.discountId === 'object' &&
-                    p.discountId.name
+                      typeof p.discountId === 'object' &&
+                      p.discountId.name
                       ? p.discountId.name
                       : 'Không có'}
                   </td>
@@ -598,12 +625,52 @@ function ProductManagerProducts() {
                       <Button
                         size="sm"
                         style={getButtonStyle('feedback')}
-                        onClick={() =>
-                          alert('Demo: Xem feedback cho sản phẩm ' + p.name)
-                        }
+                        onClick={() => handleViewFeedback(p)}
                       >
                         Phản hồi
                       </Button>
+                      {/* Modal xem tất cả phản hồi về sản phẩm */}
+                      <Modal show={showFeedbackModal} onHide={() => setShowFeedbackModal(false)} centered size="lg">
+                        <Modal.Header closeButton>
+                          <Modal.Title>Phản hồi về sản phẩm: {selectedProduct?.name}</Modal.Title>
+                        </Modal.Header>
+                        <Modal.Body>
+                          {feedbackLoading && <div>Đang tải phản hồi...</div>}
+                          {feedbackError && <div className="text-danger mb-2">{feedbackError}</div>}
+                          {!feedbackLoading && !feedbackError && feedbacks.length === 0 && (
+                            <div>Chưa có phản hồi nào cho sản phẩm này.</div>
+                          )}
+                          {!feedbackLoading && !feedbackError && feedbacks.length > 0 && (
+                            <div style={{ maxHeight: 400, overflowY: 'auto' }}>
+                              <table className="table table-bordered">
+                                <thead>
+                                  <tr>
+                                    <th>Người đánh giá</th>
+                                    <th>Chấm điểm</th>
+                                    <th>Bình luận</th>
+                                    <th>Thời gian</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {feedbacks.map((fb, idx) => (
+                                    <tr key={fb._id || idx}>
+                                      <td>{fb.author?.fullName || fb.author?.email || 'Ẩn danh'}</td>
+                                      <td>{fb.rating ? `${fb.rating} ⭐` : '-'}</td>
+                                      <td>{fb.content}</td>
+                                      <td>{fb.createdAt ? new Date(fb.createdAt).toLocaleString('vi-VN') : '-'}</td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          )}
+                        </Modal.Body>
+                        <Modal.Footer>
+                          <Button variant="secondary" onClick={() => setShowFeedbackModal(false)}>
+                            Đóng
+                          </Button>
+                        </Modal.Footer>
+                      </Modal>
                     </div>
                   </td>
                 </tr>

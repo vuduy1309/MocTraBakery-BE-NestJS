@@ -13,12 +13,6 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserService = void 0;
-function findByEmail(email) {
-    return this['userModel'].findOne({ email });
-}
-async function comparePassword(plain, hash) {
-    return await bcrypt.compare(plain, hash);
-}
 const common_1 = require("@nestjs/common");
 const mongoose_1 = require("@nestjs/mongoose");
 const mongoose_2 = require("mongoose");
@@ -26,11 +20,52 @@ const user_schema_1 = require("./user.schema");
 const bcrypt = require("bcryptjs");
 let UserService = class UserService {
     userModel;
+    async changePassword(userId, oldPassword, newPassword) {
+        if (!userId)
+            throw new common_1.BadRequestException('ID không hợp lệ');
+        if (!mongoose_2.Types.ObjectId.isValid(userId))
+            throw new common_1.BadRequestException('ID không hợp lệ');
+        const user = await this.userModel.findById(userId);
+        if (!user)
+            throw new common_1.BadRequestException('Không tìm thấy user');
+        const isMatch = await bcrypt.compare(oldPassword, user.passwordHash);
+        if (!isMatch)
+            throw new common_1.BadRequestException('Mật khẩu cũ không đúng');
+        if (oldPassword === newPassword)
+            throw new common_1.BadRequestException('Mật khẩu mới phải khác mật khẩu cũ');
+        user.passwordHash = await bcrypt.hash(newPassword, 10);
+        await user.save();
+        return true;
+    }
     constructor(userModel) {
         this.userModel = userModel;
     }
-    findByEmail = findByEmail;
-    comparePassword = comparePassword;
+    async updateProfile(userId, update) {
+        if (!userId)
+            throw new common_1.BadRequestException('ID không hợp lệ');
+        if (!mongoose_2.Types.ObjectId.isValid(userId))
+            throw new common_1.BadRequestException('ID không hợp lệ');
+        const user = await this.userModel.findByIdAndUpdate(userId, { $set: update }, { new: true, select: 'email fullName phone address createdAt' }).lean();
+        if (!user)
+            throw new common_1.BadRequestException('Không tìm thấy user');
+        return user;
+    }
+    async getProfile(userId) {
+        if (!userId)
+            throw new common_1.BadRequestException('ID không hợp lệ');
+        if (!mongoose_2.Types.ObjectId.isValid(userId))
+            throw new common_1.BadRequestException('ID không hợp lệ');
+        const user = await this.userModel.findById(userId).select('email fullName role createdAt phone address').lean();
+        if (!user)
+            throw new common_1.BadRequestException('Không tìm thấy user');
+        return user;
+    }
+    async findByEmail(email) {
+        return this.userModel.findOne({ email });
+    }
+    async comparePassword(plain, hash) {
+        return await bcrypt.compare(plain, hash);
+    }
     async register(data) {
         const existed = await this.userModel.findOne({ email: data.email });
         if (existed) {

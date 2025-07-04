@@ -18,12 +18,42 @@ const user_service_1 = require("./user.service");
 const register_user_dto_1 = require("./dto/register-user.dto");
 const login_user_dto_1 = require("./dto/login-user.dto");
 const auth_service_1 = require("../auth/auth.service");
+const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
 let UserController = class UserController {
     userService;
     authService;
+    async changePassword(req, body) {
+        const userId = req.user?.userId || req.user?.sub || req.user?._id;
+        if (!userId)
+            throw new common_1.BadRequestException('Không xác định được user');
+        if (!body.oldPassword || !body.newPassword)
+            throw new common_1.BadRequestException('Thiếu thông tin');
+        await this.userService.changePassword(userId, body.oldPassword, body.newPassword);
+        return { message: 'Đổi mật khẩu thành công' };
+    }
     constructor(userService, authService) {
         this.userService = userService;
         this.authService = authService;
+    }
+    async updateProfile(req, body) {
+        const userId = req.user?.userId || req.user?.sub || req.user?._id;
+        if (!userId)
+            throw new common_1.BadRequestException('Không xác định được user');
+        const update = {};
+        if (typeof body.fullName === 'string' && body.fullName.trim() !== '')
+            update.fullName = body.fullName.trim();
+        if (typeof body.phone === 'string' && body.phone.trim() !== '')
+            update.phone = body.phone.trim();
+        if (typeof body.address === 'string' && body.address.trim() !== '')
+            update.address = body.address.trim();
+        if (Object.keys(update).length === 0)
+            throw new common_1.BadRequestException('Không có dữ liệu cập nhật');
+        const user = await this.userService.updateProfile(userId, update);
+        return user;
+    }
+    async getProfile(req) {
+        const userId = req.user.userId || req.user.sub || req.user._id;
+        return this.userService.getProfile(userId);
     }
     async lockUser(id) {
         const user = await this.userService.lockUser(id);
@@ -34,7 +64,8 @@ let UserController = class UserController {
         return user;
     }
     async getAllUsers() {
-        const users = await this.userService['userModel'].find({}, {
+        const users = await this.userService['userModel']
+            .find({}, {
             email: 1,
             fullName: 1,
             role: 1,
@@ -42,16 +73,17 @@ let UserController = class UserController {
             address: 1,
             createdAt: 1,
             isActive: 1,
-        }).lean();
+        })
+            .lean();
         return users;
     }
     async register(body) {
         return this.userService.register(body);
     }
-    async login(body) {
+    async login(loginBody) {
         let user;
         try {
-            user = await this.userService.login(body);
+            user = await this.userService.login(loginBody);
         }
         catch (err) {
             throw new common_1.BadRequestException('Email hoặc mật khẩu không đúng');
@@ -60,6 +92,32 @@ let UserController = class UserController {
     }
 };
 exports.UserController = UserController;
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Patch)('/change-password'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "changePassword", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Patch)('/profile'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "updateProfile", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Get)('/profile'),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getProfile", null);
 __decorate([
     (0, common_1.Patch)(':id/lock'),
     __param(0, (0, common_1.Param)('id')),

@@ -63,6 +63,7 @@ function Header() {
     setUser(null);
     // Gửi event để các tab khác cũng update
     window.dispatchEvent(new Event('user-login'));
+    window.location.href = '/login';
   };
 
   return (
@@ -144,13 +145,18 @@ function Header() {
             Sản phẩm
           </Nav.Link>
           <Nav.Link
-            as={Link}
-            to="/blog"
             className="px-4 fw-medium text-dark"
             style={{
               fontSize: '1rem',
               transition: 'all 0.3s ease',
               borderRadius: '8px',
+              cursor: 'not-allowed',
+              opacity: 0.7,
+            }}
+            title="Coming soon"
+            onClick={(e) => {
+              e.preventDefault();
+              alert('Tính năng Blog sẽ ra mắt sớm!');
             }}
             onMouseEnter={(e) => {
               e.target.style.color = '#4A7C59';
@@ -294,8 +300,6 @@ function Header() {
             </Button>
 
             <Button
-              as={Link}
-              to="/messages"
               size="sm"
               className="position-relative rounded-circle d-flex align-items-center justify-content-center"
               style={{
@@ -305,8 +309,14 @@ function Header() {
                 background: '#fff',
                 color: '#8B7355',
                 transition: 'all 0.3s ease',
+                cursor: 'not-allowed',
+                opacity: 0.7,
               }}
-              title="Tin nhắn"
+              title="Coming soon"
+              onClick={(e) => {
+                e.preventDefault();
+                alert('Tính năng Tin nhắn sẽ ra mắt sớm!');
+              }}
               onMouseEnter={(e) => {
                 e.target.style.backgroundColor = '#8B7355';
                 e.target.style.borderColor = '#8B7355';
@@ -342,19 +352,24 @@ function Header() {
           <div className="border-start ps-3">
             {user ? (
               <div className="d-flex align-items-center">
-                <div
-                  className="d-flex align-items-center px-3 py-2 rounded-pill me-3"
-                  style={{ 
+                <Button
+                  as={Link}
+                  to="/profile"
+                  variant="link"
+                  className="d-flex align-items-center px-3 py-2 rounded-pill me-3 fw-medium"
+                  style={{
                     border: '1px solid #4A7C59',
                     backgroundColor: '#F0F8F0',
-                    color: '#2D5016'
+                    color: '#2D5016',
+                    textDecoration: 'none',
                   }}
+                  title="Xem thông tin cá nhân"
                 >
                   <BsPersonCircle size={20} className="me-2" style={{ color: '#4A7C59' }} />
                   <span className="fw-medium small">
                     Xin chào, {user.name}
                   </span>
-                </div>
+                </Button>
                 <Button
                   variant="outline-danger"
                   size="sm"

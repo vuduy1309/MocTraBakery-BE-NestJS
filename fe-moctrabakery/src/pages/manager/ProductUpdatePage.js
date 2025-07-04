@@ -38,6 +38,20 @@ const defaultFields = [
   { name: 'description', label: 'Mô tả', required: false, type: 'text' },
 ];
 
+function getUserFromToken() {
+  const token = localStorage.getItem('token');
+  if (!token) return null;
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return {
+      name: payload.fullName || payload.email || 'User',
+      role: payload.role,
+    };
+  } catch {
+    return null;
+  }
+}
+
 function ProductUpdatePage() {
   const { id } = useParams();
   const [fields, setFields] = useState(defaultFields);
@@ -54,6 +68,13 @@ function ProductUpdatePage() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Chỉ cho Admin và ProductManager truy cập
+    const user = getUserFromToken();
+    if (!user || (user.role !== 'Admin' && user.role !== 'ProductManager')) {
+      navigate('/login');
+      return;
+    }
+
     async function fetchData() {
       setLoading(true);
       try {

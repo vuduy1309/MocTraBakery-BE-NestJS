@@ -1,9 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Table, Spinner, Alert, Badge, Button, Row, Col, Card, Modal, Form } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 import api from '../../api';
 import BadgePopover from '../../components/BadgePopover';
 
+function getUserFromToken() {
+  const token = localStorage.getItem('token');
+  if (!token) return null;
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return {
+      name: payload.fullName || payload.email || 'User',
+      role: payload.role,
+    };
+  } catch {
+    return null;
+  }
+}
+
 function DiscountManagerPage() {
+  const navigate = useNavigate();
     const [discounts, setDiscounts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -32,13 +48,13 @@ function DiscountManagerPage() {
     const [selectedCategory, setSelectedCategory] = useState('');
     const [selectedProducts, setSelectedProducts] = useState([]);
 
-    useEffect(() => {
-        if (showModal && modalType === 'add') {
-            // Lấy danh sách sản phẩm và category khi mở modal
-            api.get('/products').then(res => setAllProducts(res.data)).catch(() => { });
-            api.get('/categories').then(res => setAllCategories(res.data)).catch(() => { });
-        }
-    }, [showModal, modalType]);
+useEffect(() => {
+    if (showModal) {
+        // Luôn lấy danh sách sản phẩm và category khi mở modal (add hoặc edit)
+        api.get('/products').then(res => setAllProducts(res.data)).catch(() => { });
+        api.get('/categories').then(res => setAllCategories(res.data)).catch(() => { });
+    }
+}, [showModal]);
 
     const handleApplyTypeChange = (e) => {
         setApplyType(e.target.value);

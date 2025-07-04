@@ -1,8 +1,25 @@
+
 import React from 'react';
 import { Table, Card, Button, Badge } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 import api from '../../api';
 
+function getUserFromToken() {
+  const token = localStorage.getItem('token');
+  if (!token) return null;
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return {
+      name: payload.fullName || payload.email || 'User',
+      role: payload.role,
+    };
+  } catch {
+    return null;
+  }
+}
+
 function UserManagerPage() {
+  const navigate = useNavigate();
   const [users, setUsers] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState(null);
@@ -15,6 +32,12 @@ function UserManagerPage() {
   });
 
   React.useEffect(() => {
+    // Chỉ cho Admin truy cập
+    const user = getUserFromToken();
+    if (!user || user.role !== 'Admin') {
+      navigate('/login');
+      return;
+    }
     setLoading(true);
     api.get('/users')
       .then(res => {
@@ -25,7 +48,7 @@ function UserManagerPage() {
         setError('Không thể tải danh sách người dùng');
         setLoading(false);
       });
-  }, []);
+  }, [navigate]);
 
   // Filter logic
   const filteredUsers = users.filter((u) => {

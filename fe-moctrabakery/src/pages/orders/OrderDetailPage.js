@@ -1,12 +1,21 @@
 import React, { useEffect, useState } from 'react';
+import { Modal, Form, Button } from 'react-bootstrap';
 import api from '../../api';
 import { useParams, useNavigate } from 'react-router-dom';
 
+
 function OrderDetailPage() {
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [feedbackProduct, setFeedbackProduct] = useState(null);
+  const [feedbackData, setFeedbackData] = useState({ rating: 5, comment: '' });
+  const [feedbackLoading, setFeedbackLoading] = useState(false);
+  const [feedbackError, setFeedbackError] = useState('');
+  const [feedbackSuccess, setFeedbackSuccess] = useState('');
   const { orderId } = useParams();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [userRole, setUserRole] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -26,6 +35,18 @@ function OrderDetailPage() {
       }
     };
     fetchOrder();
+    // Lấy role user từ localStorage (giả sử đã lưu khi login)
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        setUserRole(user.role || '');
+      } catch {
+        setUserRole('');
+      }
+    } else {
+      setUserRole('');
+    }
   }, [orderId]);
 
   return (
@@ -166,6 +187,7 @@ function OrderDetailPage() {
                   <th>Giá</th>
                   <th>Giá sau giảm</th>
                   <th>Giảm (%)</th>
+                  {order.status === 'paid' && userRole !== 'Admin' && userRole !== 'ProductManager' && <th>Feedback</th>}
                 </tr>
               </thead>
               <tbody>
@@ -177,6 +199,22 @@ function OrderDetailPage() {
                     <td>{item.price?.toLocaleString() || 0}₫</td>
                     <td>{item.priceAfterDiscount ? item.priceAfterDiscount.toLocaleString() + '₫' : '-'}</td>
                     <td>{item.discountPercent ? item.discountPercent + '%' : '-'}</td>
+                    {order.status === 'paid' && userRole !== 'Admin' && userRole !== 'ProductManager' && (
+                      <td>
+                        <button
+                          className="btn btn-sm btn-outline-success"
+                          onClick={() => {
+                            setFeedbackProduct(item);
+                            setFeedbackData({ rating: 5, comment: '' });
+                            setFeedbackError('');
+                            setFeedbackSuccess('');
+                            setShowFeedback(true);
+                          }}
+                        >
+                          Đánh giá
+                        </button>
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>
@@ -189,6 +227,80 @@ function OrderDetailPage() {
           </div>
         </div>
       )}
+
+      {/* Modal feedback sản phẩm */}
+      <Modal show={showFeedback} onHide={() => setShowFeedback(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Đánh giá sản phẩm</Modal.Title>
+        </Modal.Header>
+        <Form
+          onSubmit={async (e) => {
+            e.preventDefault();
+            setFeedbackLoading(true);
+            setFeedbackError('');
+            setFeedbackSuccess('');
+            try {
+              const token = localStorage.getItem('token');
+              const res = await fetch('http://localhost:3000/comments', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: 'Bearer ' + token,
+                },
+                body: JSON.stringify({
+                  productId: feedbackProduct?.productId || feedbackProduct?._id,
+                  rating: feedbackData.rating,
+                  content: feedbackData.comment,
+                }),
+              });
+              if (!res.ok) {
+                const text = await res.text();
+                throw new Error(text);
+              }
+              setFeedbackSuccess('Gửi đánh giá thành công!');
+              setShowFeedback(false);
+            } catch (err) {
+              setFeedbackError('Gửi đánh giá thất bại: ' + (err.message || 'Lỗi không xác định'));
+            }
+            setFeedbackLoading(false);
+          }}
+        >
+          <Modal.Body>
+            <div className="mb-3">
+              <strong>{feedbackProduct?.name}</strong>
+            </div>
+            <Form.Group className="mb-3">
+              <Form.Label>Chấm điểm</Form.Label>
+              <Form.Select
+                value={feedbackData.rating}
+                onChange={e => setFeedbackData({ ...feedbackData, rating: Number(e.target.value) })}
+                required
+              >
+                {[5,4,3,2,1].map((v) => (
+                  <option key={v} value={v}>{v} sao</option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Bình luận</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={3}
+                value={feedbackData.comment}
+                onChange={e => setFeedbackData({ ...feedbackData, comment: e.target.value })}
+                placeholder="Nhập nhận xét của bạn về sản phẩm..."
+                required
+              />
+            </Form.Group>
+            {feedbackError && <div className="text-danger mb-2">{feedbackError}</div>}
+            {feedbackSuccess && <div className="text-success mb-2">{feedbackSuccess}</div>}
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowFeedback(false)} disabled={feedbackLoading}>Huỷ</Button>
+            <Button variant="primary" type="submit" disabled={feedbackLoading}>Gửi đánh giá</Button>
+          </Modal.Footer>
+        </Form>
+      </Modal>
     </div>
   );
 }

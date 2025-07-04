@@ -51,7 +51,9 @@ function ProductListPage() {
   }, []);
 
   // Lọc sản phẩm theo search, category, giá và các trường phụ
-  const filteredProducts = products.filter((p) => {
+  // Lọc sản phẩm chỉ hiển thị isActive === true và các điều kiện khác
+  const activeProducts = products.filter((p) => p.isActive === true);
+  const filteredProducts = activeProducts.filter((p) => {
     const matchName = p.name.toLowerCase().includes(search.toLowerCase());
     let matchCategory = true;
     if (category) {
@@ -377,7 +379,7 @@ function ProductListPage() {
                   <div className="text-center py-4 border-top">
                     <p className="mb-0" style={{ color: '#8B6F3A' }}>
                       Hiển thị <strong style={{ color: '#6B4F27' }}>{filteredProducts.length}</strong> trong
-                      tổng số <strong style={{ color: '#6B4F27' }}>{products.length}</strong> sản phẩm
+                      tổng số <strong style={{ color: '#6B4F27' }}>{activeProducts.length}</strong> sản phẩm
                     </p>
                   </div>
                 </div>

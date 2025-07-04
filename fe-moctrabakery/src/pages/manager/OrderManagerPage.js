@@ -1,7 +1,20 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api';
+
+function getUserFromToken() {
+  const token = localStorage.getItem('token');
+  if (!token) return null;
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return {
+      name: payload.fullName || payload.email || 'User',
+      role: payload.role,
+    };
+  } catch {
+    return null;
+  }
+}
 
 function OrderManagerPage() {
   const [orders, setOrders] = useState([]);
@@ -19,6 +32,13 @@ function OrderManagerPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Chỉ cho Admin và ProductManager truy cập
+    const user = getUserFromToken();
+    if (!user || (user.role !== 'Admin' && user.role !== 'ProductManager')) {
+      navigate('/login');
+      return;
+    }
+
     const fetchOrders = async () => {
       setLoading(true);
       setError(null);
@@ -35,7 +55,7 @@ function OrderManagerPage() {
       }
     };
     fetchOrders();
-  }, []);
+  }, [navigate]);
 
   const getStatusColor = (status) => {
     switch (status) {

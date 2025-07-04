@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Card, Spinner, Alert } from 'react-bootstrap';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from 'recharts';
 
@@ -7,45 +7,58 @@ const BAKERY_COLORS = ['#D4A574', '#8B6914', '#A0522D', '#CD853F', '#B8860B'];
 
 // Enhanced AdminDashboardCharts component with consistent theming
 function AdminDashboardCharts({ stats, recentOrders }) {
-  // Mock data for demonstration
-  const mockStats = {
-    totalProducts: 125,
-    totalOrders: 89,
-    totalCustomers: 456,
-    totalRevenue: 15420000,
-    bestSellers: [
-      { name: 'Bánh kem dâu', stock: 12 },
-      { name: 'Cupcake vanilla', stock: 8 },
-      { name: 'Bánh chocolate', stock: 15 },
-      { name: 'Bánh tiramisu', stock: 6 }
-    ]
-  };
+  // State để lưu dữ liệu thật
+  const [actualStats, setActualStats] = useState(stats || null);
+  const [loading, setLoading] = useState(!stats);
+  const [error, setError] = useState(null);
 
-  const actualStats = stats || mockStats;
+  useEffect(() => {
+    if (!stats) {
+      setLoading(true);
+      fetch('/api/admin/stats')
+        .then((res) => {
+          if (!res.ok) throw new Error('Lỗi khi lấy dữ liệu thống kê');
+          return res.json();
+        })
+        .then((data) => {
+          setActualStats(data);
+          setLoading(false);
+        })
+        .catch((err) => {
+          setError(err.message);
+          setLoading(false);
+        });
+    }
+  }, [stats]);
 
   // Pie chart data for product/order/customer
-  const summaryData = [
+  const summaryData = actualStats ? [
     { name: 'Sản phẩm', value: actualStats.totalProducts },
     { name: 'Đơn hàng', value: actualStats.totalOrders },
     { name: 'Khách hàng', value: actualStats.totalCustomers },
-  ];
+  ] : [];
 
   // Bar chart for best sellers
-  const bestSellersData = (actualStats.bestSellers || []).map((item) => ({
+  const bestSellersData = actualStats && actualStats.bestSellers ? (actualStats.bestSellers || []).map((item) => ({
     name: item.name,
     stock: item.stock,
-  }));
+  })) : [];
 
   // Revenue data (simulated for 7 recent days)
-  const revenueData = [
-    { date: 'T2', revenue: actualStats.totalRevenue * 0.12 },
-    { date: 'T3', revenue: actualStats.totalRevenue * 0.15 },
-    { date: 'T4', revenue: actualStats.totalRevenue * 0.18 },
-    { date: 'T5', revenue: actualStats.totalRevenue * 0.13 },
-    { date: 'T6', revenue: actualStats.totalRevenue * 0.16 },
-    { date: 'T7', revenue: actualStats.totalRevenue * 0.11 },
-    { date: 'CN', revenue: actualStats.totalRevenue * 0.15 },
-  ];
+  // Nếu backend trả về revenueByDay thì dùng, không thì fallback như cũ
+  const revenueData = actualStats && actualStats.revenueByDay
+    ? actualStats.revenueByDay // [{ date: 'T2', revenue: ... }, ...]
+    : actualStats
+      ? [
+          { date: 'T2', revenue: actualStats.totalRevenue * 0.12 },
+          { date: 'T3', revenue: actualStats.totalRevenue * 0.15 },
+          { date: 'T4', revenue: actualStats.totalRevenue * 0.18 },
+          { date: 'T5', revenue: actualStats.totalRevenue * 0.13 },
+          { date: 'T6', revenue: actualStats.totalRevenue * 0.16 },
+          { date: 'T7', revenue: actualStats.totalRevenue * 0.11 },
+          { date: 'CN', revenue: actualStats.totalRevenue * 0.15 },
+        ]
+      : [];
 
   // Consistent card styling
   const cardStyle = {
@@ -98,6 +111,21 @@ function AdminDashboardCharts({ stats, recentOrders }) {
     }
     return null;
   };
+
+  if (loading) {
+    return (
+      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: 200 }}>
+        <Spinner animation="border" variant="warning" />
+        <span className="ms-2">Đang tải dữ liệu...</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <Alert variant="danger">{error}</Alert>
+    );
+  }
 
   return (
     <Row className="mb-4">

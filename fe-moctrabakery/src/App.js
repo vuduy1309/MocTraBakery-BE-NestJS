@@ -1,3 +1,4 @@
+import Profile from './pages/Profile';
 import UserManagerPage from './pages/dashboard/UserManagerPage';
 import React, { Suspense, lazy } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -38,6 +39,7 @@ function App() {
         <Route path="/products/:id" element={<ProductDetailPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/profile" element={<Profile />} />
         <Route path="/cart" element={<CartPage />} />
         <Route path="/cart/checkout" element={<CheckoutPage />} />
         <Route path="/orders" element={<OrderHistoryPage />} />

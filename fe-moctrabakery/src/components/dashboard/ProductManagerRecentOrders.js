@@ -39,7 +39,7 @@ function ProductManagerRecentOrders({ recentOrders }) {
       </Card.Header>
       <ListGroup variant="flush">
         {recentOrders && recentOrders.length > 0 ? (
-          recentOrders.map((order, idx) => (
+          recentOrders.slice(0, 5).map((order, idx) => (
             <ListGroup.Item key={order.code || idx} style={itemStyle}>
               <strong>{order.code}</strong>{' '}
               <Badge style={getBadgeStyle(order.status)}>

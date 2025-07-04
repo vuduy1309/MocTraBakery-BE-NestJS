@@ -8,17 +8,41 @@ import ProductManagerRecentOrders from '../../components/dashboard/ProductManage
 import AdminDashboardCharts from '../../components/dashboard/AdminDashboardCharts';
 import api from '../../api';
 
+import { useNavigate } from 'react-router-dom';
+
+function getUserFromToken() {
+  const token = localStorage.getItem('token');
+  if (!token) return null;
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return {
+      name: payload.fullName || payload.email || 'User',
+      role: payload.role,
+    };
+  } catch {
+    return null;
+  }
+}
+
 function AdminDashboard() {
   const [stats, setStats] = React.useState(null);
   const [recentOrders, setRecentOrders] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState(null);
 
+  const navigate = useNavigate();
+
   React.useEffect(() => {
+    // Kiểm tra quyền admin
+    const user = getUserFromToken();
+    if (!user || user.role !== 'Admin') {
+      navigate('/login');
+      return;
+    }
+
     const fetchDashboardData = async () => {
       setLoading(true);
       setError(null);
-      
       try {
         const [statsRes, ordersRes] = await Promise.all([
           api.get('/products/dashboard-stats'),
@@ -26,7 +50,6 @@ function AdminDashboard() {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
           }),
         ]);
-        
         setStats(statsRes.data);
         setRecentOrders(ordersRes.data);
       } catch (err) {
@@ -38,7 +61,7 @@ function AdminDashboard() {
     };
 
     fetchDashboardData();
-  }, []);
+  }, [navigate]);
 
   // Loading component
   const LoadingComponent = () => (

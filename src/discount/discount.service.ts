@@ -89,13 +89,11 @@ export class DiscountService {
         { $set: { discountId: discount._id } }
       );
     }
-    // Trả về discount kèm danh sách sản phẩm áp dụng mới
-    const products = productIds && productIds.length > 0
-      ? await this.productService['productModel']
-          .find({ _id: { $in: productIds.map((id: string) => new Types.ObjectId(id)) } })
-          .select('_id name images categoryId')
-          .exec()
-      : [];
+    // Trả về discount kèm danh sách sản phẩm thực tế đang áp dụng discount này
+    const products = await this.productService['productModel']
+      .find({ discountId: discount._id })
+      .select('_id name images categoryId')
+      .exec();
     return {
       ...discount.toObject(),
       products,

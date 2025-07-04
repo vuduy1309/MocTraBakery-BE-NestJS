@@ -1,13 +1,18 @@
-declare function findByEmail(this: UserService, email: string): Promise<UserDocument | null>;
-declare function comparePassword(plain: string, hash: string): Promise<boolean>;
 import { Model } from 'mongoose';
 import { User, UserDocument } from './user.schema';
 import { RegisterUserDto } from './dto/register-user.dto';
 export declare class UserService {
     private userModel;
+    changePassword(userId: string, oldPassword: string, newPassword: string): Promise<boolean>;
     constructor(userModel: Model<UserDocument>);
-    findByEmail: typeof findByEmail;
-    comparePassword: typeof comparePassword;
+    updateProfile(userId: string, update: {
+        fullName?: string;
+        phone?: string;
+        address?: string;
+    }): Promise<Partial<User>>;
+    getProfile(userId: string): Promise<Partial<User> | null>;
+    findByEmail(email: string): Promise<UserDocument | null>;
+    comparePassword(plain: string, hash: string): Promise<boolean>;
     register(data: RegisterUserDto): Promise<User>;
     lockUser(userId: string): Promise<any>;
     unlockUser(userId: string): Promise<any>;
@@ -34,4 +39,3 @@ export declare class UserService {
         __v: number;
     }>;
 }
-export {};
