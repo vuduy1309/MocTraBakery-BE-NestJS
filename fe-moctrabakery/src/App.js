@@ -27,6 +27,8 @@ import ProductUpdatePage from './pages/manager/ProductUpdatePage';
 import DiscountManagerPage from './pages/manager/DiscountManagerPage';
 import OrderHistoryPage from './pages/orders/OrderHistoryPage';
 import OrderDetailPage from './pages/orders/OrderDetailPage';
+import OrderSuccessPage from './pages/OrderSuccessPage';
+import OrderFailPage from './pages/OrderFailPage';
 const OrderManagerPage = lazy(() => import('./pages/manager/OrderManagerPage'));
 
 function App() {
@@ -44,6 +46,8 @@ function App() {
         <Route path="/cart/checkout" element={<CheckoutPage />} />
         <Route path="/orders" element={<OrderHistoryPage />} />
         <Route path="/orders/:orderId" element={<OrderDetailPage />} />
+        <Route path="/order-success" element={<OrderSuccessPage />} />
+        <Route path="/order-fail" element={<OrderFailPage />} />
         <Route path="*" element={<Navigate to="/" />} />
         <Route
           path="/manager/dashboard*"

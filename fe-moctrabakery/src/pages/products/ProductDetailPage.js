@@ -125,8 +125,19 @@ function ProductDetailPage() {
     };
   }, []);
 
+  // Lấy stock tối đa theo size hoặc tổng
+  const getMaxStock = () => {
+    if (!product) return 1;
+    if (product.sizes && product.sizes.length > 0 && selectedSize) {
+      const size = product.sizes.find((s) => s.name === selectedSize);
+      return size ? size.stock : 1;
+    }
+    return product.stock || 1;
+  };
+
   const handleQuantityChange = (operation) => {
-    if (operation === 'increment' && quantity < 10) {
+    const maxStock = getMaxStock();
+    if (operation === 'increment' && quantity < maxStock) {
       setQuantity(quantity + 1);
     } else if (operation === 'decrement' && quantity > 1) {
       setQuantity(quantity - 1);
@@ -220,6 +231,17 @@ function ProductDetailPage() {
 
   const handleMouseLeave = () => {
     setIsHovering(false);
+  };
+
+  // Kiểm tra hết hàng tổng hoặc theo size
+  const isOutOfStock = () => {
+    if (!product) return true;
+    if (product.stock === 0) return true;
+    if (product.sizes && product.sizes.length > 0 && selectedSize) {
+      const size = product.sizes.find((s) => s.name === selectedSize);
+      if (size && size.stock === 0) return true;
+    }
+    return false;
   };
 
   if (loading) {
@@ -758,7 +780,7 @@ function ProductDetailPage() {
                         <Button
                           variant="outline-secondary"
                           onClick={() => handleQuantityChange('increment')}
-                          disabled={quantity >= 10}
+                          disabled={quantity >= getMaxStock()}
                           style={{
                             borderColor: '#A4907C',
                             color: '#A4907C',
@@ -771,7 +793,7 @@ function ProductDetailPage() {
                           <FaPlus />
                         </Button>
                       </ButtonGroup>
-                      <small className="text-muted">Tối đa 10 sản phẩm</small>
+                      <small className="text-muted">Tồn kho: {getMaxStock()}</small>
                     </div>
                   </div>
                   {/* Nút hành động */}
@@ -781,7 +803,7 @@ function ProductDetailPage() {
                         size="lg"
                         className="w-100 py-3 fw-bold"
                         onClick={handleAddToCart}
-                        disabled={product.sizes && product.sizes.length > 0 && !selectedSize}
+                        disabled={isOutOfStock() || (product.sizes && product.sizes.length > 0 && !selectedSize)}
                         style={{
                           background: 'linear-gradient(135deg, #A4907C, #8B6F3A)',
                           border: 'none',
@@ -807,7 +829,7 @@ function ProductDetailPage() {
                           transition: 'all 0.3s ease'
                         }}
                         onClick={handleBuyNow}
-                        disabled={product.sizes && product.sizes.length > 0 && !selectedSize}
+                        disabled={isOutOfStock() || (product.sizes && product.sizes.length > 0 && !selectedSize)}
                       >
                         Mua ngay
                       </Button>
@@ -865,7 +887,6 @@ function ProductDetailPage() {
       `}</style>
     </div>
   );
-// ...existing code...
 }
 
 export default ProductDetailPage;

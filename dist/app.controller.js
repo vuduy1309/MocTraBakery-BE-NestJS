@@ -31,7 +31,7 @@ let AppController = class AppController {
     }
     async getHomepageData() {
         const featuredProducts = await this.productService.findAll();
-        const featured = featuredProducts.slice(0, 3);
+        const featured = featuredProducts.slice(0, 4);
         const discounts = await this.discountService.findAllActive();
         const reviews = await this.commentService.findAll(2);
         const promo = { content: 'Mua 2 bánh kem tặng 1 trà sữa! Áp dụng đến hết 30/6/2025.' };

@@ -17,10 +17,14 @@ const common_1 = require("@nestjs/common");
 const mongoose_1 = require("@nestjs/mongoose");
 const mongoose_2 = require("mongoose");
 const order_schema_1 = require("./order.schema");
+const product_service_1 = require("../product/product.service");
+const common_2 = require("@nestjs/common");
 let OrderService = class OrderService {
     orderModel;
-    constructor(orderModel) {
+    productService;
+    constructor(orderModel, productService) {
         this.orderModel = orderModel;
+        this.productService = productService;
     }
     async create(createOrderDto, userId) {
         const items = createOrderDto.items.map((item) => ({
@@ -44,6 +48,34 @@ let OrderService = class OrderService {
         return this.orderModel.findById(orderId);
     }
     async markPaid(orderId) {
+        const order = await this.orderModel.findById(orderId);
+        if (order && order.items && Array.isArray(order.items)) {
+            for (const item of order.items) {
+                if (item.productId) {
+                    try {
+                        const result = await this.productService.update(item.productId.toString(), { $inc: { stock: -item.quantity } });
+                        if (item.size) {
+                            const product = result || await this.productService.findById(item.productId.toString());
+                            if (product && Array.isArray(product.sizes)) {
+                                const sizeIndex = product.sizes.findIndex((s) => s.name === item.size);
+                                if (sizeIndex !== -1) {
+                                    const sizeStockPath = `sizes.${sizeIndex}.stock`;
+                                    const sizeResult = await this.productService.update(item.productId.toString(), { $inc: { [sizeStockPath]: -item.quantity } });
+                                    console.log('Update stock for product size', item.productId.toString(), item.size, 'quantity', item.quantity, 'result:', sizeResult);
+                                }
+                                else {
+                                    console.warn('Size not found for product', item.productId.toString(), item.size);
+                                }
+                            }
+                        }
+                        console.log('Update stock for product', item.productId.toString(), 'quantity', item.quantity, 'result:', result);
+                    }
+                    catch (err) {
+                        console.error('Error updating stock for product', item.productId.toString(), err);
+                    }
+                }
+            }
+        }
         return this.orderModel.findByIdAndUpdate(orderId, { status: 'paid' }, { new: true });
     }
     async findAll(filter = {}, options = {}) {
@@ -64,6 +96,8 @@ exports.OrderService = OrderService;
 exports.OrderService = OrderService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, mongoose_1.InjectModel)(order_schema_1.Order.name)),
-    __metadata("design:paramtypes", [mongoose_2.Model])
+    __param(1, (0, common_2.Inject)((0, common_2.forwardRef)(() => product_service_1.ProductService))),
+    __metadata("design:paramtypes", [mongoose_2.Model,
+        product_service_1.ProductService])
 ], OrderService);
 //# sourceMappingURL=order.service.js.map

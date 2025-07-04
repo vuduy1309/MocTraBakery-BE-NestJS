@@ -74,7 +74,7 @@ export class OrderController {
   async vnpayReturn(@Query() query: any, @Res() res: Response) {
     const isValid = this.vnpayService.verifyReturn(query);
     if (!isValid) {
-      return res.redirect('/orders?error=invalid_signature');
+      return res.redirect('http://localhost:3001/order-fail?error=invalid_signature');
     }
     const returnData = this.vnpayService.parseReturnData(query);
     if (returnData.isSuccess) {
@@ -88,9 +88,9 @@ export class OrderController {
       if (order && order.userId) {
         await this.cartService.deleteCartByUserId(order.userId);
       }
-      return res.redirect('/orders?paid=1&orderId=' + returnData.orderId);
+      return res.redirect('http://localhost:3001/order-success?orderId=' + returnData.orderId);
     } else {
-      return res.redirect(`/orders?paid=0&error=${returnData.responseCode}&message=${encodeURIComponent(returnData.message)}`);
+      return res.redirect(`http://localhost:3001/order-fail?error=${returnData.responseCode}&message=${encodeURIComponent(returnData.message)}`);
     }
   }
 

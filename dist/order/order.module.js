@@ -17,6 +17,7 @@ const order_cleanup_service_1 = require("./order-cleanup.service");
 const common_2 = require("@nestjs/common");
 const cart_module_1 = require("../cart/cart.module");
 const user_module_1 = require("../user/user.module");
+const product_module_1 = require("../product/product.module");
 let OrderModule = class OrderModule {
 };
 exports.OrderModule = OrderModule;
@@ -26,6 +27,7 @@ exports.OrderModule = OrderModule = __decorate([
             mongoose_1.MongooseModule.forFeature([{ name: order_schema_1.Order.name, schema: order_schema_1.OrderSchema }]),
             (0, common_2.forwardRef)(() => cart_module_1.CartModule),
             (0, common_2.forwardRef)(() => user_module_1.UserModule),
+            (0, common_2.forwardRef)(() => product_module_1.ProductModule),
         ],
         providers: [order_service_1.OrderService, vnpay_service_1.VnpayService, order_cleanup_service_1.OrderCleanupService],
         controllers: [order_controller_1.OrderController],

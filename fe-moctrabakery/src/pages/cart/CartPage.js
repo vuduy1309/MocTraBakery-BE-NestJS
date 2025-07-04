@@ -66,6 +66,16 @@ function CartPage() {
     navigate('/cart/checkout', { state: { cart } });
   };
 
+  // Lấy stock tối đa cho từng item trong cart
+  const getMaxStock = (item) => {
+    const prod = item.productId;
+    if (prod && prod.sizes && prod.sizes.length > 0 && item.size) {
+      const size = prod.sizes.find((s) => s.name === item.size);
+      return size ? size.stock : 1;
+    }
+    return prod && prod.stock ? prod.stock : 1;
+  };
+
   if (loading) return (
     <div className="cart-page-bg p-0 m-0" style={{ minHeight: '100vh', width: '100vw' }}>
       <div style={{ height: 80 }}></div>
@@ -161,12 +171,22 @@ function CartPage() {
                   <Form.Control
                     type="number"
                     min={1}
-                    max={99}
+                    max={getMaxStock(item)}
                     defaultValue={item.quantity}
                     style={{ width: 70, display: 'inline-block', background: '#fff', border: '1.5px solid #A4907C', color: '#6B4F27' }}
-                    onBlur={e => handleUpdateQuantity(prod?._id, item.size, Number(e.target.value))}
+                    onBlur={e => {
+                      let val = Number(e.target.value);
+                      const max = getMaxStock(item);
+                      if (val > max) val = max;
+                      if (val < 1) val = 1;
+                      if (val !== item.quantity) handleUpdateQuantity(prod?._id, item.size, val);
+                      else e.target.value = item.quantity; 
+                    }}
                     disabled={!prod}
                   />
+                  <span style={{ marginLeft: 8, color: '#A4907C', fontSize: 13 }}>
+                    (Tồn kho: {getMaxStock(item)})
+                  </span>
                 </div>
                 <div style={{ minWidth: 120, color: '#8B6F3A', fontWeight: 600, marginRight: 18 }}>
                   {discountPercent > 0 ? (

@@ -1,8 +1,10 @@
 import { Model } from 'mongoose';
 import { Order } from './order.schema';
+import { ProductService } from '../product/product.service';
 export declare class OrderService {
     private orderModel;
-    constructor(orderModel: Model<Order>);
+    private productService;
+    constructor(orderModel: Model<Order>, productService: ProductService);
     create(createOrderDto: any, userId: string): Promise<import("mongoose").Document<unknown, {}, Order, {}> & Order & Required<{
         _id: unknown;
     }> & {

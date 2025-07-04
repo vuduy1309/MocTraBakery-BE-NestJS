@@ -16,7 +16,8 @@ export class VnpayService {
     const now = new Date();
     const expire = new Date(now.getTime() + 24 * 60 * 60 * 1000);
     const orderId = order._id.toString();
-    const amount = Math.round(order.total * 100);
+    // const amount = Math.round(order.total * 100); // Bỏ nhân 100
+    const amount = Math.round(order.total); // Truyền đúng số tiền VND
     let processedIp = clientIp;
     if (clientIp === '::1' || clientIp === '::ffff:127.0.0.1') {
       processedIp = '127.0.0.1';
