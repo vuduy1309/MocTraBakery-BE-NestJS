@@ -1,4 +1,3 @@
-
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { join } from 'path';
@@ -12,7 +11,7 @@ async function bootstrap() {
   });
   // Bật CORS cho mọi domain, có thể cấu hình lại cho an toàn hơn
   app.enableCors({
-    origin: 'http://localhost:3001', // Chỉ cho phép FE truy cập
+    origin: ['http://localhost:3001', 'https://moctrabakery.click'], // Chỉ cho phép FE truy cập
     credentials: true,
   });
   await app.listen(process.env.PORT ?? 3000);

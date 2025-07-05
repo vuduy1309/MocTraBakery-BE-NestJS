@@ -11,7 +11,7 @@ import { IsActiveGuard } from './is-active.guard';
     forwardRef(() => UserModule),
     PassportModule,
     JwtModule.register({
-      secret: process.env.JWT_SECRET || 'secretKey',
+      secret: process.env.JWT_SECRET || 'duyha123',
       signOptions: { expiresIn: '7d' },
     }),
   ],

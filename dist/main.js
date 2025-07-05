@@ -9,7 +9,7 @@ async function bootstrap() {
         prefix: '/uploads/',
     });
     app.enableCors({
-        origin: 'http://localhost:3001',
+        origin: ['http://localhost:3001', 'https://moctrabakery.click'],
         credentials: true,
     });
     await app.listen(process.env.PORT ?? 3000);
