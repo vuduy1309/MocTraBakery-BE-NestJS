@@ -27,7 +27,7 @@ exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
         imports: [
-            mongoose_1.MongooseModule.forRoot('mongodb://localhost:27017/MocTraBakery'),
+            mongoose_1.MongooseModule.forRoot('mongodb+srv://duyha8618:duyha123@cluster0.5lrw6lt.mongodb.net/MocTraBakery?retryWrites=true&w=majority'),
             user_module_1.UserModule,
             product_module_1.ProductModule,
             category_module_1.CategoryModule,

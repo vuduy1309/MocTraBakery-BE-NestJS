@@ -16,7 +16,7 @@ import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
-    MongooseModule.forRoot('mongodb://localhost:27017/MocTraBakery'),
+    MongooseModule.forRoot('mongodb+srv://duyha8618:duyha123@cluster0.5lrw6lt.mongodb.net/MocTraBakery?retryWrites=true&w=majority'),
     UserModule,
     ProductModule, 
     CategoryModule,
