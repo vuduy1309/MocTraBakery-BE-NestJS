@@ -12,6 +12,7 @@ async function bootstrap() {
         origin: ['http://localhost:3001', 'https://moctrabakery.click'],
         credentials: true,
     });
+    app.setGlobalPrefix('api');
     await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();

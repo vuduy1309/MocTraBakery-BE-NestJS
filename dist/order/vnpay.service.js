@@ -11,11 +11,12 @@ const common_1 = require("@nestjs/common");
 const { VNPay, ProductCode, VnpLocale, ignoreLogger } = require('vnpay');
 const dayjs = require('dayjs');
 let VnpayService = class VnpayService {
-    vnp_TmnCode = process.env.VNP_TMNCODE || 'CHOECU21';
-    vnp_HashSecret = process.env.VNP_HASHSECRET || '6KMM18JSCQI1BE63KD9TK0FOJGFRICS1';
+    vnp_TmnCode = '92JV29NK';
+    vnp_HashSecret = 'YH9LZH41GJZH1WLI8NZ3CU1YZJEAMTIZ';
     vnp_Url = process.env.VNP_URL || 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html';
-    vnp_ReturnUrl = process.env.VNP_RETURNURL || 'http://localhost:3000/orders/vnpay-return';
+    vnp_ReturnUrl = 'http://localhost:3000/api/orders/vnpay-return';
     async createPaymentUrl(order, clientIp) {
+        console.log('[VNPAY] Callback URL gửi lên:', this.vnp_ReturnUrl);
         const now = new Date();
         const expire = new Date(now.getTime() + 24 * 60 * 60 * 1000);
         const orderId = order._id.toString();

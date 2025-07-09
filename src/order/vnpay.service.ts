@@ -7,12 +7,13 @@ const dayjs = require('dayjs');
 @Injectable()
 export class VnpayService {
   // Các thông tin cấu hình test VNPAY
-  vnp_TmnCode = process.env.VNP_TMNCODE || 'CHOECU21';
-  vnp_HashSecret = process.env.VNP_HASHSECRET || '6KMM18JSCQI1BE63KD9TK0FOJGFRICS1';
+  vnp_TmnCode = '92JV29NK';
+  vnp_HashSecret = 'YH9LZH41GJZH1WLI8NZ3CU1YZJEAMTIZ';
   vnp_Url = process.env.VNP_URL || 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html';
-  vnp_ReturnUrl = process.env.VNP_RETURNURL || 'http://localhost:3000/orders/vnpay-return';
+  vnp_ReturnUrl = 'http://localhost:3000/api/orders/vnpay-return'; // Luôn cố định đúng route callback
 
   async createPaymentUrl(order: any, clientIp: string) {
+    console.log('[VNPAY] Callback URL gửi lên:', this.vnp_ReturnUrl);
     const now = new Date();
     const expire = new Date(now.getTime() + 24 * 60 * 60 * 1000);
     const orderId = order._id.toString();
@@ -32,6 +33,7 @@ export class VnpayService {
       hashAlgorithm: 'SHA512',
       logger: ignoreLogger,
     });
+    // Luôn dùng đúng callback chuẩn, không lấy từ biến môi trường nữa
     const vnpayResponse = await vnpay.buildPaymentUrl({
       vnp_Amount: amount,
       vnp_IpAddr: processedIp,
