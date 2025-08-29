@@ -72,7 +72,7 @@ export class OrderController {
 
   @Get('vnpay-return')
   async vnpayReturn(@Query() query: any, @Res() res: Response) {
-    const isValid = this.vnpayService.verifyReturn(query);
+    const isValid = this.vnpayService.verifyReturn(query); 
     if (!isValid) {
       return res.redirect('http://localhost:3001/order-fail?error=invalid_signature');
     }

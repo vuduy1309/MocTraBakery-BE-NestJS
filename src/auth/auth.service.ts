@@ -28,7 +28,6 @@ export class AuthService {
       isActive: user.isActive,
     };
     const token = this.jwtService.sign(payload);
-    // Log thông tin user và token sau khi đăng nhập thành công
     console.log('[AuthService.login] user:', user);
     console.log('[AuthService.login] payload:', payload);
     console.log('[AuthService.login] access_token:', token);

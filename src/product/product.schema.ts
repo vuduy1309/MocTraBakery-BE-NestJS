@@ -23,7 +23,6 @@ export class Product {
   @Prop()
   isActive: boolean;
 
-  // Thêm trường origin (xuất xứ)
   @Prop({ type: String, default: '' })
   origin?: string;
 

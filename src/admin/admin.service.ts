@@ -20,11 +20,9 @@ export class AdminService {
       this.userModel.countDocuments(),
     ]);
 
-    // Tổng doanh thu
     const orders = await this.orderModel.find({ status: { $in: ['completed', 'paid'] } });
     const totalRevenue = orders.reduce((sum, o) => sum + (o.total || 0), 0);
 
-    // Top sản phẩm bán chạy
     const pipeline: PipelineStage[] = [
       { $unwind: { path: '$items' } },
       { $group: { _id: '$items.product', totalSold: { $sum: '$items.quantity' } } },
@@ -43,7 +41,6 @@ export class AdminService {
     ];
     const bestSellers = await this.orderModel.aggregate(pipeline);
 
-    // Doanh thu từng ngày trong tuần (7 ngày gần nhất)
     const now = new Date();
     const weekAgo = new Date(now);
     weekAgo.setDate(now.getDate() - 6);
@@ -57,7 +54,6 @@ export class AdminService {
       },
       { $sort: { _id: 1 } },
     ]);
-    // Chuyển sang format frontend cần
     const days = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
     const revenueByDay = Array(7).fill(0).map((_, i) => {
       const d = new Date(weekAgo);

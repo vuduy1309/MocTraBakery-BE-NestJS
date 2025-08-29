@@ -14,18 +14,15 @@ export class AppController {
     private readonly discountService: DiscountService,
     private readonly commentService: CommentService,
   ) {}
-  // API: GET /homepage-data
   @Get('homepage-data')
   async getHomepageData() {
-    // Lấy 3 sản phẩm nổi bật (có thể chọn theo tiêu chí khác)
     const featuredProducts = await this.productService.findAll();
     const featured = featuredProducts.slice(0, 4);
-    // Lấy các discount đang active
     const discounts = await this.discountService.findAllActive();
-    // Lấy review động từ comment collection
     const reviews = await this.commentService.findAll(2);
-    // Lấy 1 promo mẫu (cứng)
-    const promo = { content: 'Mua 2 bánh kem tặng 1 trà sữa! Áp dụng đến hết 30/6/2025.' };
+    const promo = {
+      content: 'Mua 2 bánh kem tặng 1 trà sữa! Áp dụng đến hết 30/6/2025.',
+    };
     return {
       featuredProducts: featured,
       discounts,

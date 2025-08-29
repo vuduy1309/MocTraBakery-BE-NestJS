@@ -11,7 +11,6 @@ export class CartService {
     private readonly productService: ProductService,
   ) {}
 
-  // Lấy cart theo userId
   async getCartByUser(userId: string) {
     const cart = await this.cartModel
       .findOne({ userId: new Types.ObjectId(userId) })
@@ -26,7 +25,6 @@ export class CartService {
       })
       .exec();
     if (!cart) return { items: [], total: 0 };
-    // Tính tổng tiền đã trừ discount
     let total = 0;
     const items = cart.items.map((item) => {
       const prod: any =

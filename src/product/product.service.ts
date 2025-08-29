@@ -7,9 +7,7 @@ import { Product, ProductDocument } from './product.schema';
 export class ProductService {
   constructor(@InjectModel(Product.name) private productModel: Model<ProductDocument>) {}
 
-  // Cập nhật sản phẩm, hỗ trợ $unset
   async update(id: string, data: any): Promise<Product | null> {
-    // Nếu có $unset thì dùng updateOne với $set và $unset, sau đó trả về bản ghi mới nhất
     if (data.$unset) {
       const unset = data.$unset;
       const setData = { ...data };
@@ -27,12 +25,10 @@ export class ProductService {
     }
   }
 
-  // Xóa sản phẩm
   async remove(id: string): Promise<Product | null> {
     return this.productModel.findByIdAndDelete(id).exec();
   }
 
-  // Lấy tất cả sản phẩm
   async findAll(): Promise<Product[]> {
     return this.productModel
       .find()
@@ -41,7 +37,6 @@ export class ProductService {
       .exec();
   }
 
-  // Lấy chi tiết sản phẩm theo id
   async findById(id: string): Promise<Product | null> {
     return this.productModel
       .findById(id)
@@ -51,12 +46,10 @@ export class ProductService {
   }
 
 
-  // Đếm tổng số sản phẩm
   async countDocuments(): Promise<number> {
     return this.productModel.countDocuments().exec();
   }
 
-  // Lấy top N sản phẩm bán chạy (ở đây giả lập: stock thấp nhất)
   async findBestSellers(limit: number) {
     return this.productModel
       .find({ isActive: true })
@@ -66,7 +59,6 @@ export class ProductService {
       .exec();
   }
 
-  // Thêm sản phẩm mới
   async create(data: any): Promise<Product> {
     const created = new this.productModel(data);
     return created.save();

@@ -8,7 +8,6 @@ export class CommentController {
 
   @Get()
   async getAll(@Req() req) {
-    // Lấy productId từ query
     const productId = req.query?.productId;
     if (productId) {
       return this.commentService.findByProduct(productId);
@@ -16,7 +15,6 @@ export class CommentController {
     return this.commentService.findAll();
   }
 
-  // API: POST /comments (thêm đánh giá sản phẩm)
   @UseGuards(JwtAuthGuard)
   @Post()
   async createComment(@Req() req, @Body() body: { productId: string; rating: number; content: string }) {
