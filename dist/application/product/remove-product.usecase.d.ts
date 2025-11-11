@@ -1,0 +1,6 @@
+import { IProductRepository } from '../../domain/product/product.repository';
+export declare class RemoveProductUseCase {
+    private readonly repo;
+    constructor(repo: IProductRepository);
+    execute(id: string): Promise<any>;
+}

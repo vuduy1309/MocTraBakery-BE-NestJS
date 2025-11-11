@@ -9,9 +9,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserModule = void 0;
 const common_1 = require("@nestjs/common");
 const mongoose_1 = require("@nestjs/mongoose");
-const user_schema_1 = require("./user.schema");
-const user_service_1 = require("./user.service");
+const user_schema_1 = require("../infrastructure/mongoose/user/user.schema");
 const user_controller_1 = require("./user.controller");
+const user_repository_1 = require("../infrastructure/mongoose/user/user.repository");
 const auth_module_1 = require("../auth/auth.module");
 let UserModule = class UserModule {
 };
@@ -22,9 +22,30 @@ exports.UserModule = UserModule = __decorate([
             mongoose_1.MongooseModule.forFeature([{ name: user_schema_1.User.name, schema: user_schema_1.UserSchema }]),
             (0, common_1.forwardRef)(() => auth_module_1.AuthModule),
         ],
-        providers: [user_service_1.UserService],
+        providers: [
+            user_repository_1.MongooseUserRepository,
+            { provide: 'IUserRepository', useClass: user_repository_1.MongooseUserRepository },
+            require('../application/user/register-user.usecase').RegisterUserUseCase,
+            require('../application/user/change-password.usecase')
+                .ChangePasswordUseCase,
+            require('../application/user/update-profile.usecase').UpdateProfileUseCase,
+            require('../application/user/get-profile.usecase').GetProfileUseCase,
+            require('../application/user/lock-unlock-user.usecase')
+                .LockUnlockUserUseCase,
+            require('../application/user/list-users.usecase').ListUsersUseCase,
+        ],
         controllers: [user_controller_1.UserController],
-        exports: [user_service_1.UserService],
+        exports: [
+            { provide: 'IUserRepository', useClass: user_repository_1.MongooseUserRepository },
+            require('../application/user/register-user.usecase').RegisterUserUseCase,
+            require('../application/user/change-password.usecase')
+                .ChangePasswordUseCase,
+            require('../application/user/update-profile.usecase').UpdateProfileUseCase,
+            require('../application/user/get-profile.usecase').GetProfileUseCase,
+            require('../application/user/lock-unlock-user.usecase')
+                .LockUnlockUserUseCase,
+            require('../application/user/list-users.usecase').ListUsersUseCase,
+        ],
     })
 ], UserModule);
 //# sourceMappingURL=user.module.js.map

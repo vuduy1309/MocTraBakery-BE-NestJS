@@ -18,16 +18,14 @@ const platform_express_1 = require("@nestjs/platform-express");
 const multer_1 = require("multer");
 const path_1 = require("path");
 const fs = require("fs");
+const upload_file_usecase_1 = require("../application/upload/upload-file.usecase");
 let UploadController = class UploadController {
+    uploadFileUseCase;
+    constructor(uploadFileUseCase) {
+        this.uploadFileUseCase = uploadFileUseCase;
+    }
     uploadFile(file) {
-        if (!file) {
-            throw new common_1.BadRequestException('Không nhận được file');
-        }
-        return {
-            url: `/uploads/${file.filename}`,
-            filename: file.filename,
-            originalname: file.originalname,
-        };
+        return this.uploadFileUseCase.execute(file);
     }
 };
 exports.UploadController = UploadController;
@@ -61,6 +59,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], UploadController.prototype, "uploadFile", null);
 exports.UploadController = UploadController = __decorate([
-    (0, common_1.Controller)('upload')
+    (0, common_1.Controller)('upload'),
+    __metadata("design:paramtypes", [upload_file_usecase_1.UploadFileUseCase])
 ], UploadController);
 //# sourceMappingURL=upload.controller.js.map

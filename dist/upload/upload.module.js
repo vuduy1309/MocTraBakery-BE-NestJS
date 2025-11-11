@@ -9,12 +9,20 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UploadModule = void 0;
 const common_1 = require("@nestjs/common");
 const upload_controller_1 = require("./upload.controller");
+const local_upload_repository_1 = require("../infrastructure/upload/local-upload.repository");
+const upload_file_usecase_1 = require("../application/upload/upload-file.usecase");
 let UploadModule = class UploadModule {
 };
 exports.UploadModule = UploadModule;
 exports.UploadModule = UploadModule = __decorate([
     (0, common_1.Module)({
         controllers: [upload_controller_1.UploadController],
+        providers: [
+            local_upload_repository_1.LocalUploadRepository,
+            { provide: 'IUploadRepository', useClass: local_upload_repository_1.LocalUploadRepository },
+            upload_file_usecase_1.UploadFileUseCase,
+        ],
+        exports: [upload_file_usecase_1.UploadFileUseCase],
     })
 ], UploadModule);
 //# sourceMappingURL=upload.module.js.map

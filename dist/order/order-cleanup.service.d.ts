@@ -1,11 +1,10 @@
 import { OnModuleInit } from '@nestjs/common';
-import { Model } from 'mongoose';
-import { Order } from './order.schema';
+import { IOrderRepository } from '../domain/order/order.repository';
 export declare class OrderCleanupService implements OnModuleInit {
-    private orderModel;
+    private readonly orderRepo;
     private readonly logger;
     private intervalId;
-    constructor(orderModel: Model<Order>);
+    constructor(orderRepo: IOrderRepository);
     onModuleInit(): void;
     cleanupPendingVnpayOrders(): Promise<void>;
 }

@@ -1,7 +1,10 @@
+import { UploadFileUseCase } from '../application/upload/upload-file.usecase';
 export declare class UploadController {
-    uploadFile(file: any): {
+    private readonly uploadFileUseCase;
+    constructor(uploadFileUseCase: UploadFileUseCase);
+    uploadFile(file: any): Promise<{
         url: string;
-        filename: any;
-        originalname: any;
-    };
+        filename: string;
+        originalname: string;
+    }>;
 }

@@ -8,16 +8,18 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.IsActiveGuard = void 0;
 const common_1 = require("@nestjs/common");
 const core_1 = require("@nestjs/core");
-const user_service_1 = require("../user/user.service");
 let IsActiveGuard = class IsActiveGuard {
-    userService;
+    userRepository;
     reflector;
-    constructor(userService, reflector) {
-        this.userService = userService;
+    constructor(userRepository, reflector) {
+        this.userRepository = userRepository;
         this.reflector = reflector;
     }
     async canActivate(context) {
@@ -27,14 +29,24 @@ let IsActiveGuard = class IsActiveGuard {
             console.log('[IsActiveGuard] Không có user trong request');
             return false;
         }
-        console.log('[IsActiveGuard] user:', user);
-        return true;
+        try {
+            const u = await this.userRepository.findById(user.userId);
+            if (!u)
+                return false;
+            if (u.isActive === false)
+                throw new common_1.ForbiddenException('User is not active');
+            return true;
+        }
+        catch (err) {
+            console.error('[IsActiveGuard] error checking user active', err);
+            throw err;
+        }
     }
 };
 exports.IsActiveGuard = IsActiveGuard;
 exports.IsActiveGuard = IsActiveGuard = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [user_service_1.UserService,
-        core_1.Reflector])
+    __param(0, (0, common_1.Inject)('IUserRepository')),
+    __metadata("design:paramtypes", [Object, core_1.Reflector])
 ], IsActiveGuard);
 //# sourceMappingURL=is-active.guard.js.map

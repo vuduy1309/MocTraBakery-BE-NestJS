@@ -1,10 +1,6 @@
-import { CategoryService } from './category.service';
+import { FindAllCategoriesUseCase } from '../application/category/find-all-categories.usecase';
 export declare class CategoryController {
-    private readonly categoryService;
-    constructor(categoryService: CategoryService);
-    getAll(): Promise<(import("mongoose").Document<unknown, {}, import("./category.schema").Category, {}> & import("./category.schema").Category & Required<{
-        _id: unknown;
-    }> & {
-        __v: number;
-    })[]>;
+    private readonly findAllCategoriesUseCase;
+    constructor(findAllCategoriesUseCase: FindAllCategoriesUseCase);
+    getAll(): Promise<any[]>;
 }

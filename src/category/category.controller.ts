@@ -1,12 +1,12 @@
 import { Controller, Get } from '@nestjs/common';
-import { CategoryService } from './category.service';
+import { FindAllCategoriesUseCase } from '../application/category/find-all-categories.usecase';
 
 @Controller('categories')
 export class CategoryController {
-  constructor(private readonly categoryService: CategoryService) {}
+  constructor(private readonly findAllCategoriesUseCase: FindAllCategoriesUseCase) {}
 
   @Get()
   async getAll() {
-    return this.categoryService.findAll();
+    return this.findAllCategoriesUseCase.execute();
   }
 }

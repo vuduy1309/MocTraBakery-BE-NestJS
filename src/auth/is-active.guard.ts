@@ -1,12 +1,12 @@
-import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
+import { CanActivate, ExecutionContext, ForbiddenException, Injectable, Inject } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
-import { UserService } from '../user/user.service';
+import { IUserRepository } from '../domain/user/user.repository';
 
 @Injectable()
 export class IsActiveGuard implements CanActivate {
   constructor(
-    private readonly userService: UserService,
+    @Inject('IUserRepository') private readonly userRepository: IUserRepository,
     private readonly reflector: Reflector,
   ) {}
 
@@ -17,7 +17,15 @@ export class IsActiveGuard implements CanActivate {
       console.log('[IsActiveGuard] Không có user trong request');
       return false;
     }
-    console.log('[IsActiveGuard] user:', user);
-    return true;
+    // Check user active flag via repository
+    try {
+      const u = await this.userRepository.findById(user.userId);
+      if (!u) return false;
+      if (u.isActive === false) throw new ForbiddenException('User is not active');
+      return true;
+    } catch (err) {
+      console.error('[IsActiveGuard] error checking user active', err);
+      throw err;
+    }
   }
 }

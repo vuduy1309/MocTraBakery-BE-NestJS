@@ -15,23 +15,35 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.DiscountController = void 0;
 const common_1 = require("@nestjs/common");
 const create_discount_dto_1 = require("./dto/create-discount.dto");
-const discount_service_1 = require("./discount.service");
+const find_all_discounts_usecase_1 = require("../application/discount/find-all-discounts.usecase");
+const create_discount_usecase_1 = require("../application/discount/create-discount.usecase");
+const update_discount_usecase_1 = require("../application/discount/update-discount.usecase");
+const remove_discount_usecase_1 = require("../application/discount/remove-discount.usecase");
 let DiscountController = class DiscountController {
-    discountService;
-    constructor(discountService) {
-        this.discountService = discountService;
+    findAllUseCase;
+    createUseCase;
+    updateUseCase;
+    removeUseCase;
+    constructor(findAllUseCase, createUseCase, updateUseCase, removeUseCase) {
+        this.findAllUseCase = findAllUseCase;
+        this.createUseCase = createUseCase;
+        this.updateUseCase = updateUseCase;
+        this.removeUseCase = removeUseCase;
     }
     async findAll() {
-        return this.discountService.findAll();
+        return this.findAllUseCase.execute();
+    }
+    async findAllActive() {
+        return (await this.findAllUseCase.execute()).filter((d) => d.active);
     }
     async create(createDiscountDto) {
-        return this.discountService.create(createDiscountDto);
+        return this.createUseCase.execute(createDiscountDto);
     }
     async update(id, updateDiscountDto) {
-        return this.discountService.update(id, updateDiscountDto);
+        return this.updateUseCase.execute(id, updateDiscountDto);
     }
     async remove(id) {
-        return this.discountService.remove(id);
+        return this.removeUseCase.execute(id);
     }
 };
 exports.DiscountController = DiscountController;
@@ -41,6 +53,12 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], DiscountController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)('active'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], DiscountController.prototype, "findAllActive", null);
 __decorate([
     (0, common_1.Post)(),
     __param(0, (0, common_1.Body)()),
@@ -65,6 +83,9 @@ __decorate([
 ], DiscountController.prototype, "remove", null);
 exports.DiscountController = DiscountController = __decorate([
     (0, common_1.Controller)('discounts'),
-    __metadata("design:paramtypes", [discount_service_1.DiscountService])
+    __metadata("design:paramtypes", [find_all_discounts_usecase_1.FindAllDiscountsUseCase,
+        create_discount_usecase_1.CreateDiscountUseCase,
+        update_discount_usecase_1.UpdateDiscountUseCase,
+        remove_discount_usecase_1.RemoveDiscountUseCase])
 ], DiscountController);
 //# sourceMappingURL=discount.controller.js.map

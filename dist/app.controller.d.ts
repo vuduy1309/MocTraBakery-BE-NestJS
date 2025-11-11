@@ -1,23 +1,19 @@
-import { ProductService } from './product/product.service';
-import { CategoryService } from './category/category.service';
-import { DiscountService } from './discount/discount.service';
-import { CommentService } from './comment/comment.service';
+import { FindAllCategoriesUseCase } from './application/category/find-all-categories.usecase';
+import { FindAllActiveDiscountsUseCase } from './application/discount/find-all-active-discounts.usecase';
+import { ListProductsUseCase } from './application/product/list-products.usecase';
+import { FindAllCommentsUseCase } from './application/comment/find-all-comments.usecase';
 import { AppService } from './app.service';
 export declare class AppController {
     private readonly appService;
-    private readonly productService;
-    private readonly categoryService;
-    private readonly discountService;
-    private readonly commentService;
-    constructor(appService: AppService, productService: ProductService, categoryService: CategoryService, discountService: DiscountService, commentService: CommentService);
+    private readonly findAllCategoriesUseCase;
+    private readonly listProductsUseCase;
+    private readonly findActiveDiscountsUseCase;
+    private readonly findAllCommentsUseCase;
+    constructor(appService: AppService, findAllCategoriesUseCase: FindAllCategoriesUseCase, listProductsUseCase: ListProductsUseCase, findActiveDiscountsUseCase: FindAllActiveDiscountsUseCase, findAllCommentsUseCase: FindAllCommentsUseCase);
     getHomepageData(): Promise<{
-        featuredProducts: import("./product/product.schema").Product[];
+        featuredProducts: any[];
         discounts: any[];
-        reviews: (import("mongoose").Document<unknown, {}, import("./comment/comment.schema").Comment, {}> & import("./comment/comment.schema").Comment & Required<{
-            _id: unknown;
-        }> & {
-            __v: number;
-        })[];
+        reviews: any[];
         promo: {
             content: string;
         };

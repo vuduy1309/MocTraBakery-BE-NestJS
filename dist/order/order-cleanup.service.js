@@ -15,27 +15,24 @@ var OrderCleanupService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OrderCleanupService = void 0;
 const common_1 = require("@nestjs/common");
-const mongoose_1 = require("@nestjs/mongoose");
-const mongoose_2 = require("mongoose");
-const order_schema_1 = require("./order.schema");
 let OrderCleanupService = OrderCleanupService_1 = class OrderCleanupService {
-    orderModel;
+    orderRepo;
     logger = new common_1.Logger(OrderCleanupService_1.name);
     intervalId;
-    constructor(orderModel) {
-        this.orderModel = orderModel;
+    constructor(orderRepo) {
+        this.orderRepo = orderRepo;
     }
     onModuleInit() {
         this.intervalId = setInterval(() => this.cleanupPendingVnpayOrders(), 60 * 1000);
     }
     async cleanupPendingVnpayOrders() {
         const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
-        const result = await this.orderModel.deleteMany({
+        const result = await this.orderRepo.deleteMany({
             paymentMethod: 'vnpay',
             status: 'pending',
             createdAt: { $lt: tenMinutesAgo },
         });
-        if (result.deletedCount > 0) {
+        if (result && result.deletedCount && result.deletedCount > 0) {
             this.logger.log(`Đã tự động xóa ${result.deletedCount} đơn hàng VNPAY pending quá 10 phút.`);
         }
     }
@@ -43,7 +40,7 @@ let OrderCleanupService = OrderCleanupService_1 = class OrderCleanupService {
 exports.OrderCleanupService = OrderCleanupService;
 exports.OrderCleanupService = OrderCleanupService = OrderCleanupService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __param(0, (0, mongoose_1.InjectModel)(order_schema_1.Order.name)),
-    __metadata("design:paramtypes", [mongoose_2.Model])
+    __param(0, (0, common_1.Inject)('IOrderRepository')),
+    __metadata("design:paramtypes", [Object])
 ], OrderCleanupService);
 //# sourceMappingURL=order-cleanup.service.js.map

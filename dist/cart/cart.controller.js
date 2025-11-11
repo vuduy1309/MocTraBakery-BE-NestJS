@@ -14,36 +14,45 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CartController = void 0;
 const common_1 = require("@nestjs/common");
-const cart_service_1 = require("./cart.service");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
 const is_active_guard_1 = require("../auth/is-active.guard");
+const get_cart_by_user_usecase_1 = require("../application/cart/get-cart-by-user.usecase");
+const add_to_cart_usecase_1 = require("../application/cart/add-to-cart.usecase");
+const update_item_quantity_usecase_1 = require("../application/cart/update-item-quantity.usecase");
+const remove_from_cart_usecase_1 = require("../application/cart/remove-from-cart.usecase");
 let CartController = class CartController {
-    cartService;
-    constructor(cartService) {
-        this.cartService = cartService;
+    getCartByUserUseCase;
+    addToCartUseCase;
+    updateItemQuantityUseCase;
+    removeFromCartUseCase;
+    constructor(getCartByUserUseCase, addToCartUseCase, updateItemQuantityUseCase, removeFromCartUseCase) {
+        this.getCartByUserUseCase = getCartByUserUseCase;
+        this.addToCartUseCase = addToCartUseCase;
+        this.updateItemQuantityUseCase = updateItemQuantityUseCase;
+        this.removeFromCartUseCase = removeFromCartUseCase;
     }
     async getCart(req) {
         console.log('[CartController.getCart] request.user:', req.user);
         const userId = req.user.userId;
-        return this.cartService.getCartByUser(userId);
+        return this.getCartByUserUseCase.execute(userId);
     }
     async addToCart(req, body) {
         console.log('[CartController.addToCart] request.user:', req.user);
         const userId = req.user.userId;
         const { productId, size, quantity } = body;
-        return this.cartService.addToCart(userId, productId, size, quantity);
+        return this.addToCartUseCase.execute(userId, productId, size, quantity);
     }
     async updateItemQuantity(req, body) {
         console.log('[CartController.updateItemQuantity] request.user:', req.user);
         const userId = req.user.userId;
         const { productId, size, quantity } = body;
-        return this.cartService.updateItemQuantity(userId, productId, size, quantity);
+        return this.updateItemQuantityUseCase.execute(userId, productId, size, quantity);
     }
     async removeFromCart(req, body) {
         console.log('[CartController.removeFromCart] request.user:', req.user);
         const userId = req.user.userId;
         const { productId, size } = body;
-        return this.cartService.removeFromCart(userId, productId, size);
+        return this.removeFromCartUseCase.execute(userId, productId, size);
     }
 };
 exports.CartController = CartController;
@@ -84,6 +93,9 @@ __decorate([
 ], CartController.prototype, "removeFromCart", null);
 exports.CartController = CartController = __decorate([
     (0, common_1.Controller)('cart'),
-    __metadata("design:paramtypes", [cart_service_1.CartService])
+    __metadata("design:paramtypes", [get_cart_by_user_usecase_1.GetCartByUserUseCase,
+        add_to_cart_usecase_1.AddToCartUseCase,
+        update_item_quantity_usecase_1.UpdateItemQuantityUseCase,
+        remove_from_cart_usecase_1.RemoveFromCartUseCase])
 ], CartController);
 //# sourceMappingURL=cart.controller.js.map

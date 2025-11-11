@@ -1,18 +1,25 @@
 import { Controller, Get, Post, Body, Req, UseGuards, BadRequestException } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { CommentService } from './comment.service';
+import { FindAllCommentsUseCase } from '../application/comment/find-all-comments.usecase';
+import { FindByProductUseCase } from '../application/comment/find-by-product.usecase';
+import { CreateCommentUseCase } from '../application/comment/create-comment.usecase';
 
 @Controller('comments')
 export class CommentController {
-  constructor(private readonly commentService: CommentService) {}
+  constructor(
+    private readonly findAllCommentsUseCase: FindAllCommentsUseCase,
+    private readonly findByProductUseCase: FindByProductUseCase,
+    private readonly createCommentUseCase: CreateCommentUseCase,
+  ) {}
 
   @Get()
   async getAll(@Req() req) {
     const productId = req.query?.productId;
     if (productId) {
-      return this.commentService.findByProduct(productId);
+      return this.findByProductUseCase.execute(productId);
     }
-    return this.commentService.findAll();
+    const limit = req.query?.limit ? parseInt(req.query.limit) : undefined;
+    return this.findAllCommentsUseCase.execute(limit);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -20,12 +27,6 @@ export class CommentController {
   async createComment(@Req() req, @Body() body: { productId: string; rating: number; content: string }) {
     const userId = req.user?.userId || req.user?.sub || req.user?._id;
     if (!userId) throw new BadRequestException('Không xác định user');
-    if (!body.productId || !body.rating || !body.content) throw new BadRequestException('Thiếu thông tin');
-    return this.commentService.create({
-      productId: body.productId,
-      rating: body.rating,
-      content: body.content,
-      author: userId,
-    });
+    return this.createCommentUseCase.execute(userId, body);
   }
 }

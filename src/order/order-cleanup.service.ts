@@ -1,7 +1,5 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { Order } from './order.schema';
+import { Injectable, Logger, OnModuleInit, Inject } from '@nestjs/common';
+import { IOrderRepository } from '../domain/order/order.repository';
 
 @Injectable()
 export class OrderCleanupService implements OnModuleInit {
@@ -9,23 +7,28 @@ export class OrderCleanupService implements OnModuleInit {
   private intervalId: NodeJS.Timeout;
 
   constructor(
-    @InjectModel(Order.name) private orderModel: Model<Order>
+    @Inject('IOrderRepository') private readonly orderRepo: IOrderRepository,
   ) {}
 
   onModuleInit() {
     // Chạy mỗi phút
-    this.intervalId = setInterval(() => this.cleanupPendingVnpayOrders(), 60 * 1000);
+    this.intervalId = setInterval(
+      () => this.cleanupPendingVnpayOrders(),
+      60 * 1000,
+    );
   }
 
   async cleanupPendingVnpayOrders() {
     const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
-    const result = await this.orderModel.deleteMany({
+    const result = await this.orderRepo.deleteMany({
       paymentMethod: 'vnpay',
       status: 'pending',
       createdAt: { $lt: tenMinutesAgo },
     });
-    if (result.deletedCount > 0) {
-      this.logger.log(`Đã tự động xóa ${result.deletedCount} đơn hàng VNPAY pending quá 10 phút.`);
+    if (result && result.deletedCount && result.deletedCount > 0) {
+      this.logger.log(
+        `Đã tự động xóa ${result.deletedCount} đơn hàng VNPAY pending quá 10 phút.`,
+      );
     }
   }
 }

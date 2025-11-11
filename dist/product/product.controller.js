@@ -15,17 +15,33 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProductController = void 0;
 const common_1 = require("@nestjs/common");
 const mongoose_1 = require("mongoose");
-const product_service_1 = require("./product.service");
-const order_service_1 = require("../order/order.service");
-const user_service_1 = require("../user/user.service");
+const create_product_usecase_1 = require("../application/product/create-product.usecase");
+const get_product_usecase_1 = require("../application/product/get-product.usecase");
+const list_products_usecase_1 = require("../application/product/list-products.usecase");
+const update_product_usecase_1 = require("../application/product/update-product.usecase");
+const remove_product_usecase_1 = require("../application/product/remove-product.usecase");
+const count_products_usecase_1 = require("../application/product/count-products.usecase");
+const find_bestsellers_usecase_1 = require("../application/product/find-bestsellers.usecase");
 let ProductController = class ProductController {
-    productService;
-    orderService;
-    userService;
-    constructor(productService, orderService, userService) {
-        this.productService = productService;
-        this.orderService = orderService;
-        this.userService = userService;
+    orderRepository;
+    userRepository;
+    createProductUseCase;
+    getProductUseCase;
+    listProductsUseCase;
+    updateProductUseCase;
+    removeProductUseCase;
+    countProductsUseCase;
+    findBestSellersUseCase;
+    constructor(orderRepository, userRepository, createProductUseCase, getProductUseCase, listProductsUseCase, updateProductUseCase, removeProductUseCase, countProductsUseCase, findBestSellersUseCase) {
+        this.orderRepository = orderRepository;
+        this.userRepository = userRepository;
+        this.createProductUseCase = createProductUseCase;
+        this.getProductUseCase = getProductUseCase;
+        this.listProductsUseCase = listProductsUseCase;
+        this.updateProductUseCase = updateProductUseCase;
+        this.removeProductUseCase = removeProductUseCase;
+        this.countProductsUseCase = countProductsUseCase;
+        this.findBestSellersUseCase = findBestSellersUseCase;
     }
     async update(id, body) {
         if (!mongoose_1.Types.ObjectId.isValid(id)) {
@@ -41,7 +57,7 @@ let ProductController = class ProductController {
         if (body.$unset) {
             updateBody = { ...body };
         }
-        const updated = await this.productService.update(id, updateBody);
+        const updated = await this.updateProductUseCase.execute(id, updateBody);
         if (!updated) {
             throw new common_1.NotFoundException('Product not found');
         }
@@ -51,10 +67,7 @@ let ProductController = class ProductController {
         if (!mongoose_1.Types.ObjectId.isValid(id)) {
             throw new common_1.BadRequestException('Invalid product id');
         }
-        if (typeof this.productService['remove'] !== 'function') {
-            throw new common_1.NotFoundException('Remove method not implemented in ProductService');
-        }
-        const deleted = await this.productService.remove(id);
+        const deleted = await this.removeProductUseCase.execute(id);
         if (!deleted) {
             throw new common_1.NotFoundException('Product not found');
         }
@@ -67,16 +80,18 @@ let ProductController = class ProductController {
         if (typeof body.images === 'string') {
             body.images = body.images.split(',').map((s) => s.trim());
         }
-        const created = await this.productService.create(body);
+        const created = await this.createProductUseCase.execute(body);
         return created;
     }
     async getDashboardStats() {
-        const totalProducts = await this.productService.countDocuments();
-        const totalOrders = await this.orderService['orderModel'].countDocuments();
-        const totalCustomers = await this.userService['userModel'].countDocuments({ role: 'Customer' });
-        const orders = await this.orderService['orderModel'].find({}, { total: 1 });
+        const totalProducts = await this.countProductsUseCase.execute();
+        const totalOrders = await this.orderRepository.countDocuments();
+        const totalCustomers = await this.userRepository.countDocuments({
+            role: 'Customer',
+        });
+        const orders = await this.orderRepository.find({}, { total: 1 });
         const totalRevenue = orders.reduce((sum, o) => sum + (o.total || 0), 0);
-        const bestSellers = await this.productService.findBestSellers(5);
+        const bestSellers = await this.findBestSellersUseCase.execute(5);
         return {
             totalProducts,
             totalOrders,
@@ -86,7 +101,7 @@ let ProductController = class ProductController {
         };
     }
     async getAll() {
-        const products = await this.productService.findAll();
+        const products = await this.listProductsUseCase.execute();
         return products.map((p) => {
             const obj = p.toObject ? p.toObject() : p;
             return {
@@ -116,7 +131,7 @@ let ProductController = class ProductController {
         if (!mongoose_1.Types.ObjectId.isValid(id)) {
             throw new common_1.BadRequestException('Invalid product id');
         }
-        const p = await this.productService.findById(id);
+        const p = await this.getProductUseCase.execute(id);
         if (!p) {
             throw new common_1.NotFoundException('Product not found');
         }
@@ -188,8 +203,14 @@ __decorate([
 ], ProductController.prototype, "getById", null);
 exports.ProductController = ProductController = __decorate([
     (0, common_1.Controller)('products'),
-    __metadata("design:paramtypes", [product_service_1.ProductService,
-        order_service_1.OrderService,
-        user_service_1.UserService])
+    __param(0, (0, common_1.Inject)('IOrderRepository')),
+    __param(1, (0, common_1.Inject)('IUserRepository')),
+    __metadata("design:paramtypes", [Object, Object, create_product_usecase_1.CreateProductUseCase,
+        get_product_usecase_1.GetProductUseCase,
+        list_products_usecase_1.ListProductsUseCase,
+        update_product_usecase_1.UpdateProductUseCase,
+        remove_product_usecase_1.RemoveProductUseCase,
+        count_products_usecase_1.CountProductsUseCase,
+        find_bestsellers_usecase_1.FindBestSellersUseCase])
 ], ProductController);
 //# sourceMappingURL=product.controller.js.map

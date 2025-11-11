@@ -1,18 +1,26 @@
-import { Controller, Get, Post, Body, Req, UseGuards } from '@nestjs/common';
-import { CartService } from './cart.service';
+import { Controller, Get, Post, Body, Req, UseGuards, Inject } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { IsActiveGuard } from '../auth/is-active.guard';
+import { GetCartByUserUseCase } from '../application/cart/get-cart-by-user.usecase';
+import { AddToCartUseCase } from '../application/cart/add-to-cart.usecase';
+import { UpdateItemQuantityUseCase } from '../application/cart/update-item-quantity.usecase';
+import { RemoveFromCartUseCase } from '../application/cart/remove-from-cart.usecase';
 
 @Controller('cart')
 export class CartController {
-  constructor(private readonly cartService: CartService) {}
+  constructor(
+    private readonly getCartByUserUseCase: GetCartByUserUseCase,
+    private readonly addToCartUseCase: AddToCartUseCase,
+    private readonly updateItemQuantityUseCase: UpdateItemQuantityUseCase,
+    private readonly removeFromCartUseCase: RemoveFromCartUseCase,
+  ) {}
 
   @UseGuards(JwtAuthGuard, IsActiveGuard)
   @Get()
   async getCart(@Req() req) {
     console.log('[CartController.getCart] request.user:', req.user);
     const userId = req.user.userId;
-    return this.cartService.getCartByUser(userId);
+  return this.getCartByUserUseCase.execute(userId);
   }
 
   @UseGuards(JwtAuthGuard, IsActiveGuard)
@@ -21,7 +29,7 @@ export class CartController {
     console.log('[CartController.addToCart] request.user:', req.user);
     const userId = req.user.userId;
     const { productId, size, quantity } = body;
-    return this.cartService.addToCart(userId, productId, size, quantity);
+  return this.addToCartUseCase.execute(userId, productId, size, quantity);
   }
   @UseGuards(JwtAuthGuard, IsActiveGuard)
   @Post('update')
@@ -29,12 +37,7 @@ export class CartController {
     console.log('[CartController.updateItemQuantity] request.user:', req.user);
     const userId = req.user.userId;
     const { productId, size, quantity } = body;
-    return this.cartService.updateItemQuantity(
-      userId,
-      productId,
-      size,
-      quantity,
-    );
+    return this.updateItemQuantityUseCase.execute(userId, productId, size, quantity);
   }
   @UseGuards(JwtAuthGuard, IsActiveGuard)
   @Post('remove')
@@ -42,6 +45,6 @@ export class CartController {
     console.log('[CartController.removeFromCart] request.user:', req.user);
     const userId = req.user.userId;
     const { productId, size } = body;
-    return this.cartService.removeFromCart(userId, productId, size);
+    return this.removeFromCartUseCase.execute(userId, productId, size);
   }
 }

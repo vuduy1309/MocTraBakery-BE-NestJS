@@ -11,14 +11,14 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AdminController = void 0;
 const common_1 = require("@nestjs/common");
-const admin_service_1 = require("./admin.service");
+const get_admin_stats_usecase_1 = require("../application/admin/get-admin-stats.usecase");
 let AdminController = class AdminController {
-    adminService;
-    constructor(adminService) {
-        this.adminService = adminService;
+    getAdminStats;
+    constructor(getAdminStats) {
+        this.getAdminStats = getAdminStats;
     }
     async getStats() {
-        return this.adminService.getStats();
+        return this.getAdminStats.execute();
     }
 };
 exports.AdminController = AdminController;
@@ -30,6 +30,6 @@ __decorate([
 ], AdminController.prototype, "getStats", null);
 exports.AdminController = AdminController = __decorate([
     (0, common_1.Controller)('api/admin'),
-    __metadata("design:paramtypes", [admin_service_1.AdminService])
+    __metadata("design:paramtypes", [get_admin_stats_usecase_1.GetAdminStatsUseCase])
 ], AdminController);
 //# sourceMappingURL=admin.controller.js.map

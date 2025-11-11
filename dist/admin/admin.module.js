@@ -9,11 +9,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AdminModule = void 0;
 const common_1 = require("@nestjs/common");
 const admin_controller_1 = require("./admin.controller");
-const admin_service_1 = require("./admin.service");
 const mongoose_1 = require("@nestjs/mongoose");
-const product_schema_1 = require("../product/product.schema");
-const order_schema_1 = require("../order/order.schema");
-const user_schema_1 = require("../user/user.schema");
+const product_schema_1 = require("../infrastructure/mongoose/product/product.schema");
+const order_schema_1 = require("../infrastructure/mongoose/order/order.schema");
+const user_schema_1 = require("../infrastructure/mongoose/user/user.schema");
+const product_repository_1 = require("../infrastructure/mongoose/product/product.repository");
+const order_repository_1 = require("../infrastructure/mongoose/order/order.repository");
+const user_repository_1 = require("../infrastructure/mongoose/user/user.repository");
+const get_admin_stats_usecase_1 = require("../application/admin/get-admin-stats.usecase");
 let AdminModule = class AdminModule {
 };
 exports.AdminModule = AdminModule;
@@ -27,7 +30,15 @@ exports.AdminModule = AdminModule = __decorate([
             ]),
         ],
         controllers: [admin_controller_1.AdminController],
-        providers: [admin_service_1.AdminService],
+        providers: [
+            product_repository_1.MongooseProductRepository,
+            { provide: 'IProductRepository', useClass: product_repository_1.MongooseProductRepository },
+            order_repository_1.MongooseOrderRepository,
+            { provide: 'IOrderRepository', useClass: order_repository_1.MongooseOrderRepository },
+            user_repository_1.MongooseUserRepository,
+            { provide: 'IUserRepository', useClass: user_repository_1.MongooseUserRepository },
+            get_admin_stats_usecase_1.GetAdminStatsUseCase,
+        ],
     })
 ], AdminModule);
 //# sourceMappingURL=admin.module.js.map

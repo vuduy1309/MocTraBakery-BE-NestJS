@@ -11,11 +11,20 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { UserService } from './user.service';
+// UserService removed — controller uses IUserRepository and use-cases directly
 import { RegisterUserDto } from './dto/register-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
-import { AuthService } from '../auth/auth.service';
+import { ValidateUserUseCase } from '../application/auth/validate-user.usecase';
+import { LoginUseCase } from '../application/auth/login.usecase';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { ChangePasswordUseCase } from '../application/user/change-password.usecase';
+import { UpdateProfileUseCase } from '../application/user/update-profile.usecase';
+import { GetProfileUseCase } from '../application/user/get-profile.usecase';
+import { LockUnlockUserUseCase } from '../application/user/lock-unlock-user.usecase';
+import { ListUsersUseCase } from '../application/user/list-users.usecase';
+import { RegisterUserUseCase } from '../application/user/register-user.usecase';
+import { Inject } from '@nestjs/common';
+import { IUserRepository } from '../domain/user/user.repository';
 
 @Controller('users')
 export class UserController {
@@ -29,7 +38,7 @@ export class UserController {
     if (!userId) throw new BadRequestException('Không xác định được user');
     if (!body.oldPassword || !body.newPassword)
       throw new BadRequestException('Thiếu thông tin');
-    await this.userService.changePassword(
+    await this.changePasswordUseCase.execute(
       userId,
       body.oldPassword,
       body.newPassword,
@@ -37,8 +46,15 @@ export class UserController {
     return { message: 'Đổi mật khẩu thành công' };
   }
   constructor(
-    private readonly userService: UserService,
-    private readonly authService: AuthService,
+    private readonly validateUserUseCase: ValidateUserUseCase,
+    private readonly loginUseCase: LoginUseCase,
+    private readonly changePasswordUseCase: ChangePasswordUseCase,
+    private readonly updateProfileUseCase: UpdateProfileUseCase,
+    private readonly getProfileUseCase: GetProfileUseCase,
+    private readonly lockUnlockUseCase: LockUnlockUserUseCase,
+    private readonly listUsersUseCase: ListUsersUseCase,
+    private readonly registerUserUseCase: RegisterUserUseCase,
+    @Inject('IUserRepository') private readonly userRepository: IUserRepository,
   ) {}
 
   @UseGuards(JwtAuthGuard)
@@ -58,7 +74,7 @@ export class UserController {
       update.address = body.address.trim();
     if (Object.keys(update).length === 0)
       throw new BadRequestException('Không có dữ liệu cập nhật');
-    const user = await this.userService.updateProfile(userId, update);
+    const user = await this.updateProfileUseCase.execute(userId, update);
     return user;
   }
 
@@ -66,42 +82,28 @@ export class UserController {
   @Get('/profile')
   async getProfile(@Req() req) {
     const userId = req.user.userId || req.user.sub || req.user._id;
-    return this.userService.getProfile(userId);
+    return this.getProfileUseCase.execute(userId);
   }
 
   @Patch(':id/lock')
   async lockUser(@Param('id') id: string) {
-    const user = await this.userService.lockUser(id);
+    const user = await this.lockUnlockUseCase.lock(id);
     return user;
   }
   @Patch(':id/unlock')
   async unlockUser(@Param('id') id: string) {
-    const user = await this.userService.unlockUser(id);
+    const user = await this.lockUnlockUseCase.unlock(id);
     return user;
   }
   @Get()
   async getAllUsers() {
-    const users = await this.userService['userModel']
-      .find(
-        {},
-        {
-          email: 1,
-          fullName: 1,
-          role: 1,
-          phone: 1,
-          address: 1,
-          createdAt: 1,
-          isActive: 1,
-        },
-      )
-      .lean();
-    return users;
+    return this.listUsersUseCase.execute();
   }
 
   @Post('register')
   @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
   async register(@Body() body: RegisterUserDto) {
-    return this.userService.register(body);
+    return this.registerUserUseCase.execute(body);
   }
 
   @Post('login')
@@ -109,10 +111,18 @@ export class UserController {
   async login(@Body() loginBody: LoginUserDto) {
     let user: any;
     try {
-      user = await this.userService.login(loginBody);
+      // perform login via repository directly
+      const found = await this.userRepository.findByEmail(loginBody.email);
+      if (!found) throw new Error('Invalid credentials');
+      const ok = await this.userRepository.comparePassword(
+        loginBody.password,
+        found.passwordHash,
+      );
+      if (!ok) throw new Error('Invalid credentials');
+      user = found;
     } catch (err) {
       throw new BadRequestException('Email hoặc mật khẩu không đúng');
     }
-    return this.authService.login(user);
+    return this.loginUseCase.execute(user);
   }
 }

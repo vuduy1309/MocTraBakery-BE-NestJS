@@ -9,9 +9,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CartModule = void 0;
 const common_1 = require("@nestjs/common");
 const mongoose_1 = require("@nestjs/mongoose");
-const cart_schema_1 = require("./cart.schema");
-const cart_service_1 = require("./cart.service");
+const cart_schema_1 = require("../infrastructure/mongoose/cart/cart.schema");
 const cart_controller_1 = require("./cart.controller");
+const cart_repository_1 = require("../infrastructure/mongoose/cart/cart.repository");
+const get_cart_by_user_usecase_1 = require("../application/cart/get-cart-by-user.usecase");
+const add_to_cart_usecase_1 = require("../application/cart/add-to-cart.usecase");
+const update_item_quantity_usecase_1 = require("../application/cart/update-item-quantity.usecase");
+const remove_from_cart_usecase_1 = require("../application/cart/remove-from-cart.usecase");
+const delete_cart_by_user_usecase_1 = require("../application/cart/delete-cart-by-user.usecase");
 const common_2 = require("@nestjs/common");
 const product_module_1 = require("../product/product.module");
 const user_module_1 = require("../user/user.module");
@@ -25,9 +30,24 @@ exports.CartModule = CartModule = __decorate([
             (0, common_2.forwardRef)(() => product_module_1.ProductModule),
             (0, common_2.forwardRef)(() => user_module_1.UserModule),
         ],
-        providers: [cart_service_1.CartService],
+        providers: [
+            cart_repository_1.MongooseCartRepository,
+            { provide: 'ICartRepository', useClass: cart_repository_1.MongooseCartRepository },
+            get_cart_by_user_usecase_1.GetCartByUserUseCase,
+            add_to_cart_usecase_1.AddToCartUseCase,
+            update_item_quantity_usecase_1.UpdateItemQuantityUseCase,
+            remove_from_cart_usecase_1.RemoveFromCartUseCase,
+            delete_cart_by_user_usecase_1.DeleteCartByUserUseCase,
+        ],
         controllers: [cart_controller_1.CartController],
-        exports: [cart_service_1.CartService],
+        exports: [
+            { provide: 'ICartRepository', useClass: cart_repository_1.MongooseCartRepository },
+            get_cart_by_user_usecase_1.GetCartByUserUseCase,
+            add_to_cart_usecase_1.AddToCartUseCase,
+            update_item_quantity_usecase_1.UpdateItemQuantityUseCase,
+            remove_from_cart_usecase_1.RemoveFromCartUseCase,
+            delete_cart_by_user_usecase_1.DeleteCartByUserUseCase,
+        ],
     })
 ], CartModule);
 //# sourceMappingURL=cart.module.js.map

@@ -2,9 +2,10 @@ import { Module, forwardRef } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { UserModule } from '../user/user.module';
-import { AuthService } from './auth.service';
 import { JwtStrategy } from './jwt.strategy';
 import { IsActiveGuard } from './is-active.guard';
+import { ValidateUserUseCase } from '../application/auth/validate-user.usecase';
+import { LoginUseCase } from '../application/auth/login.usecase';
 
 @Module({
   imports: [
@@ -15,7 +16,7 @@ import { IsActiveGuard } from './is-active.guard';
       signOptions: { expiresIn: '7d' },
     }),
   ],
-  providers: [AuthService, JwtStrategy, IsActiveGuard],
-  exports: [AuthService],
+  providers: [ValidateUserUseCase, LoginUseCase, JwtStrategy, IsActiveGuard],
+  exports: [ValidateUserUseCase, LoginUseCase],
 })
 export class AuthModule {}

@@ -1,41 +1,18 @@
-import { CartService } from './cart.service';
+import { GetCartByUserUseCase } from '../application/cart/get-cart-by-user.usecase';
+import { AddToCartUseCase } from '../application/cart/add-to-cart.usecase';
+import { UpdateItemQuantityUseCase } from '../application/cart/update-item-quantity.usecase';
+import { RemoveFromCartUseCase } from '../application/cart/remove-from-cart.usecase';
 export declare class CartController {
-    private readonly cartService;
-    constructor(cartService: CartService);
+    private readonly getCartByUserUseCase;
+    private readonly addToCartUseCase;
+    private readonly updateItemQuantityUseCase;
+    private readonly removeFromCartUseCase;
+    constructor(getCartByUserUseCase: GetCartByUserUseCase, addToCartUseCase: AddToCartUseCase, updateItemQuantityUseCase: UpdateItemQuantityUseCase, removeFromCartUseCase: RemoveFromCartUseCase);
     getCart(req: any): Promise<{
-        items: {
-            productId: {
-                _id: any;
-                name: any;
-                images: any;
-                image: any;
-                description: any;
-                price: any;
-                sizes: any;
-                origin: any;
-                isVegetarian: any;
-                isRefrigerated: any;
-                calories: any;
-                category: any;
-                discount: any;
-            } | null;
-            size: string | undefined;
-            quantity: number;
-            price: number;
-            priceAfterDiscount: number;
-            discountPercent: number;
-        }[];
+        items: any;
         total: number;
     }>;
-    addToCart(req: any, body: any): Promise<import("mongoose").Document<unknown, {}, import("./cart.schema").Cart, {}> & import("./cart.schema").Cart & Required<{
-        _id: unknown;
-    }> & {
-        __v: number;
-    }>;
-    updateItemQuantity(req: any, body: any): Promise<import("mongoose").Document<unknown, {}, import("./cart.schema").Cart, {}> & import("./cart.schema").Cart & Required<{
-        _id: unknown;
-    }> & {
-        __v: number;
-    }>;
-    removeFromCart(req: any, body: any): Promise<import("mongoose").UpdateWriteOpResult>;
+    addToCart(req: any, body: any): Promise<any>;
+    updateItemQuantity(req: any, body: any): Promise<any>;
+    removeFromCart(req: any, body: any): Promise<any>;
 }

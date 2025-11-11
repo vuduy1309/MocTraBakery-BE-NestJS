@@ -1,51 +1,35 @@
-import { OrderService } from './order.service';
+import { CreateOrderUseCase } from '../application/order/create-order.usecase';
+import { FindOrderUseCase } from '../application/order/find-order.usecase';
+import { ListOrdersUseCase } from '../application/order/list-orders.usecase';
+import { MarkPaidUseCase } from '../application/order/mark-paid.usecase';
+import { UpdateOrderStatusUseCase } from '../application/order/update-order-status.usecase';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { VnpayService } from './vnpay.service';
+import { IVnpayProvider } from '../domain/vnpay/vnpay.provider';
 import { Request, Response } from 'express';
-import { CartService } from '../cart/cart.service';
+import { DeleteCartByUserUseCase } from '../application/cart/delete-cart-by-user.usecase';
 export declare class OrderController {
-    private readonly orderService;
-    private readonly vnpayService;
-    private readonly cartService;
-    constructor(orderService: OrderService, vnpayService: VnpayService, cartService: CartService);
+    private readonly createOrderUseCase;
+    private readonly findOrderUseCase;
+    private readonly listOrdersUseCase;
+    private readonly markPaidUseCase;
+    private readonly updateOrderStatusUseCase;
+    private readonly vnpayProvider;
+    private readonly deleteCartByUserUseCase;
+    constructor(createOrderUseCase: CreateOrderUseCase, findOrderUseCase: FindOrderUseCase, listOrdersUseCase: ListOrdersUseCase, markPaidUseCase: MarkPaidUseCase, updateOrderStatusUseCase: UpdateOrderStatusUseCase, vnpayProvider: IVnpayProvider, deleteCartByUserUseCase: DeleteCartByUserUseCase);
     getRecentOrders(req: any): Promise<{
         code: any;
         status: any;
         amount: any;
         createdAt: any;
     }[]>;
-    getAllOrders(req: any, query: any): Promise<(import("mongoose").Document<unknown, {}, import("./order.schema").Order, {}> & import("./order.schema").Order & Required<{
-        _id: unknown;
-    }> & {
-        __v: number;
-    })[]>;
-    create(createOrderDto: CreateOrderDto, req: any): Promise<import("mongoose").Document<unknown, {}, import("./order.schema").Order, {}> & import("./order.schema").Order & Required<{
-        _id: unknown;
-    }> & {
-        __v: number;
-    }>;
+    getAllOrders(req: any, query: any): Promise<any[]>;
+    create(createOrderDto: CreateOrderDto, req: any): Promise<any>;
     getVnpayUrl(orderId: string, req: Request): Promise<{
         url: any;
     }>;
     vnpayReturn(query: any, res: Response): Promise<void>;
-    updateStatus(id: string, status: string): Promise<(import("mongoose").Document<unknown, {}, import("./order.schema").Order, {}> & import("./order.schema").Order & Required<{
-        _id: unknown;
-    }> & {
-        __v: number;
-    }) | {
-        error: string;
-    } | null>;
-    getMyOrders(req: any): Promise<(import("mongoose").Document<unknown, {}, import("./order.schema").Order, {}> & import("./order.schema").Order & Required<{
-        _id: unknown;
-    }> & {
-        __v: number;
-    })[]>;
-    getOrderDetail(id: string, req: any): Promise<(import("mongoose").Document<unknown, {}, import("./order.schema").Order, {}> & import("./order.schema").Order & Required<{
-        _id: unknown;
-    }> & {
-        __v: number;
-    }) | {
-        error: string;
-    }>;
+    updateStatus(id: string, status: string): Promise<any>;
+    getMyOrders(req: any): Promise<any[]>;
+    getOrderDetail(id: string, req: any): Promise<any>;
     private getClientIp;
 }

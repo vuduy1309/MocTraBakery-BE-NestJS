@@ -11,14 +11,14 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CategoryController = void 0;
 const common_1 = require("@nestjs/common");
-const category_service_1 = require("./category.service");
+const find_all_categories_usecase_1 = require("../application/category/find-all-categories.usecase");
 let CategoryController = class CategoryController {
-    categoryService;
-    constructor(categoryService) {
-        this.categoryService = categoryService;
+    findAllCategoriesUseCase;
+    constructor(findAllCategoriesUseCase) {
+        this.findAllCategoriesUseCase = findAllCategoriesUseCase;
     }
     async getAll() {
-        return this.categoryService.findAll();
+        return this.findAllCategoriesUseCase.execute();
     }
 };
 exports.CategoryController = CategoryController;
@@ -30,6 +30,6 @@ __decorate([
 ], CategoryController.prototype, "getAll", null);
 exports.CategoryController = CategoryController = __decorate([
     (0, common_1.Controller)('categories'),
-    __metadata("design:paramtypes", [category_service_1.CategoryService])
+    __metadata("design:paramtypes", [find_all_categories_usecase_1.FindAllCategoriesUseCase])
 ], CategoryController);
 //# sourceMappingURL=category.controller.js.map

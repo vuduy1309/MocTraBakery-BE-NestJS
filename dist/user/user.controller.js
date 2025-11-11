@@ -14,26 +14,47 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserController = void 0;
 const common_1 = require("@nestjs/common");
-const user_service_1 = require("./user.service");
 const register_user_dto_1 = require("./dto/register-user.dto");
 const login_user_dto_1 = require("./dto/login-user.dto");
-const auth_service_1 = require("../auth/auth.service");
+const validate_user_usecase_1 = require("../application/auth/validate-user.usecase");
+const login_usecase_1 = require("../application/auth/login.usecase");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
+const change_password_usecase_1 = require("../application/user/change-password.usecase");
+const update_profile_usecase_1 = require("../application/user/update-profile.usecase");
+const get_profile_usecase_1 = require("../application/user/get-profile.usecase");
+const lock_unlock_user_usecase_1 = require("../application/user/lock-unlock-user.usecase");
+const list_users_usecase_1 = require("../application/user/list-users.usecase");
+const register_user_usecase_1 = require("../application/user/register-user.usecase");
+const common_2 = require("@nestjs/common");
 let UserController = class UserController {
-    userService;
-    authService;
+    validateUserUseCase;
+    loginUseCase;
+    changePasswordUseCase;
+    updateProfileUseCase;
+    getProfileUseCase;
+    lockUnlockUseCase;
+    listUsersUseCase;
+    registerUserUseCase;
+    userRepository;
     async changePassword(req, body) {
         const userId = req.user?.userId || req.user?.sub || req.user?._id;
         if (!userId)
             throw new common_1.BadRequestException('Không xác định được user');
         if (!body.oldPassword || !body.newPassword)
             throw new common_1.BadRequestException('Thiếu thông tin');
-        await this.userService.changePassword(userId, body.oldPassword, body.newPassword);
+        await this.changePasswordUseCase.execute(userId, body.oldPassword, body.newPassword);
         return { message: 'Đổi mật khẩu thành công' };
     }
-    constructor(userService, authService) {
-        this.userService = userService;
-        this.authService = authService;
+    constructor(validateUserUseCase, loginUseCase, changePasswordUseCase, updateProfileUseCase, getProfileUseCase, lockUnlockUseCase, listUsersUseCase, registerUserUseCase, userRepository) {
+        this.validateUserUseCase = validateUserUseCase;
+        this.loginUseCase = loginUseCase;
+        this.changePasswordUseCase = changePasswordUseCase;
+        this.updateProfileUseCase = updateProfileUseCase;
+        this.getProfileUseCase = getProfileUseCase;
+        this.lockUnlockUseCase = lockUnlockUseCase;
+        this.listUsersUseCase = listUsersUseCase;
+        this.registerUserUseCase = registerUserUseCase;
+        this.userRepository = userRepository;
     }
     async updateProfile(req, body) {
         const userId = req.user?.userId || req.user?.sub || req.user?._id;
@@ -48,47 +69,42 @@ let UserController = class UserController {
             update.address = body.address.trim();
         if (Object.keys(update).length === 0)
             throw new common_1.BadRequestException('Không có dữ liệu cập nhật');
-        const user = await this.userService.updateProfile(userId, update);
+        const user = await this.updateProfileUseCase.execute(userId, update);
         return user;
     }
     async getProfile(req) {
         const userId = req.user.userId || req.user.sub || req.user._id;
-        return this.userService.getProfile(userId);
+        return this.getProfileUseCase.execute(userId);
     }
     async lockUser(id) {
-        const user = await this.userService.lockUser(id);
+        const user = await this.lockUnlockUseCase.lock(id);
         return user;
     }
     async unlockUser(id) {
-        const user = await this.userService.unlockUser(id);
+        const user = await this.lockUnlockUseCase.unlock(id);
         return user;
     }
     async getAllUsers() {
-        const users = await this.userService['userModel']
-            .find({}, {
-            email: 1,
-            fullName: 1,
-            role: 1,
-            phone: 1,
-            address: 1,
-            createdAt: 1,
-            isActive: 1,
-        })
-            .lean();
-        return users;
+        return this.listUsersUseCase.execute();
     }
     async register(body) {
-        return this.userService.register(body);
+        return this.registerUserUseCase.execute(body);
     }
     async login(loginBody) {
         let user;
         try {
-            user = await this.userService.login(loginBody);
+            const found = await this.userRepository.findByEmail(loginBody.email);
+            if (!found)
+                throw new Error('Invalid credentials');
+            const ok = await this.userRepository.comparePassword(loginBody.password, found.passwordHash);
+            if (!ok)
+                throw new Error('Invalid credentials');
+            user = found;
         }
         catch (err) {
             throw new common_1.BadRequestException('Email hoặc mật khẩu không đúng');
         }
-        return this.authService.login(user);
+        return this.loginUseCase.execute(user);
     }
 };
 exports.UserController = UserController;
@@ -156,7 +172,14 @@ __decorate([
 ], UserController.prototype, "login", null);
 exports.UserController = UserController = __decorate([
     (0, common_1.Controller)('users'),
-    __metadata("design:paramtypes", [user_service_1.UserService,
-        auth_service_1.AuthService])
+    __param(8, (0, common_2.Inject)('IUserRepository')),
+    __metadata("design:paramtypes", [validate_user_usecase_1.ValidateUserUseCase,
+        login_usecase_1.LoginUseCase,
+        change_password_usecase_1.ChangePasswordUseCase,
+        update_profile_usecase_1.UpdateProfileUseCase,
+        get_profile_usecase_1.GetProfileUseCase,
+        lock_unlock_user_usecase_1.LockUnlockUserUseCase,
+        list_users_usecase_1.ListUsersUseCase,
+        register_user_usecase_1.RegisterUserUseCase, Object])
 ], UserController);
 //# sourceMappingURL=user.controller.js.map

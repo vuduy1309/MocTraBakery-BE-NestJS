@@ -9,8 +9,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CommentModule = void 0;
 const common_1 = require("@nestjs/common");
 const mongoose_1 = require("@nestjs/mongoose");
-const comment_schema_1 = require("./comment.schema");
-const comment_service_1 = require("./comment.service");
+const comment_schema_1 = require("../infrastructure/mongoose/comment/comment.schema");
+const comment_repository_1 = require("../infrastructure/mongoose/comment/comment.repository");
+const find_all_comments_usecase_1 = require("../application/comment/find-all-comments.usecase");
+const find_by_product_usecase_1 = require("../application/comment/find-by-product.usecase");
+const create_comment_usecase_1 = require("../application/comment/create-comment.usecase");
 const comment_controller_1 = require("./comment.controller");
 let CommentModule = class CommentModule {
 };
@@ -18,9 +21,15 @@ exports.CommentModule = CommentModule;
 exports.CommentModule = CommentModule = __decorate([
     (0, common_1.Module)({
         imports: [mongoose_1.MongooseModule.forFeature([{ name: comment_schema_1.Comment.name, schema: comment_schema_1.CommentSchema }])],
-        providers: [comment_service_1.CommentService],
         controllers: [comment_controller_1.CommentController],
-        exports: [comment_service_1.CommentService],
+        providers: [
+            comment_repository_1.MongooseCommentRepository,
+            { provide: 'ICommentRepository', useClass: comment_repository_1.MongooseCommentRepository },
+            find_all_comments_usecase_1.FindAllCommentsUseCase,
+            find_by_product_usecase_1.FindByProductUseCase,
+            create_comment_usecase_1.CreateCommentUseCase,
+        ],
+        exports: [find_all_comments_usecase_1.FindAllCommentsUseCase, find_by_product_usecase_1.FindByProductUseCase, create_comment_usecase_1.CreateCommentUseCase],
     })
 ], CommentModule);
 //# sourceMappingURL=comment.module.js.map

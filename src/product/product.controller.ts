@@ -8,19 +8,33 @@ import {
   Param,
   NotFoundException,
   BadRequestException,
+  Inject,
 } from '@nestjs/common';
 import { Types } from 'mongoose';
 
-import { ProductService } from './product.service';
-import { OrderService } from '../order/order.service';
-import { UserService } from '../user/user.service';
+import { IOrderRepository } from '../domain/order/order.repository';
+import { IUserRepository } from '../domain/user/user.repository';
+import { CreateProductUseCase } from '../application/product/create-product.usecase';
+import { GetProductUseCase } from '../application/product/get-product.usecase';
+import { ListProductsUseCase } from '../application/product/list-products.usecase';
+import { UpdateProductUseCase } from '../application/product/update-product.usecase';
+import { RemoveProductUseCase } from '../application/product/remove-product.usecase';
+import { CountProductsUseCase } from '../application/product/count-products.usecase';
+import { FindBestSellersUseCase } from '../application/product/find-bestsellers.usecase';
 
 @Controller('products')
 export class ProductController {
   constructor(
-    private readonly productService: ProductService,
-    private readonly orderService: OrderService,
-    private readonly userService: UserService,
+    @Inject('IOrderRepository')
+    private readonly orderRepository: IOrderRepository,
+    @Inject('IUserRepository') private readonly userRepository: IUserRepository,
+    private readonly createProductUseCase: CreateProductUseCase,
+    private readonly getProductUseCase: GetProductUseCase,
+    private readonly listProductsUseCase: ListProductsUseCase,
+    private readonly updateProductUseCase: UpdateProductUseCase,
+    private readonly removeProductUseCase: RemoveProductUseCase,
+    private readonly countProductsUseCase: CountProductsUseCase,
+    private readonly findBestSellersUseCase: FindBestSellersUseCase,
   ) {}
 
   @Put(':id')
@@ -38,7 +52,7 @@ export class ProductController {
     if (body.$unset) {
       updateBody = { ...body };
     }
-    const updated = await this.productService.update(id, updateBody);
+    const updated = await this.updateProductUseCase.execute(id, updateBody);
     if (!updated) {
       throw new NotFoundException('Product not found');
     }
@@ -50,12 +64,7 @@ export class ProductController {
     if (!Types.ObjectId.isValid(id)) {
       throw new BadRequestException('Invalid product id');
     }
-    if (typeof this.productService['remove'] !== 'function') {
-      throw new NotFoundException(
-        'Remove method not implemented in ProductService',
-      );
-    }
-    const deleted = await (this.productService as any).remove(id);
+    const deleted = await this.removeProductUseCase.execute(id);
     if (!deleted) {
       throw new NotFoundException('Product not found');
     }
@@ -70,22 +79,24 @@ export class ProductController {
     if (typeof body.images === 'string') {
       body.images = body.images.split(',').map((s: string) => s.trim());
     }
-    const created = await this.productService.create(body);
+    const created = await this.createProductUseCase.execute(body);
     return created;
   }
 
   @Get('/dashboard-stats')
   async getDashboardStats() {
-    const totalProducts = await this.productService.countDocuments();
+    const totalProducts = await this.countProductsUseCase.execute();
 
-    const totalOrders = await this.orderService['orderModel'].countDocuments();
+    const totalOrders = await this.orderRepository.countDocuments();
 
-    const totalCustomers = await this.userService['userModel'].countDocuments({ role: 'Customer' });
+    const totalCustomers = await this.userRepository.countDocuments({
+      role: 'Customer',
+    });
 
-    const orders = await this.orderService['orderModel'].find({}, { total: 1 });
+    const orders = await this.orderRepository.find({}, { total: 1 });
     const totalRevenue = orders.reduce((sum, o) => sum + (o.total || 0), 0);
 
-    const bestSellers = await this.productService.findBestSellers(5);
+    const bestSellers = await this.findBestSellersUseCase.execute(5);
 
     return {
       totalProducts,
@@ -98,7 +109,7 @@ export class ProductController {
 
   @Get()
   async getAll() {
-    const products = await this.productService.findAll();
+    const products = await this.listProductsUseCase.execute();
     return products.map((p: any) => {
       const obj = (p as any).toObject ? (p as any).toObject() : p;
       return {
@@ -109,8 +120,8 @@ export class ProductController {
         images: obj.images,
         stock: obj.stock,
         isActive: obj.isActive,
-        categoryId: obj.categoryId, 
-        discountId: obj.discountId, 
+        categoryId: obj.categoryId,
+        discountId: obj.discountId,
         createdBy: obj.createdBy,
         createdAt: obj.createdAt,
         shelfLifeDays: obj.shelfLifeDays,
@@ -130,7 +141,7 @@ export class ProductController {
     if (!Types.ObjectId.isValid(id)) {
       throw new BadRequestException('Invalid product id');
     }
-    const p = await this.productService.findById(id);
+    const p = await this.getProductUseCase.execute(id);
     if (!p) {
       throw new NotFoundException('Product not found');
     }

@@ -10,31 +10,33 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppController = void 0;
-const product_service_1 = require("./product/product.service");
-const category_service_1 = require("./category/category.service");
-const discount_service_1 = require("./discount/discount.service");
+const find_all_categories_usecase_1 = require("./application/category/find-all-categories.usecase");
+const find_all_active_discounts_usecase_1 = require("./application/discount/find-all-active-discounts.usecase");
+const list_products_usecase_1 = require("./application/product/list-products.usecase");
 const common_1 = require("@nestjs/common");
-const comment_service_1 = require("./comment/comment.service");
+const find_all_comments_usecase_1 = require("./application/comment/find-all-comments.usecase");
 const app_service_1 = require("./app.service");
 let AppController = class AppController {
     appService;
-    productService;
-    categoryService;
-    discountService;
-    commentService;
-    constructor(appService, productService, categoryService, discountService, commentService) {
+    findAllCategoriesUseCase;
+    listProductsUseCase;
+    findActiveDiscountsUseCase;
+    findAllCommentsUseCase;
+    constructor(appService, findAllCategoriesUseCase, listProductsUseCase, findActiveDiscountsUseCase, findAllCommentsUseCase) {
         this.appService = appService;
-        this.productService = productService;
-        this.categoryService = categoryService;
-        this.discountService = discountService;
-        this.commentService = commentService;
+        this.findAllCategoriesUseCase = findAllCategoriesUseCase;
+        this.listProductsUseCase = listProductsUseCase;
+        this.findActiveDiscountsUseCase = findActiveDiscountsUseCase;
+        this.findAllCommentsUseCase = findAllCommentsUseCase;
     }
     async getHomepageData() {
-        const featuredProducts = await this.productService.findAll();
-        const featured = featuredProducts.slice(0, 4);
-        const discounts = await this.discountService.findAllActive();
-        const reviews = await this.commentService.findAll(2);
-        const promo = { content: 'Mua 2 bánh kem tặng 1 trà sữa! Áp dụng đến hết 30/6/2025.' };
+        const featuredProducts = await this.listProductsUseCase.execute();
+        const featured = (featuredProducts || []).slice(0, 4);
+        const discounts = await this.findActiveDiscountsUseCase.execute();
+        const reviews = await this.findAllCommentsUseCase.execute(2);
+        const promo = {
+            content: 'Mua 2 bánh kem tặng 1 trà sữa! Áp dụng đến hết 30/6/2025.',
+        };
         return {
             featuredProducts: featured,
             discounts,
@@ -62,9 +64,9 @@ __decorate([
 exports.AppController = AppController = __decorate([
     (0, common_1.Controller)(),
     __metadata("design:paramtypes", [app_service_1.AppService,
-        product_service_1.ProductService,
-        category_service_1.CategoryService,
-        discount_service_1.DiscountService,
-        comment_service_1.CommentService])
+        find_all_categories_usecase_1.FindAllCategoriesUseCase,
+        list_products_usecase_1.ListProductsUseCase,
+        find_all_active_discounts_usecase_1.FindAllActiveDiscountsUseCase,
+        find_all_comments_usecase_1.FindAllCommentsUseCase])
 ], AppController);
 //# sourceMappingURL=app.controller.js.map

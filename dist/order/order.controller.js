@@ -14,29 +14,45 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OrderController = void 0;
 const common_1 = require("@nestjs/common");
-const order_service_1 = require("./order.service");
+const create_order_usecase_1 = require("../application/order/create-order.usecase");
+const find_order_usecase_1 = require("../application/order/find-order.usecase");
+const list_orders_usecase_1 = require("../application/order/list-orders.usecase");
+const mark_paid_usecase_1 = require("../application/order/mark-paid.usecase");
+const update_order_status_usecase_1 = require("../application/order/update-order-status.usecase");
 const create_order_dto_1 = require("./dto/create-order.dto");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
 const is_active_guard_1 = require("../auth/is-active.guard");
-const vnpay_service_1 = require("./vnpay.service");
-const cart_service_1 = require("../cart/cart.service");
+const common_2 = require("@nestjs/common");
+const delete_cart_by_user_usecase_1 = require("../application/cart/delete-cart-by-user.usecase");
 let OrderController = class OrderController {
-    orderService;
-    vnpayService;
-    cartService;
-    constructor(orderService, vnpayService, cartService) {
-        this.orderService = orderService;
-        this.vnpayService = vnpayService;
-        this.cartService = cartService;
+    createOrderUseCase;
+    findOrderUseCase;
+    listOrdersUseCase;
+    markPaidUseCase;
+    updateOrderStatusUseCase;
+    vnpayProvider;
+    deleteCartByUserUseCase;
+    constructor(createOrderUseCase, findOrderUseCase, listOrdersUseCase, markPaidUseCase, updateOrderStatusUseCase, vnpayProvider, deleteCartByUserUseCase) {
+        this.createOrderUseCase = createOrderUseCase;
+        this.findOrderUseCase = findOrderUseCase;
+        this.listOrdersUseCase = listOrdersUseCase;
+        this.markPaidUseCase = markPaidUseCase;
+        this.updateOrderStatusUseCase = updateOrderStatusUseCase;
+        this.vnpayProvider = vnpayProvider;
+        this.deleteCartByUserUseCase = deleteCartByUserUseCase;
     }
     async getRecentOrders(req) {
         if (req.user?.role !== 'Admin' && req.user?.role !== 'ProductManager') {
             return [];
         }
-        const orders = await this.orderService.findAll({}, { sort: { createdAt: -1 }, limit: 10 });
+        const orders = await this.listOrdersUseCase.execute({}, { sort: { createdAt: -1 }, limit: 10 });
         return orders.map((o) => ({
             code: o._id?.toString().slice(-6).toUpperCase(),
-            status: o.status === 'paid' ? 'Hoàn thành' : (o.status === 'pending' ? 'Đang xử lý' : o.status),
+            status: o.status === 'paid'
+                ? 'Hoàn thành'
+                : o.status === 'pending'
+                    ? 'Đang xử lý'
+                    : o.status,
             amount: o.total || 0,
             createdAt: o.createdAt,
         }));
@@ -52,39 +68,39 @@ let OrderController = class OrderController {
             limit: query.limit ? parseInt(query.limit) : 50,
             skip: query.skip ? parseInt(query.skip) : 0,
         };
-        return await this.orderService.findAll(filter, options);
+        return await this.listOrdersUseCase.execute(filter, options);
     }
     async create(createOrderDto, req) {
-        const order = await this.orderService.create(createOrderDto, req.user.userId);
-        await this.cartService.deleteCartByUserId(req.user.userId);
+        const order = await this.createOrderUseCase.execute(createOrderDto, req.user.userId);
+        await this.deleteCartByUserUseCase.execute(req.user.userId);
         return order;
     }
     async getVnpayUrl(orderId, req) {
-        const order = await this.orderService.findById(orderId);
+        const order = await this.findOrderUseCase.execute(orderId);
         if (!order) {
             throw new Error('Order not found');
         }
         const clientIp = this.getClientIp(req);
-        const vnpayResponse = await this.vnpayService.createPaymentUrl(order, clientIp);
+        const vnpayResponse = await this.vnpayProvider.createPaymentUrl(order, clientIp);
         const url = vnpayResponse?.paymentUrl || vnpayResponse?.url || vnpayResponse;
         return { url };
     }
     async vnpayReturn(query, res) {
-        const isValid = this.vnpayService.verifyReturn(query);
+        const isValid = this.vnpayProvider.verifyReturn(query);
         if (!isValid) {
             return res.redirect('http://localhost:3001/order-fail?error=invalid_signature');
         }
-        const returnData = this.vnpayService.parseReturnData(query);
+        const returnData = this.vnpayProvider.parseReturnData(query);
         if (returnData.isSuccess) {
             const { Types } = require('mongoose');
             let orderId = returnData.orderId;
             if (orderId && Types.ObjectId.isValid(orderId)) {
                 orderId = new Types.ObjectId(orderId);
             }
-            await this.orderService.markPaid(orderId);
-            const order = await this.orderService.findById(orderId);
+            await this.markPaidUseCase.execute(orderId);
+            const order = await this.findOrderUseCase.execute(orderId);
             if (order && order.userId) {
-                await this.cartService.deleteCartByUserId(order.userId);
+                await this.deleteCartByUserUseCase.execute(order.userId);
             }
             return res.redirect('http://localhost:3001/order-success?orderId=' + returnData.orderId);
         }
@@ -96,19 +112,20 @@ let OrderController = class OrderController {
         if (!['pending', 'paid', 'cancelled'].includes(status)) {
             return { error: 'Trạng thái không hợp lệ' };
         }
-        return await this.orderService.updateStatus(id, status);
+        return await this.updateOrderStatusUseCase.execute(id, status);
     }
     async getMyOrders(req) {
         const userId = req.user.userId;
-        const orders = await this.orderService.findAll({ userId }, { sort: { createdAt: -1 } });
+        const orders = await this.listOrdersUseCase.execute({ userId }, { sort: { createdAt: -1 } });
         return orders;
     }
     async getOrderDetail(id, req) {
-        const order = await this.orderService.findById(id);
+        const order = await this.findOrderUseCase.execute(id);
         if (!order)
             return { error: 'Order not found' };
         if (req.user?.role !== 'Admin' && req.user?.role !== 'ProductManager') {
-            if (order.userId?.toString && order.userId.toString() !== req.user.userId) {
+            if (order.userId?.toString &&
+                order.userId.toString() !== req.user.userId) {
                 return { error: 'Bạn không có quyền xem đơn này' };
             }
         }
@@ -206,8 +223,11 @@ __decorate([
 ], OrderController.prototype, "getOrderDetail", null);
 exports.OrderController = OrderController = __decorate([
     (0, common_1.Controller)('orders'),
-    __metadata("design:paramtypes", [order_service_1.OrderService,
-        vnpay_service_1.VnpayService,
-        cart_service_1.CartService])
+    __param(5, (0, common_2.Inject)('IVnpayProvider')),
+    __metadata("design:paramtypes", [create_order_usecase_1.CreateOrderUseCase,
+        find_order_usecase_1.FindOrderUseCase,
+        list_orders_usecase_1.ListOrdersUseCase,
+        mark_paid_usecase_1.MarkPaidUseCase,
+        update_order_status_usecase_1.UpdateOrderStatusUseCase, Object, delete_cart_by_user_usecase_1.DeleteCartByUserUseCase])
 ], OrderController);
 //# sourceMappingURL=order.controller.js.map

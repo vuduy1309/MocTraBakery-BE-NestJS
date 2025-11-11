@@ -1,12 +1,19 @@
-
-import { Controller, Post, UploadedFile, UseInterceptors, BadRequestException } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  UploadedFile,
+  UseInterceptors,
+  BadRequestException,
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import * as fs from 'fs';
+import { UploadFileUseCase } from '../application/upload/upload-file.usecase';
 
 @Controller('upload')
 export class UploadController {
+  constructor(private readonly uploadFileUseCase: UploadFileUseCase) {}
   @Post()
   @UseInterceptors(
     FileInterceptor('file', {
@@ -19,7 +26,8 @@ export class UploadController {
           cb(null, uploadPath);
         },
         filename: (req, file, cb) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
           cb(null, uniqueSuffix + extname(file.originalname));
         },
       }),
@@ -30,16 +38,10 @@ export class UploadController {
         cb(null, true);
       },
       limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
-    })
+    }),
   )
   uploadFile(@UploadedFile() file: any) {
-    if (!file) {
-      throw new BadRequestException('Không nhận được file');
-    }
-    return {
-      url: `/uploads/${file.filename}`,
-      filename: file.filename,
-      originalname: file.originalname,
-    };
+    // delegate response shaping / any post-processing to the use-case / adapter
+    return this.uploadFileUseCase.execute(file);
   }
 }

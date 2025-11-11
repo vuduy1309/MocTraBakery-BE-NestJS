@@ -16,9 +16,11 @@ import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
-    MongooseModule.forRoot('mongodb+srv://duyha8618:duyha123@cluster0.5lrw6lt.mongodb.net/MocTraBakery?retryWrites=true&w=majority'),
+    MongooseModule.forRoot(
+      'mongodb+srv://duyha8618:duyha123@cluster0.5lrw6lt.mongodb.net/MocTraBakery?retryWrites=true&w=majority',
+    ),
     UserModule,
-    ProductModule, 
+    ProductModule,
     CategoryModule,
     DiscountModule,
     CartModule,

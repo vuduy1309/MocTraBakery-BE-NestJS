@@ -1,0 +1,47 @@
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.UpdateDiscountUseCase = void 0;
+const common_1 = require("@nestjs/common");
+let UpdateDiscountUseCase = class UpdateDiscountUseCase {
+    discountRepo;
+    productRepo;
+    constructor(discountRepo, productRepo) {
+        this.discountRepo = discountRepo;
+        this.productRepo = productRepo;
+    }
+    async execute(id, updateDiscountDto) {
+        const { productIds, ...discountData } = updateDiscountDto;
+        const discount = await this.discountRepo.update(id, discountData);
+        if (!discount)
+            throw new Error('Discount not found');
+        await this.productRepo.updateManyByFilter({ discountId: discount._id }, { $unset: { discountId: '' } });
+        if (productIds && Array.isArray(productIds) && productIds.length > 0) {
+            await this.productRepo.updateMany(productIds, { $set: { discountId: discount._id } });
+        }
+        const products = await this.productRepo.find({ discountId: discount._id }, { _id: 1, name: 1, images: 1, categoryId: 1 });
+        return {
+            ...discount.toObject(),
+            products,
+        };
+    }
+};
+exports.UpdateDiscountUseCase = UpdateDiscountUseCase;
+exports.UpdateDiscountUseCase = UpdateDiscountUseCase = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, common_1.Inject)('IDiscountRepository')),
+    __param(1, (0, common_1.Inject)('IProductRepository')),
+    __metadata("design:paramtypes", [Object, Object])
+], UpdateDiscountUseCase);
+//# sourceMappingURL=update-discount.usecase.js.map

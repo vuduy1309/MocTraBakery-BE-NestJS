@@ -1,12 +1,12 @@
-import { AdminService } from './admin.service';
+import { GetAdminStatsUseCase } from '../application/admin/get-admin-stats.usecase';
 export declare class AdminController {
-    private readonly adminService;
-    constructor(adminService: AdminService);
+    private readonly getAdminStats;
+    constructor(getAdminStats: GetAdminStatsUseCase);
     getStats(): Promise<{
         totalProducts: number;
         totalOrders: number;
         totalCustomers: number;
-        totalRevenue: number;
+        totalRevenue: any;
         bestSellers: any[];
         revenueByDay: {
             date: string;

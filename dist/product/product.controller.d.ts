@@ -1,26 +1,34 @@
-import { ProductService } from './product.service';
-import { OrderService } from '../order/order.service';
-import { UserService } from '../user/user.service';
+import { IOrderRepository } from '../domain/order/order.repository';
+import { IUserRepository } from '../domain/user/user.repository';
+import { CreateProductUseCase } from '../application/product/create-product.usecase';
+import { GetProductUseCase } from '../application/product/get-product.usecase';
+import { ListProductsUseCase } from '../application/product/list-products.usecase';
+import { UpdateProductUseCase } from '../application/product/update-product.usecase';
+import { RemoveProductUseCase } from '../application/product/remove-product.usecase';
+import { CountProductsUseCase } from '../application/product/count-products.usecase';
+import { FindBestSellersUseCase } from '../application/product/find-bestsellers.usecase';
 export declare class ProductController {
-    private readonly productService;
-    private readonly orderService;
-    private readonly userService;
-    constructor(productService: ProductService, orderService: OrderService, userService: UserService);
-    update(id: string, body: any): Promise<import("./product.schema").Product>;
+    private readonly orderRepository;
+    private readonly userRepository;
+    private readonly createProductUseCase;
+    private readonly getProductUseCase;
+    private readonly listProductsUseCase;
+    private readonly updateProductUseCase;
+    private readonly removeProductUseCase;
+    private readonly countProductsUseCase;
+    private readonly findBestSellersUseCase;
+    constructor(orderRepository: IOrderRepository, userRepository: IUserRepository, createProductUseCase: CreateProductUseCase, getProductUseCase: GetProductUseCase, listProductsUseCase: ListProductsUseCase, updateProductUseCase: UpdateProductUseCase, removeProductUseCase: RemoveProductUseCase, countProductsUseCase: CountProductsUseCase, findBestSellersUseCase: FindBestSellersUseCase);
+    update(id: string, body: any): Promise<any>;
     remove(id: string): Promise<{
         success: boolean;
     }>;
-    create(body: any): Promise<import("./product.schema").Product>;
+    create(body: any): Promise<any>;
     getDashboardStats(): Promise<{
         totalProducts: number;
         totalOrders: number;
         totalCustomers: number;
-        totalRevenue: number;
-        bestSellers: (import("mongoose").Document<unknown, {}, import("./product.schema").ProductDocument, {}> & import("./product.schema").Product & import("mongoose").Document<unknown, any, any, Record<string, any>> & Required<{
-            _id: unknown;
-        }> & {
-            __v: number;
-        })[];
+        totalRevenue: any;
+        bestSellers: any[];
     }>;
     getAll(): Promise<{
         _id: any;

@@ -15,31 +15,31 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CommentController = void 0;
 const common_1 = require("@nestjs/common");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
-const comment_service_1 = require("./comment.service");
+const find_all_comments_usecase_1 = require("../application/comment/find-all-comments.usecase");
+const find_by_product_usecase_1 = require("../application/comment/find-by-product.usecase");
+const create_comment_usecase_1 = require("../application/comment/create-comment.usecase");
 let CommentController = class CommentController {
-    commentService;
-    constructor(commentService) {
-        this.commentService = commentService;
+    findAllCommentsUseCase;
+    findByProductUseCase;
+    createCommentUseCase;
+    constructor(findAllCommentsUseCase, findByProductUseCase, createCommentUseCase) {
+        this.findAllCommentsUseCase = findAllCommentsUseCase;
+        this.findByProductUseCase = findByProductUseCase;
+        this.createCommentUseCase = createCommentUseCase;
     }
     async getAll(req) {
         const productId = req.query?.productId;
         if (productId) {
-            return this.commentService.findByProduct(productId);
+            return this.findByProductUseCase.execute(productId);
         }
-        return this.commentService.findAll();
+        const limit = req.query?.limit ? parseInt(req.query.limit) : undefined;
+        return this.findAllCommentsUseCase.execute(limit);
     }
     async createComment(req, body) {
         const userId = req.user?.userId || req.user?.sub || req.user?._id;
         if (!userId)
             throw new common_1.BadRequestException('Không xác định user');
-        if (!body.productId || !body.rating || !body.content)
-            throw new common_1.BadRequestException('Thiếu thông tin');
-        return this.commentService.create({
-            productId: body.productId,
-            rating: body.rating,
-            content: body.content,
-            author: userId,
-        });
+        return this.createCommentUseCase.execute(userId, body);
     }
 };
 exports.CommentController = CommentController;
@@ -61,6 +61,8 @@ __decorate([
 ], CommentController.prototype, "createComment", null);
 exports.CommentController = CommentController = __decorate([
     (0, common_1.Controller)('comments'),
-    __metadata("design:paramtypes", [comment_service_1.CommentService])
+    __metadata("design:paramtypes", [find_all_comments_usecase_1.FindAllCommentsUseCase,
+        find_by_product_usecase_1.FindByProductUseCase,
+        create_comment_usecase_1.CreateCommentUseCase])
 ], CommentController);
 //# sourceMappingURL=comment.controller.js.map
